@@ -34,6 +34,7 @@ window.APP_CONFIG = {
 };
 
 // 📢 Mensaje informativo
-console.log('🌐 Aplicación ejecutándose en modo demostración');
-console.log('📋 Para funcionalidad completa, clona el repositorio y configura tus API keys');
+console.log('🌐 Aplicación ejecutándose en GitHub Pages');
+console.log('🔥 Firebase configurado para uso familiar');
+console.log('📱 Listo para acceso desde móviles');
 console.log('📂 Repositorio: https://github.com/alvaretto/mis-finanzas-familiares');
