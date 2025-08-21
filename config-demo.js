@@ -7,23 +7,24 @@
 // - Los datos están separados del proyecto personal
 // - Ideal para uso familiar desde múltiples dispositivos
 
-// 🔐 API Key de Gemini (pública para GitHub Pages)
-// Esta key está restringida solo para el dominio de GitHub Pages
-const GEMINI_API_KEY = "AIzaSyD29AwETHKyHWZlyh563HtDuSD8MBN6_sY";
+// 🔐 API Key de Gemini (REEMPLAZAR CON TU KEY)
+// ⚠️ IMPORTANTE: Reemplaza con tu propia API key restringida
+const GEMINI_API_KEY = "TU_GEMINI_API_KEY_AQUI";
 
-// 🔥 Configuración de Firebase para GitHub Pages (proyecto público)
+// 🔥 Configuración de Firebase (REEMPLAZAR CON TU PROYECTO)
+// ⚠️ IMPORTANTE: Reemplaza con tu propia configuración de Firebase
 const firebaseConfig = {
-    apiKey: "AIzaSyAv-gCdNgsC4lJbEQ6OP9zbZm1ljj_HQ88",
-    authDomain: "mis-finanzas-familiares-f7298.firebaseapp.com",
-    projectId: "mis-finanzas-familiares-f7298",
-    storageBucket: "mis-finanzas-familiares-f7298.firebasestorage.app",
-    messagingSenderId: "133085274608",
-    appId: "1:133085274608:web:1884eb9af14b6190a7d35",
-    measurementId: "G-5SH2P1YRDW"
+    apiKey: "TU_FIREBASE_API_KEY",
+    authDomain: "tu-proyecto.firebaseapp.com",
+    projectId: "tu-proyecto-id",
+    storageBucket: "tu-proyecto.firebasestorage.app",
+    messagingSenderId: "TU_SENDER_ID",
+    appId: "TU_APP_ID",
+    measurementId: "TU_MEASUREMENT_ID"
 };
 
-// 🏷️ ID de la aplicación
-const appId = 'mis-finanzas-familiares-f7298';
+// 🏷️ ID de la aplicación (REEMPLAZAR CON TU ID)
+const appId = 'tu-proyecto-id';
 
 // 🚀 Exportar configuración para uso en GitHub Pages
 window.APP_CONFIG = {
