@@ -12,11 +12,11 @@
 // - GitHub Pages: Usa este archivo (config-demo.js) para acceso público
 // - Local: Usa config.js para desarrollo con tus credenciales privadas
 
-// 🔐 API Key de Gemini - GENERADA DINÁMICAMENTE POR GITHUB ACTIONS
+// 🔐 API Key de Gemini - SERÁ REEMPLAZADA POR GITHUB ACTIONS
 // Las credenciales reales se almacenan de forma segura en GitHub Secrets
 const GEMINI_API_KEY = "{{GEMINI_API_KEY}}";
 
-// 🔥 Configuración de Firebase - GENERADA DINÁMICAMENTE POR GITHUB ACTIONS
+// 🔥 Configuración de Firebase - SERÁ REEMPLAZADA POR GITHUB ACTIONS
 // Las credenciales reales se almacenan de forma segura en GitHub Secrets
 const firebaseConfig = {
     apiKey: "{{FIREBASE_API_KEY}}",
