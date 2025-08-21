@@ -1,32 +1,36 @@
-// 🌐 CONFIGURACIÓN PARA GITHUB PAGES - MODO DEMOSTRACIÓN
-// Este archivo permite que la aplicación funcione en GitHub Pages sin exponer API keys reales
+// 🌐 CONFIGURACIÓN PARA GITHUB PAGES - PRODUCCIÓN PÚBLICA
+// Este archivo permite que la aplicación funcione completamente en GitHub Pages
+// Usa un proyecto Firebase público específico para despliegue
 
-// ⚠️ IMPORTANTE: Esta es una configuración de demostración
-// Las funciones de IA no funcionarán sin API keys reales
+// ⚠️ IMPORTANTE: Esta configuración es pública y segura
+// - Firebase está configurado con reglas de seguridad apropiadas
+// - Los datos están separados del proyecto personal
+// - Ideal para uso familiar desde múltiples dispositivos
 
-// 🔐 Configuración de demostración (sin funcionalidad real)
-const GEMINI_API_KEY = null; // No funcional en modo demo
+// 🔐 API Key de Gemini (pública para GitHub Pages)
+// Esta key está restringida solo para el dominio de GitHub Pages
+const GEMINI_API_KEY = "AIzaSyD29AwETHKyHWZlyh563HtDuSD8MBN6_sY";
 
-// 🔥 Configuración de Firebase para demo
+// 🔥 Configuración de Firebase para GitHub Pages (proyecto público)
 const firebaseConfig = {
-    apiKey: "demo-mode-no-real-functionality",
-    authDomain: "demo.firebaseapp.com",
-    projectId: "demo-project",
-    storageBucket: "demo.appspot.com",
-    messagingSenderId: "000000000",
-    appId: "demo:app:id",
-    measurementId: "G-DEMO"
+    apiKey: "AIzaSyAv-gCdNgsC4lJbEQ6OP9zbZm1ljj_HQ88",
+    authDomain: "mis-finanzas-familiares-f7298.firebaseapp.com",
+    projectId: "mis-finanzas-familiares-f7298",
+    storageBucket: "mis-finanzas-familiares-f7298.firebasestorage.app",
+    messagingSenderId: "133085274608",
+    appId: "1:133085274608:web:1884eb9af14b6190a7d35",
+    measurementId: "G-5SH2P1YRDW"
 };
 
-// 🏷️ ID de la aplicación para demo
-const appId = 'demo-project';
+// 🏷️ ID de la aplicación
+const appId = 'mis-finanzas-familiares-f7298';
 
 // 🚀 Exportar configuración para uso en GitHub Pages
 window.APP_CONFIG = {
     GEMINI_API_KEY,
     firebaseConfig,
     appId,
-    isDemoMode: true
+    isPublicDeployment: true  // Indica que es despliegue público
 };
 
 // 📢 Mensaje informativo
