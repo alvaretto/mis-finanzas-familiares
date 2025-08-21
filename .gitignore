@@ -1,0 +1,35 @@
+# 🔐 ARCHIVOS DE CONFIGURACIÓN SENSIBLES
+# Estos archivos contienen API keys y no deben subirse al repositorio
+config.js
+
+# 📝 ARCHIVOS DE DESARROLLO
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# 🔧 ARCHIVOS DE EDITOR
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 📦 DEPENDENCIAS (si usas npm en el futuro)
+node_modules/
+package-lock.json
+yarn.lock
+
+# 🚀 ARCHIVOS DE BUILD (si usas herramientas de build)
+dist/
+build/
+.cache/
+
+# 🌐 ARCHIVOS DE ENTORNO
+.env
+.env.local
+.env.production
+.env.development
+
+# 📊 ARCHIVOS DE ANÁLISIS
+coverage/
+.nyc_output/

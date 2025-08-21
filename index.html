@@ -1,0 +1,2609 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finanzas Familiares</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- 🔐 Configuración de API Keys (archivo externo no incluido en GitHub) -->
+    <script src="config.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .modal-backdrop { background-color: rgba(0,0,0,0.5); }
+        .prose-dark { color: #d1d5db; }
+        .prose-dark h2, .prose-dark h3, .prose-dark strong { color: #f9fafb; }
+        .prose-dark ul > li::before { background-color: #9ca3af; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .animate-spin { animation: spin 1s linear infinite; }
+        .chat-bubble-user { background-color: #4f46e5; color: white; }
+        .chat-bubble-ai { background-color: #e5e7eb; color: #1f2937; }
+        .dark .chat-bubble-ai { background-color: #374151; color: #d1d5db; }
+
+        /* Mejoras para formularios extensos */
+        .modal-content {
+            scroll-behavior: smooth;
+        }
+
+        .form-section {
+            transition: all 0.3s ease;
+        }
+
+        .form-section:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-dot {
+            transition: all 0.3s ease;
+        }
+
+        .progress-dot.active {
+            transform: scale(1.2);
+        }
+
+        .specific-field {
+            transition: all 0.2s ease;
+        }
+
+        .specific-field:focus-within {
+            transform: translateY(-1px);
+        }
+
+        /* Scroll personalizado */
+        .modal-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 3px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 3px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        /* Animaciones suaves para campos dinámicos */
+        .dynamic-field {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 dark:bg-gray-900 text-slate-800 dark:text-slate-200 antialiased">
+
+    <!-- Auth Screen -->
+    <div id="auth-screen" class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg">
+            <h2 id="auth-title" class="text-2xl font-bold text-center text-indigo-600 dark:text-indigo-400 mb-6">Iniciar Sesión</h2>
+            <form id="auth-form">
+                <div class="mb-4">
+                    <label for="email" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Correo Electrónico</label>
+                    <input type="email" id="email" class="w-full px-3 py-2 bg-slate-50 dark:bg-gray-700 border border-slate-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                </div>
+                <div class="mb-4">
+                    <label for="password" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Contraseña</label>
+                    <input type="password" id="password" class="w-full px-3 py-2 bg-slate-50 dark:bg-gray-700 border border-slate-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required minlength="6">
+                </div>
+                <div class="text-right mb-4">
+                    <button type="button" id="forgot-password-btn" class="text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">Olvidé mi contraseña</button>
+                </div>
+                <p id="auth-error" class="text-red-500 text-sm text-center mb-4 h-5"></p>
+                <button type="submit" id="auth-submit-btn" class="w-full bg-indigo-600 text-white py-3 rounded-md font-semibold hover:bg-indigo-700 transition-colors">Acceder</button>
+            </form>
+            <p class="text-center text-sm text-slate-500 dark:text-slate-400 mt-6">
+                <span id="auth-toggle-text">¿No tienes una cuenta?</span>
+                <button id="auth-toggle-btn" class="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">Regístrate</button>
+            </p>
+        </div>
+    </div>
+
+    <!-- Main App Screen -->
+    <div id="app" class="container mx-auto max-w-2xl p-4 sm:p-6 hidden">
+        <header class="mb-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Bienvenido/a,</p>
+                    <p id="user-email" class="font-semibold"></p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="manage-categories-btn" class="flex items-center gap-1 px-3 py-1 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-gray-700 rounded-md transition-colors">
+                        <i data-lucide="folder-tree" class="w-3 h-3"></i>
+                        Categorías
+                    </button>
+                    <button id="logout-btn" class="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline">Cerrar Sesión</button>
+                    <button id="theme-toggle" class="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors inline-flex"><i data-lucide="sun" class="block dark:hidden"></i><i data-lucide="moon" class="hidden dark:block"></i></button>
+                </div>
+            </div>
+        </header>
+
+        <section class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md"><h2 class="text-sm font-medium text-slate-500 dark:text-slate-400">Saldo Actual</h2><p id="balance" class="text-2xl font-semibold mt-1">$0.00</p></div>
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md"><h2 class="text-sm font-medium text-slate-500 dark:text-slate-400">Ingresos Totales</h2><p id="total-income" class="text-2xl font-semibold mt-1 text-green-500">$0.00</p></div>
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md"><h2 class="text-sm font-medium text-slate-500 dark:text-slate-400">Gastos Totales</h2><p id="total-expense" class="text-2xl font-semibold mt-1 text-red-500">$0.00</p></div>
+        </section>
+
+        <!-- Patrimonio Section -->
+        <section class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold flex items-center gap-2">
+                    <i data-lucide="trending-up" class="w-5 h-5 text-blue-500"></i>
+                    Patrimonio Neto
+                </h2>
+                <div class="flex gap-2">
+                    <button id="manage-assets-btn" class="flex items-center gap-1 px-3 py-1 text-xs font-medium text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-md transition-colors">
+                        <i data-lucide="plus-circle" class="w-3 h-3"></i>
+                        Activos
+                    </button>
+                    <button id="manage-liabilities-btn" class="flex items-center gap-1 px-3 py-1 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors">
+                        <i data-lucide="minus-circle" class="w-3 h-3"></i>
+                        Pasivos
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                <div class="text-center">
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Total Activos</p>
+                    <p id="total-assets" class="text-xl font-semibold text-green-600 dark:text-green-400">$0.00</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Total Pasivos</p>
+                    <p id="total-liabilities" class="text-xl font-semibold text-red-600 dark:text-red-400">$0.00</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Patrimonio Neto</p>
+                    <p id="net-worth" class="text-xl font-semibold text-blue-600 dark:text-blue-400">$0.00</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Nivel Endeudamiento</p>
+                    <p id="debt-ratio" class="text-xl font-semibold text-orange-600 dark:text-orange-400">0%</p>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <div class="flex justify-between text-sm text-slate-500 dark:text-slate-400 mb-1">
+                    <span>Salud Financiera</span>
+                    <span id="financial-health-text">Evaluando...</span>
+                </div>
+                <div class="w-full bg-slate-200 dark:bg-gray-700 rounded-full h-2">
+                    <div id="financial-health-bar" class="h-2 rounded-full transition-all duration-500 bg-blue-500" style="width: 0%;"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="budget-section" class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md mb-6">
+            <div class="flex justify-between items-center mb-2">
+                <h2 class="text-lg font-semibold">Presupuesto Mensual</h2>
+                <button id="edit-budget-btn" class="p-1 rounded-full hover:bg-slate-200 dark:hover:bg-gray-700"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+            </div>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Gastado: <span id="budget-spent" class="font-semibold"></span> de <span id="budget-total" class="font-semibold"></span></p>
+            <div class="w-full bg-slate-200 dark:bg-gray-700 rounded-full h-4 mt-2"><div id="budget-progress" class="h-4 rounded-full transition-all duration-500" style="width: 0%;"></div></div>
+        </section>
+
+        <section class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md mb-6">
+            <h2 class="text-lg font-semibold mb-2">Gastos por Categoría</h2>
+            <div class="h-64 relative"><canvas id="finance-chart"></canvas><div id="chart-empty-state" class="absolute inset-0 flex items-center justify-center hidden"><p class="text-slate-500 dark:text-slate-400">No hay datos de gastos para mostrar.</p></div></div>
+        </section>
+        
+        <section class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Historial de Transacciones</h2>
+            <div class="flex gap-2">
+                <button id="tips-btn" class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg shadow-md hover:bg-teal-700 transition-colors"><i data-lucide="lightbulb" class="w-4 h-4"></i> Tips IA</button>
+                <button id="ai-assistant-btn" class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg shadow-md hover:bg-purple-700 transition-colors"><i data-lucide="brain-circuit" class="w-4 h-4"></i> Asistente IA</button>
+            </div>
+        </section>
+        <div id="transaction-list" class="space-y-3"><p class="text-center text-slate-500 dark:text-slate-400 py-4">No hay transacciones todavía.</p></div>
+        <button id="add-transaction-btn" class="fixed bottom-6 right-6 bg-indigo-600 text-white p-4 rounded-full shadow-lg hover:bg-indigo-700 transition-transform transform hover:scale-110"><i data-lucide="plus"></i></button>
+        
+        <!-- Modals -->
+        <div id="transaction-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden"></div>
+        <div id="budget-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden"></div>
+        <div id="ai-chat-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden"></div>
+        <div id="tips-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden"></div>
+        <div id="categories-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden"></div>
+        <div id="assets-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden"></div>
+        <div id="asset-form-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden"></div>
+        <div id="liabilities-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden"></div>
+        <div id="liability-form-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, query, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
+
+        // 🔐 CONFIGURACIÓN SEGURA - Las API keys se cargan desde config.js
+        // ⚠️  Si ves errores, asegúrate de crear el archivo config.js basado en config.example.js
+
+        // Verificar que la configuración esté cargada
+        if (!window.APP_CONFIG) {
+            alert('⚠️ Error de Configuración\n\nNo se encontró el archivo config.js.\n\nPor favor:\n1. Copia config.example.js como config.js\n2. Completa tus API keys en config.js\n3. Recarga la página');
+            throw new Error('Configuración no encontrada. Revisa config.js');
+        }
+
+        // Cargar configuración desde archivo externo
+        const { GEMINI_API_KEY, firebaseConfig, appId } = window.APP_CONFIG;
+
+        // Validar que las API keys estén configuradas
+        if (!GEMINI_API_KEY || GEMINI_API_KEY.includes('TU_API_KEY')) {
+            console.warn('⚠️ API Key de Gemini no configurada correctamente');
+        }
+
+        if (!firebaseConfig.apiKey || firebaseConfig.apiKey.includes('TU_FIREBASE')) {
+            console.warn('⚠️ Configuración de Firebase no completada');
+        }
+
+        let app, auth, db, transactionsCollection, budgetDocRef, categoriesDocRef, assetsCollection, liabilitiesCollection;
+        let unsubscribeListener, unsubscribeBudgetListener, unsubscribeCategoriesListener, unsubscribeAssetsListener, unsubscribeLiabilitiesListener;
+        let transactions = [], assets = [], liabilities = [], financeChart, currentEditingId = null, monthlyBudget = 0;
+        let isLoginMode = true;
+        let aiChatHistory = [], financialTips = [], currentTipIndex = 0;
+        let userCategoryStructure = null; // Categorías personalizadas del usuario
+
+        // Sistema de categorías con subcategorías de dos niveles
+        const categoryStructure = {
+            income: {
+                "Salario": {},
+                "Inversiones": {},
+                "Ventas": {},
+                "Ganancias Ocasionales": {},
+                "Otros Ingresos": {}
+            },
+            expense: {
+                "Alimentación": {
+                    "SuperMercado": ["Frutas", "Verduras", "Hortalizas", "Legumbres", "Granos", "Especias", "Lácteos", "Cárnicos", "Mecato 1", "Otros"],
+                    "Restaurantes": [],
+                    "Domicilios": [],
+                    "Batidos": [],
+                    "OmniLife": [],
+                    "Otros": []
+                },
+                "Transporte": {
+                    "Gasolina": [],
+                    "Transporte Público": [],
+                    "Mantenimiento": [],
+                    "Seguros Chana": [],
+                    "Otros": []
+                },
+                "Entretenimiento": {
+                    "Cine": [],
+                    "Deporte": [],
+                    "Viajes": [],
+                    "Otros": []
+                },
+                "Salud": {
+                    "Medicamentos": [],
+                    "Consultas Médicas": [],
+                    "Seguros": [],
+                    "Otros": []
+                },
+                "Educación": {
+                    "Colegio": [],
+                    "Cursos": [],
+                    "Libros": [],
+                    "Otros": []
+                },
+                "Aseo": {
+                    "Casa": [],
+                    "Familia": [],
+                    "Otros": []
+                },
+                "Otros Gastos": {
+                    "Otros": []
+                }
+            },
+            assets: {
+                "Activos Líquidos": {
+                    "Efectivo": ["Dinero en casa", "Billetera/Cartera", "Cajas de ahorro"],
+                    "Cuentas Bancarias": ["Cuenta Corriente", "Cuenta de Ahorros", "Cuenta Nómina", "Cuentas en USD/EUR"],
+                    "Inversiones Líquidas": ["CDT/Certificados", "Fondos de Inversión", "Acciones", "Bonos", "Criptomonedas"]
+                },
+                "Activos Fijos": {
+                    "Bienes Raíces": ["Casa Principal", "Casa de Campo/Vacaciones", "Apartamentos de Inversión", "Lotes/Terrenos", "Locales Comerciales"],
+                    "Vehículos": ["Automóviles", "Motocicletas", "Bicicletas", "Otros Vehículos"],
+                    "Muebles y Enseres": ["Electrodomésticos", "Muebles", "Equipos Electrónicos", "Arte y Colecciones"]
+                },
+                "Activos de Inversión": {
+                    "Negocios Propios": ["Participaciones Empresariales", "Franquicias", "Negocios Independientes"],
+                    "Otros Activos": ["Joyas y Metales Preciosos", "Seguros de Vida (Valor de Rescate)", "Préstamos por Cobrar", "Otros"]
+                }
+            },
+            liabilities: {
+                "Deudas Bancarias": {
+                    "Hipotecas": ["Hipoteca Casa Principal", "Hipoteca Propiedades de Inversión", "Créditos Hipotecarios"],
+                    "Préstamos Personales": ["Préstamos Bancarios", "Préstamos de Libre Inversión", "Préstamos de Vehículo", "Préstamos Estudiantiles"],
+                    "Líneas de Crédito": ["Sobregiros", "Cupos Rotativos", "Líneas de Crédito Personal"]
+                },
+                "Deudas de Consumo": {
+                    "Tarjetas de Crédito": ["Visa", "MasterCard", "American Express", "Tarjetas de Tiendas"],
+                    "Créditos Comerciales": ["Almacenes por Departamentos", "Concesionarios", "Electrodomésticos", "Otros Comercios"]
+                },
+                "Deudas Personales": {
+                    "Familiares y Amigos": ["Préstamos Familiares", "Préstamos de Amigos", "Deudas Informales"],
+                    "Otros Pasivos": ["Impuestos por Pagar", "Servicios Públicos Pendientes", "Seguros por Pagar", "Otros"]
+                }
+            }
+        };
+
+        // Funciones auxiliares para manejar categorías (dinámicas)
+        const getCurrentCategoryStructure = () => userCategoryStructure || categoryStructure;
+        const getCategoriesForType = (type) => Object.keys(getCurrentCategoryStructure()[type] || {});
+        const getSubcategoriesForCategory = (type, category) => Object.keys(getCurrentCategoryStructure()[type]?.[category] || {});
+        const getSubSubcategoriesForSubcategory = (type, category, subcategory) => getCurrentCategoryStructure()[type]?.[category]?.[subcategory] || [];
+
+        // Mantener compatibilidad con el código existente
+        const getIncomeCategories = () => getCategoriesForType('income');
+        const getExpenseCategories = () => getCategoriesForType('expense');
+
+        // Sistema de campos específicos por categoría
+        const specificFields = {
+            // ALIMENTACIÓN
+            "expense.Alimentación.SuperMercado": [
+                {field: "fecha_compra", label: "Fecha de Compra", type: "date", required: true},
+                {field: "articulo", label: "Artículo", type: "text", required: true, placeholder: "Ej: Arroz Diana"},
+                {field: "cantidad", label: "Cantidad", type: "number", required: true, step: "0.01"},
+                {field: "unidad", label: "Unidad de Medida", type: "select", required: true,
+                 options: ["gramos", "libras", "kilos", "unidades", "litros", "mililitros", "paquetes", "cajas"]},
+                {field: "marca", label: "Marca", type: "text", required: false, placeholder: "Ej: Diana, Roa, etc."},
+                {field: "lugar", label: "Supermercado", type: "text", required: true, placeholder: "Ej: Éxito, Carulla, D1"},
+                {field: "precio_unitario", label: "Precio Unitario", type: "number", required: false, step: "0.01"},
+                {field: "observaciones", label: "Observaciones", type: "textarea", required: false}
+            ],
+            "expense.Alimentación.Restaurantes": [
+                {field: "fecha_consumo", label: "Fecha", type: "date", required: true},
+                {field: "restaurante", label: "Restaurante", type: "text", required: true},
+                {field: "tipo_comida", label: "Tipo de Comida", type: "select", required: false,
+                 options: ["Desayuno", "Almuerzo", "Cena", "Merienda", "Comida Rápida", "Comida Típica", "Internacional"]},
+                {field: "num_personas", label: "Número de Personas", type: "number", required: false, min: "1"},
+                {field: "propina", label: "Propina", type: "number", required: false, step: "0.01"},
+                {field: "calificacion", label: "Calificación", type: "select", required: false,
+                 options: ["⭐", "⭐⭐", "⭐⭐⭐", "⭐⭐⭐⭐", "⭐⭐⭐⭐⭐"]},
+                {field: "observaciones", label: "Observaciones", type: "textarea", required: false}
+            ],
+            "expense.Alimentación.Domicilios": [
+                {field: "fecha_pedido", label: "Fecha del Pedido", type: "date", required: true},
+                {field: "restaurante", label: "Restaurante", type: "text", required: true},
+                {field: "plataforma", label: "Plataforma", type: "select", required: false,
+                 options: ["Rappi", "Uber Eats", "Domicilios.com", "iFood", "Directo", "Otro"]},
+                {field: "tipo_comida", label: "Tipo de Comida", type: "text", required: false},
+                {field: "tiempo_entrega", label: "Tiempo de Entrega (min)", type: "number", required: false},
+                {field: "propina", label: "Propina", type: "number", required: false, step: "0.01"},
+                {field: "costo_domicilio", label: "Costo Domicilio", type: "number", required: false, step: "0.01"},
+                {field: "observaciones", label: "Observaciones", type: "textarea", required: false}
+            ],
+
+            // TRANSPORTE
+            "expense.Transporte.Gasolina": [
+                {field: "fecha_tanqueo", label: "Fecha del Tanqueo", type: "date", required: true},
+                {field: "estacion", label: "Estación de Servicio", type: "text", required: true, placeholder: "Ej: Terpel, Mobil, Esso"},
+                {field: "litros", label: "Litros", type: "number", required: true, step: "0.01"},
+                {field: "precio_litro", label: "Precio por Litro", type: "number", required: false, step: "0.01"},
+                {field: "kilometraje", label: "Kilometraje Actual", type: "number", required: false},
+                {field: "vehiculo", label: "Vehículo", type: "text", required: false, placeholder: "Ej: Carro, Moto"},
+                {field: "tipo_combustible", label: "Tipo de Combustible", type: "select", required: false,
+                 options: ["Corriente", "Extra", "Diesel", "Gas Natural"]},
+                {field: "observaciones", label: "Observaciones", type: "textarea", required: false}
+            ],
+            "expense.Transporte.Transporte Público": [
+                {field: "fecha_viaje", label: "Fecha del Viaje", type: "date", required: true},
+                {field: "tipo_transporte", label: "Tipo de Transporte", type: "select", required: true,
+                 options: ["Bus", "Metro", "Taxi", "Uber", "Cabify", "TransMilenio", "SITP", "Otro"]},
+                {field: "origen", label: "Origen", type: "text", required: false},
+                {field: "destino", label: "Destino", type: "text", required: false},
+                {field: "ruta", label: "Ruta/Línea", type: "text", required: false},
+                {field: "duracion", label: "Duración (min)", type: "number", required: false},
+                {field: "observaciones", label: "Observaciones", type: "textarea", required: false}
+            ],
+
+            // SALUD
+            "expense.Salud.Medicamentos": [
+                {field: "fecha_compra", label: "Fecha de Compra", type: "date", required: true},
+                {field: "medicamento", label: "Nombre del Medicamento", type: "text", required: true},
+                {field: "dosis", label: "Dosis", type: "text", required: false, placeholder: "Ej: 500mg, 1 tableta"},
+                {field: "cantidad", label: "Cantidad", type: "number", required: true},
+                {field: "farmacia", label: "Farmacia", type: "text", required: false, placeholder: "Ej: Cruz Verde, Copidrogas"},
+                {field: "receta_medica", label: "¿Con Receta Médica?", type: "select", required: false,
+                 options: ["Sí", "No"]},
+                {field: "fecha_vencimiento", label: "Fecha de Vencimiento", type: "date", required: false},
+                {field: "observaciones", label: "Observaciones", type: "textarea", required: false}
+            ],
+            "expense.Salud.Consultas Médicas": [
+                {field: "fecha_consulta", label: "Fecha de la Consulta", type: "date", required: true},
+                {field: "doctor", label: "Doctor/Especialista", type: "text", required: true},
+                {field: "especialidad", label: "Especialidad", type: "text", required: false},
+                {field: "tipo_consulta", label: "Tipo de Consulta", type: "select", required: false,
+                 options: ["Consulta General", "Especialista", "Control", "Urgencias", "Exámenes", "Procedimiento"]},
+                {field: "diagnostico", label: "Diagnóstico/Motivo", type: "textarea", required: false},
+                {field: "proxima_cita", label: "Próxima Cita", type: "date", required: false},
+                {field: "observaciones", label: "Observaciones", type: "textarea", required: false}
+            ],
+
+            // ENTRETENIMIENTO
+            "expense.Entretenimiento.Cine": [
+                {field: "fecha_funcion", label: "Fecha de la Función", type: "date", required: true},
+                {field: "pelicula", label: "Película", type: "text", required: true},
+                {field: "cine", label: "Cine", type: "text", required: true, placeholder: "Ej: Cinemark, Cine Colombia"},
+                {field: "horario", label: "Horario", type: "time", required: false},
+                {field: "num_boletos", label: "Número de Boletos", type: "number", required: true, min: "1"},
+                {field: "tipo_funcion", label: "Tipo de Función", type: "select", required: false,
+                 options: ["2D", "3D", "4D", "IMAX", "VIP", "Normal"]},
+                {field: "sala", label: "Sala", type: "text", required: false},
+                {field: "observaciones", label: "Observaciones", type: "textarea", required: false}
+            ],
+            "expense.Entretenimiento.Deporte": [
+                {field: "fecha_actividad", label: "Fecha de la Actividad", type: "date", required: true},
+                {field: "actividad", label: "Actividad Deportiva", type: "text", required: true},
+                {field: "lugar", label: "Lugar", type: "text", required: true},
+                {field: "duracion", label: "Duración (min)", type: "number", required: false},
+                {field: "instructor", label: "Instructor/Entrenador", type: "text", required: false},
+                {field: "nivel", label: "Nivel", type: "select", required: false,
+                 options: ["Principiante", "Intermedio", "Avanzado", "Profesional"]},
+                {field: "observaciones", label: "Observaciones", type: "textarea", required: false}
+            ],
+
+            // EDUCACIÓN
+            "expense.Educación.Libros": [
+                {field: "fecha_compra", label: "Fecha de Compra", type: "date", required: true},
+                {field: "titulo", label: "Título del Libro", type: "text", required: true},
+                {field: "autor", label: "Autor", type: "text", required: false},
+                {field: "editorial", label: "Editorial", type: "text", required: false},
+                {field: "isbn", label: "ISBN", type: "text", required: false},
+                {field: "materia", label: "Materia/Curso", type: "text", required: false},
+                {field: "tipo", label: "Tipo", type: "select", required: false,
+                 options: ["Físico", "Digital", "Usado", "Nuevo"]},
+                {field: "observaciones", label: "Observaciones", type: "textarea", required: false}
+            ]
+        };
+
+        // Función para obtener campos específicos
+        const getSpecificFields = (type, category, subcategory) => {
+            const key = `${type}.${category}.${subcategory}`;
+            return specificFields[key] || [];
+        };
+
+        const authScreen = document.getElementById('auth-screen');
+        const appScreen = document.getElementById('app');
+        const authForm = document.getElementById('auth-form');
+        const authTitle = document.getElementById('auth-title');
+        const authSubmitBtn = document.getElementById('auth-submit-btn');
+        const authToggleBtn = document.getElementById('auth-toggle-btn');
+        const authToggleText = document.getElementById('auth-toggle-text');
+        const authError = document.getElementById('auth-error');
+        const logoutBtn = document.getElementById('logout-btn');
+        const userEmailEl = document.getElementById('user-email');
+        const themeToggle = document.getElementById('theme-toggle');
+        const balanceEl = document.getElementById('balance');
+        const totalIncomeEl = document.getElementById('total-income');
+        const totalExpenseEl = document.getElementById('total-expense');
+        const transactionListEl = document.getElementById('transaction-list');
+        const addTransactionBtn = document.getElementById('add-transaction-btn');
+        const transactionModalEl = document.getElementById('transaction-modal');
+        const budgetModalEl = document.getElementById('budget-modal');
+        const aiChatModalEl = document.getElementById('ai-chat-modal');
+        const tipsModalEl = document.getElementById('tips-modal');
+        const chartCanvas = document.getElementById('finance-chart');
+        const chartEmptyState = document.getElementById('chart-empty-state');
+        const budgetSpentEl = document.getElementById('budget-spent');
+        const budgetTotalEl = document.getElementById('budget-total');
+        const budgetProgressEl = document.getElementById('budget-progress');
+        const editBudgetBtn = document.getElementById('edit-budget-btn');
+        const aiAssistantBtn = document.getElementById('ai-assistant-btn');
+        const tipsBtn = document.getElementById('tips-btn');
+        const forgotPasswordBtn = document.getElementById('forgot-password-btn');
+        const manageCategoriesBtn = document.getElementById('manage-categories-btn');
+        const categoriesModalEl = document.getElementById('categories-modal');
+        const manageAssetsBtn = document.getElementById('manage-assets-btn');
+        const manageLiabilitiesBtn = document.getElementById('manage-liabilities-btn');
+        const assetsModalEl = document.getElementById('assets-modal');
+        const assetFormModalEl = document.getElementById('asset-form-modal');
+        const liabilitiesModalEl = document.getElementById('liabilities-modal');
+        const liabilityFormModalEl = document.getElementById('liability-form-modal');
+        const totalAssetsEl = document.getElementById('total-assets');
+        const totalLiabilitiesEl = document.getElementById('total-liabilities');
+        const netWorthEl = document.getElementById('net-worth');
+        const debtRatioEl = document.getElementById('debt-ratio');
+        const financialHealthTextEl = document.getElementById('financial-health-text');
+        const financialHealthBarEl = document.getElementById('financial-health-bar');
+
+        const formatCurrency = (amount) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount);
+
+        const applyTheme = (isDark) => {
+            document.documentElement.classList.toggle('dark', isDark);
+            if (financeChart) {
+                updateChart();
+            }
+        };
+
+        const toggleTheme = () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            applyTheme(isDark);
+        };
+
+        const toggleAuthMode = () => {
+            isLoginMode = !isLoginMode;
+            authTitle.textContent = isLoginMode ? 'Iniciar Sesión' : 'Crear Cuenta';
+            authSubmitBtn.textContent = isLoginMode ? 'Acceder' : 'Registrarse';
+            authToggleText.textContent = isLoginMode ? '¿No tienes una cuenta?' : '¿Ya tienes una cuenta?';
+            authToggleBtn.textContent = isLoginMode ? 'Regístrate' : 'Inicia Sesión';
+            forgotPasswordBtn.style.display = isLoginMode ? 'block' : 'none';
+            authError.textContent = '';
+            authForm.reset();
+        };
+
+        const handleAuthFormSubmit = async (e) => {
+            e.preventDefault();
+            const email = authForm.email.value;
+            const password = authForm.password.value;
+            authError.textContent = '';
+            try {
+                if (isLoginMode) {
+                    await signInWithEmailAndPassword(auth, email, password);
+                } else {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                }
+            } catch (error) {
+                authError.textContent = 'Error: ' + (error.code === 'auth/invalid-credential' ? 'Credenciales incorrectas.' : 'Inténtalo de nuevo.');
+            }
+        };
+        
+        const handlePasswordReset = async () => {
+            const email = authForm.email.value;
+            if (!email) {
+                authError.textContent = 'Por favor, introduce tu email para restablecer la contraseña.';
+                return;
+            }
+            try {
+                await sendPasswordResetEmail(auth, email);
+                authError.textContent = 'Correo de restablecimiento enviado. Revisa tu bandeja de entrada.';
+            } catch (error) {
+                authError.textContent = 'Error al enviar el correo. Verifica la dirección.';
+            }
+        };
+
+        const handleLogout = async () => {
+            if (unsubscribeListener) unsubscribeListener();
+            if (unsubscribeBudgetListener) unsubscribeBudgetListener();
+            if (unsubscribeCategoriesListener) unsubscribeCategoriesListener();
+            if (unsubscribeAssetsListener) unsubscribeAssetsListener();
+            if (unsubscribeLiabilitiesListener) unsubscribeLiabilitiesListener();
+            await signOut(auth);
+        };
+
+        const showApp = (user) => {
+            authScreen.classList.add('hidden');
+            appScreen.classList.remove('hidden');
+            userEmailEl.textContent = user.email;
+            setupRealtimeListeners();
+            lucide.createIcons();
+        };
+
+        const showAuth = () => {
+            authScreen.classList.remove('hidden');
+            appScreen.classList.add('hidden');
+            if (unsubscribeListener) unsubscribeListener();
+            if (unsubscribeBudgetListener) unsubscribeBudgetListener();
+            if (unsubscribeCategoriesListener) unsubscribeCategoriesListener();
+            if (unsubscribeAssetsListener) unsubscribeAssetsListener();
+            if (unsubscribeLiabilitiesListener) unsubscribeLiabilitiesListener();
+            transactionsCollection = null;
+            userCategoryStructure = null;
+            assets = [];
+            liabilities = [];
+        };
+
+        const setupRealtimeListeners = () => {
+            if (!db) return;
+            const basePath = `artifacts/${appId}/shared_transactions/family_data`;
+            transactionsCollection = collection(db, `${basePath}/transactions`);
+            budgetDocRef = doc(db, `${basePath}/budget`, 'monthly');
+            categoriesDocRef = doc(db, `${basePath}/categories`, 'structure');
+            assetsCollection = collection(db, `${basePath}/assets`);
+            liabilitiesCollection = collection(db, `${basePath}/liabilities`);
+
+            unsubscribeListener = onSnapshot(query(transactionsCollection), (snapshot) => {
+                transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                updateAllUI();
+            });
+
+            unsubscribeBudgetListener = onSnapshot(budgetDocRef, (doc) => {
+                monthlyBudget = doc.exists() ? doc.data().amount : 0;
+                updateAllUI();
+            });
+
+            unsubscribeCategoriesListener = onSnapshot(categoriesDocRef, (doc) => {
+                userCategoryStructure = doc.exists() ? doc.data() : null;
+                if (!categoriesModalEl.classList.contains('hidden')) {
+                    renderCategoriesModal();
+                }
+            });
+
+            unsubscribeAssetsListener = onSnapshot(query(assetsCollection), (snapshot) => {
+                assets = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                updateAllUI();
+            });
+
+            unsubscribeLiabilitiesListener = onSnapshot(query(liabilitiesCollection), (snapshot) => {
+                liabilities = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                updateAllUI();
+            });
+        };
+
+        const loadLiabilities = async () => {
+            if (!liabilitiesCollection) return;
+            try {
+                const snapshot = await getDocs(query(liabilitiesCollection));
+                liabilities = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            } catch (error) {
+                console.error('Error loading liabilities:', error);
+            }
+        };
+        
+        const renderSummary = () => {
+            const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+            const totalExpense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+            const balance = totalIncome - totalExpense;
+            balanceEl.textContent = formatCurrency(balance);
+            totalIncomeEl.textContent = formatCurrency(totalIncome);
+            totalExpenseEl.textContent = formatCurrency(totalExpense);
+            balanceEl.classList.toggle('text-red-500', balance < 0);
+            balanceEl.classList.toggle('text-green-500', balance >= 0);
+        };
+
+        const renderBudget = () => {
+            const totalExpense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+            budgetSpentEl.textContent = formatCurrency(totalExpense);
+            budgetTotalEl.textContent = formatCurrency(monthlyBudget);
+            let percentage = 0;
+            if (monthlyBudget > 0) percentage = Math.min((totalExpense / monthlyBudget) * 100, 100);
+            budgetProgressEl.style.width = `${percentage}%`;
+            budgetProgressEl.className = 'h-4 rounded-full transition-all duration-500 ';
+            if (percentage < 75) budgetProgressEl.classList.add('bg-green-500');
+            else if (percentage < 90) budgetProgressEl.classList.add('bg-yellow-500');
+            else budgetProgressEl.classList.add('bg-red-500');
+        };
+
+        const renderTransactions = () => {
+            transactionListEl.innerHTML = '';
+            if (transactions.length === 0) {
+                transactionListEl.innerHTML = `<p class="text-center text-slate-500 dark:text-slate-400 py-4">No hay transacciones todavía.</p>`;
+                return;
+            }
+            [...transactions].sort((a, b) => b.createdAt?.toDate() - a.createdAt?.toDate()).forEach(t => {
+                const isIncome = t.type === 'income';
+
+                // Construir la cadena de categorías
+                let categoryDisplay = t.category;
+                if (t.subcategory) {
+                    categoryDisplay += ` › ${t.subcategory}`;
+                    if (t.subsubcategory) {
+                        categoryDisplay += ` › ${t.subsubcategory}`;
+                    }
+                }
+
+                const li = document.createElement('div');
+                li.className = 'bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md flex items-center justify-between';
+                li.innerHTML = `
+                    <div class="flex items-center overflow-hidden mr-2">
+                        <div class="p-2 rounded-full mr-4 flex-shrink-0 ${isIncome ? 'bg-green-100 dark:bg-green-900/50' : 'bg-red-100 dark:bg-red-900/50'}">
+                            <i data-lucide="${isIncome ? 'arrow-down-circle' : 'arrow-up-circle'}" class="${isIncome ? 'text-green-500' : 'text-red-500'}"></i>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="font-semibold truncate">${t.description}</p>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">
+                                ${t.transactionDate ? new Date(t.transactionDate).toLocaleDateString('es-ES') : t.createdAt?.toDate().toLocaleDateString('es-ES')}
+                            </p>
+                            ${t.subcategory || t.subsubcategory ? `<p class="text-xs text-slate-400 dark:text-slate-500 truncate mt-1" title="${categoryDisplay}">${categoryDisplay}</p>` : ''}
+                            ${t.specificDetails ? renderSpecificDetailsPreview(t.specificDetails) : ''}
+                        </div>
+                    </div>
+                    <div class="text-right flex items-center gap-2 flex-shrink-0">
+                        <div>
+                            <p class="font-semibold ${isIncome ? 'text-green-500' : 'text-red-500'}">${isIncome ? '+' : '-'}${formatCurrency(t.amount)}</p>
+                            <span class="text-xs px-2 py-1 bg-slate-200 dark:bg-gray-700 rounded-full" title="${categoryDisplay}">${t.category}</span>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <button class="edit-btn text-slate-400 hover:text-indigo-500" data-id="${t.id}">
+                                <i data-lucide="edit-3" class="w-4 h-4"></i>
+                            </button>
+                            <button class="delete-btn text-slate-400 hover:text-red-500" data-id="${t.id}">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>`;
+                transactionListEl.appendChild(li);
+            });
+            lucide.createIcons();
+        };
+
+        const renderSpecificDetailsPreview = (specificDetails) => {
+            if (!specificDetails || Object.keys(specificDetails).length === 0) return '';
+
+            // Mostrar solo los campos más relevantes en el preview
+            const priorityFields = ['articulo', 'medicamento', 'pelicula', 'actividad', 'restaurante', 'estacion', 'titulo'];
+            const relevantFields = [];
+
+            // Buscar campos prioritarios primero
+            priorityFields.forEach(field => {
+                if (specificDetails[field]) {
+                    relevantFields.push(`${specificDetails[field]}`);
+                }
+            });
+
+            // Si no hay campos prioritarios, mostrar los primeros 2 campos disponibles
+            if (relevantFields.length === 0) {
+                const fields = Object.entries(specificDetails).slice(0, 2);
+                fields.forEach(([key, value]) => {
+                    if (value && typeof value === 'string' && value.length < 30) {
+                        relevantFields.push(value);
+                    }
+                });
+            }
+
+            if (relevantFields.length === 0) return '';
+
+            const preview = relevantFields.slice(0, 2).join(' • ');
+            return `<p class="text-xs text-blue-600 dark:text-blue-400 truncate mt-1" title="Detalles específicos">${preview}</p>`;
+        };
+
+        const updateChart = () => {
+            if (financeChart) {
+                financeChart.destroy();
+            }
+            const expenses = transactions.filter(t => t.type === 'expense');
+            const hasExpenses = expenses.length > 0;
+            chartCanvas.classList.toggle('hidden', !hasExpenses);
+            chartEmptyState.classList.toggle('hidden', hasExpenses);
+            if (!hasExpenses) return;
+
+            const categoryTotals = expenses.reduce((acc, {category, amount}) => { acc[category] = (acc[category] || 0) + amount; return acc; }, {});
+            const data = { 
+                labels: Object.keys(categoryTotals), 
+                datasets: [{ 
+                    data: Object.values(categoryTotals), 
+                    backgroundColor: Object.keys(categoryTotals).map((_, i) => `hsla(${(i * 360 / Object.keys(categoryTotals).length) % 360}, 70%, 60%, 0.7)`), 
+                    borderWidth: 2,
+                    borderColor: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff'
+                }] 
+            };
+            
+            financeChart = new Chart(chartCanvas.getContext('2d'), { 
+                type: 'doughnut', 
+                data, 
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { 
+                        legend: { display: false } 
+                    } 
+                } 
+            });
+        };
+
+        const renderPatrimony = () => {
+            const totalAssets = assets.reduce((sum, asset) => sum + (asset.currentValue || 0), 0);
+            const totalLiabilities = liabilities.reduce((sum, liability) => sum + (liability.currentBalance || 0), 0);
+            const netWorth = totalAssets - totalLiabilities;
+            const debtRatio = totalAssets > 0 ? (totalLiabilities / totalAssets) * 100 : 0;
+
+            totalAssetsEl.textContent = formatCurrency(totalAssets);
+            totalLiabilitiesEl.textContent = formatCurrency(totalLiabilities);
+            netWorthEl.textContent = formatCurrency(netWorth);
+            debtRatioEl.textContent = `${debtRatio.toFixed(1)}%`;
+
+            // Actualizar colores según el patrimonio neto
+            netWorthEl.className = `text-xl font-semibold ${netWorth >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`;
+
+            // Calcular salud financiera
+            let healthScore = 0;
+            let healthText = '';
+            let healthColor = '';
+
+            if (debtRatio <= 30) {
+                healthScore = 100 - debtRatio;
+                healthText = 'Excelente';
+                healthColor = 'bg-green-500';
+            } else if (debtRatio <= 50) {
+                healthScore = 70 - (debtRatio - 30);
+                healthText = 'Buena';
+                healthColor = 'bg-yellow-500';
+            } else if (debtRatio <= 70) {
+                healthScore = 50 - (debtRatio - 50);
+                healthText = 'Regular';
+                healthColor = 'bg-orange-500';
+            } else {
+                healthScore = Math.max(0, 30 - (debtRatio - 70));
+                healthText = 'Crítica';
+                healthColor = 'bg-red-500';
+            }
+
+            financialHealthTextEl.textContent = healthText;
+            financialHealthBarEl.style.width = `${Math.max(5, healthScore)}%`;
+            financialHealthBarEl.className = `h-2 rounded-full transition-all duration-500 ${healthColor}`;
+        };
+
+        const updateAllUI = () => { renderSummary(); renderBudget(); renderTransactions(); updateChart(); renderPatrimony(); };
+        const openModal = (modalEl) => modalEl.classList.remove('hidden');
+        const closeModal = (modalEl) => modalEl.classList.add('hidden');
+
+        const openTransactionModal = (id = null) => {
+            currentEditingId = id;
+            const transaction = id ? transactions.find(t => t.id === id) : null;
+            const type = transaction ? transaction.type : 'income';
+
+            transactionModalEl.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 w-full max-w-2xl m-4 rounded-2xl shadow-xl flex flex-col max-h-[90vh]">
+                    <div class="flex justify-between items-center p-6 border-b dark:border-gray-700 flex-shrink-0">
+                        <div>
+                            <h3 class="text-xl font-semibold">${id ? 'Editar' : 'Nueva'} Transacción</h3>
+                            <div class="flex items-center gap-2 mt-2">
+                                <div class="flex items-center gap-1">
+                                    <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                    <span class="text-xs text-slate-500">Información Básica</span>
+                                </div>
+                                <div class="w-4 h-px bg-slate-300 dark:bg-gray-600"></div>
+                                <div class="flex items-center gap-1">
+                                    <div class="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                    <span class="text-xs text-slate-500">Categorización</span>
+                                </div>
+                                <div class="w-4 h-px bg-slate-300 dark:bg-gray-600"></div>
+                                <div class="flex items-center gap-1">
+                                    <div class="w-2 h-2 bg-green-500 rounded-full opacity-50" id="details-indicator"></div>
+                                    <span class="text-xs text-slate-500">Detalles</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="js-close-modal p-2 rounded-full hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex-1 overflow-y-auto px-6 py-4 modal-content">
+                        <div class="space-y-4">
+                            <form id="transaction-form-dynamic" class="space-y-6">
+                                <!-- Sección: Información Básica -->
+                                <div class="bg-slate-50 dark:bg-gray-700/50 p-4 rounded-lg form-section">
+                                    <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+                                        <i data-lucide="calendar" class="w-4 h-4 text-blue-500"></i>
+                                        Información Básica
+                                    </h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label for="transaction-date" class="block text-sm font-medium mb-1">Fecha de la Transacción</label>
+                                            <input type="date" id="transaction-date" value="${transaction?.transactionDate || new Date().toISOString().split('T')[0]}"
+                                                   class="w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-md focus:ring-2 focus:ring-indigo-500" required>
+                                        </div>
+                                        <div>
+                                            <label for="amount" class="block text-sm font-medium mb-1">Monto Total</label>
+                                            <input type="number" id="amount" value="${transaction?.amount || ''}"
+                                                   min="0.01" step="0.01" class="w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-md focus:ring-2 focus:ring-indigo-500" required>
+                                        </div>
+                                    </div>
+                                    <div class="mt-4">
+                                        <label for="description" class="block text-sm font-medium mb-1">Descripción General</label>
+                                        <input type="text" id="description" value="${transaction?.description || ''}"
+                                               class="w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-md focus:ring-2 focus:ring-indigo-500"
+                                               placeholder="Describe brevemente esta transacción..." required>
+                                    </div>
+                                </div>
+
+                                <!-- Sección: Tipo y Categorización -->
+                                <div class="bg-slate-50 dark:bg-gray-700/50 p-4 rounded-lg form-section">
+                                    <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+                                        <i data-lucide="tag" class="w-4 h-4 text-purple-500"></i>
+                                        Categorización
+                                    </h4>
+
+                                    <div class="mb-4">
+                                        <span class="block text-sm font-medium mb-2">Tipo de Transacción</span>
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <label class="flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all hover:border-green-300 has-[:checked]:border-green-500 has-[:checked]:bg-green-50 dark:has-[:checked]:bg-green-900/20">
+                                                <input type="radio" name="type" value="income" class="sr-only" ${type === 'income' ? 'checked' : ''}>
+                                                <i data-lucide="trending-up" class="text-green-500 mr-3 w-5 h-5"></i>
+                                                <div>
+                                                    <div class="font-medium">Ingreso</div>
+                                                    <div class="text-xs text-slate-500">Dinero que entra</div>
+                                                </div>
+                                            </label>
+                                            <label class="flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all hover:border-red-300 has-[:checked]:border-red-500 has-[:checked]:bg-red-50 dark:has-[:checked]:bg-red-900/20">
+                                                <input type="radio" name="type" value="expense" class="sr-only" ${type === 'expense' ? 'checked' : ''}>
+                                                <i data-lucide="trending-down" class="text-red-500 mr-3 w-5 h-5"></i>
+                                                <div>
+                                                    <div class="font-medium">Gasto</div>
+                                                    <div class="text-xs text-slate-500">Dinero que sale</div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div>
+                                            <label for="category" class="block text-sm font-medium mb-1">Categoría Principal</label>
+                                            <select id="category" class="w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-md focus:ring-2 focus:ring-indigo-500" required>
+                                                <option value="">Selecciona una categoría</option>
+                                            </select>
+                                        </div>
+
+                                        <div id="subcategory-container" style="display: none;">
+                                            <label for="subcategory" class="block text-sm font-medium mb-1">Subcategoría</label>
+                                            <select id="subcategory" class="w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-md focus:ring-2 focus:ring-indigo-500">
+                                                <option value="">Sin subcategoría</option>
+                                            </select>
+                                        </div>
+
+                                        <div id="subsubcategory-container" style="display: none;">
+                                            <label for="subsubcategory" class="block text-sm font-medium mb-1">Detalle</label>
+                                            <select id="subsubcategory" class="w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-md focus:ring-2 focus:ring-indigo-500">
+                                                <option value="">Sin detalle específico</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Sección: Campos Específicos Dinámicos -->
+                                <div id="specific-fields-container" style="display: none;">
+                                    <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                                        <h4 class="text-sm font-semibold text-blue-700 dark:text-blue-300 mb-3 flex items-center gap-2">
+                                            <i data-lucide="list-checks" class="w-4 h-4"></i>
+                                            Detalles Específicos
+                                        </h4>
+                                        <div id="specific-fields-content" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <!-- Los campos específicos se generarán aquí dinámicamente -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Footer fijo con botones -->
+                        <div class="border-t dark:border-gray-700 p-6 bg-slate-50 dark:bg-gray-800/50 flex-shrink-0">
+                            <div class="flex gap-3">
+                                <button type="button" class="js-close-modal flex-1 px-4 py-3 text-sm font-medium border border-slate-300 dark:border-gray-600 rounded-md hover:bg-slate-100 dark:hover:bg-gray-700 transition-colors">
+                                    Cancelar
+                                </button>
+                                <button type="submit" form="transaction-form-dynamic" class="flex-1 px-4 py-3 text-sm font-medium bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">
+                                    <i data-lucide="save" class="w-4 h-4 inline mr-2"></i>
+                                    ${id ? 'Guardar Cambios' : 'Agregar Transacción'}
+                                </button>
+                            </div>
+                        </div>
+                </div>`;
+
+            openModal(transactionModalEl);
+            lucide.createIcons();
+
+            // Event listeners
+            transactionModalEl.querySelector('.js-close-modal').addEventListener('click', () => closeModal(transactionModalEl));
+            transactionModalEl.querySelector('#transaction-form-dynamic').addEventListener('submit', handleTransactionFormSubmit);
+
+            // Configurar listeners para cambios de tipo y categorías
+            const typeRadios = transactionModalEl.querySelectorAll('input[name="type"]');
+            const categorySelect = transactionModalEl.querySelector('#category');
+            const subcategorySelect = transactionModalEl.querySelector('#subcategory');
+            const subsubcategorySelect = transactionModalEl.querySelector('#subsubcategory');
+
+            typeRadios.forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    updateCategoryOptions(e.target.value);
+                    hideSubcategories();
+                });
+            });
+
+            categorySelect.addEventListener('change', (e) => {
+                updateSubcategoryOptions(e.target.value);
+            });
+
+            subcategorySelect.addEventListener('change', (e) => {
+                updateSubSubcategoryOptions(categorySelect.value, e.target.value);
+                updateSpecificFields();
+            });
+
+            subsubcategorySelect.addEventListener('change', () => {
+                updateSpecificFields();
+            });
+
+            // Inicializar con el tipo actual
+            updateCategoryOptions(type);
+
+            // Si estamos editando, restaurar valores
+            if (transaction) {
+                setTimeout(() => {
+                    if (transaction.category) categorySelect.value = transaction.category;
+                    if (transaction.subcategory) {
+                        updateSubcategoryOptions(transaction.category);
+                        setTimeout(() => {
+                            subcategorySelect.value = transaction.subcategory;
+                            updateSpecificFields();
+
+                            if (transaction.subsubcategory) {
+                                updateSubSubcategoryOptions(transaction.category, transaction.subcategory);
+                                setTimeout(() => {
+                                    subsubcategorySelect.value = transaction.subsubcategory;
+                                    updateSpecificFields();
+                                }, 50);
+                            }
+
+                            // Restaurar campos específicos
+                            if (transaction.specificDetails) {
+                                setTimeout(() => {
+                                    Object.entries(transaction.specificDetails).forEach(([field, value]) => {
+                                        const input = transactionModalEl.querySelector(`[name="specific-${field}"]`);
+                                        if (input) {
+                                            input.value = value;
+                                        }
+                                    });
+                                }, 100);
+                            }
+                        }, 50);
+                    }
+                }, 50);
+            }
+        };
+
+        // Funciones para manejar las opciones de categorías y subcategorías
+        const updateCategoryOptions = (type) => {
+            const categorySelect = transactionModalEl.querySelector('#category');
+            const categories = getCategoriesForType(type);
+            categorySelect.innerHTML = '<option value="">Selecciona una categoría</option>' +
+                categories.map(c => `<option value="${c}">${c}</option>`).join('');
+            hideSubcategories();
+        };
+
+        const updateSubcategoryOptions = (category) => {
+            const subcategoryContainer = transactionModalEl.querySelector('#subcategory-container');
+            const subcategorySelect = transactionModalEl.querySelector('#subcategory');
+            const type = transactionModalEl.querySelector('input[name="type"]:checked').value;
+
+            if (!category) {
+                hideSubcategories();
+                return;
+            }
+
+            const subcategories = getSubcategoriesForCategory(type, category);
+            if (subcategories.length > 0) {
+                subcategorySelect.innerHTML = '<option value="">Sin subcategoría</option>' +
+                    subcategories.map(sc => `<option value="${sc}">${sc}</option>`).join('');
+                subcategoryContainer.style.display = 'block';
+            } else {
+                hideSubcategories();
+            }
+
+            // Ocultar sub-subcategorías cuando cambia la categoría
+            const subsubcategoryContainer = transactionModalEl.querySelector('#subsubcategory-container');
+            subsubcategoryContainer.style.display = 'none';
+        };
+
+        const updateSubSubcategoryOptions = (category, subcategory) => {
+            const subsubcategoryContainer = transactionModalEl.querySelector('#subsubcategory-container');
+            const subsubcategorySelect = transactionModalEl.querySelector('#subsubcategory');
+            const type = transactionModalEl.querySelector('input[name="type"]:checked').value;
+
+            if (!subcategory) {
+                subsubcategoryContainer.style.display = 'none';
+                return;
+            }
+
+            const subsubcategories = getSubSubcategoriesForSubcategory(type, category, subcategory);
+            if (subsubcategories.length > 0) {
+                subsubcategorySelect.innerHTML = '<option value="">Sin detalle específico</option>' +
+                    subsubcategories.map(ssc => `<option value="${ssc}">${ssc}</option>`).join('');
+                subsubcategoryContainer.style.display = 'block';
+            } else {
+                subsubcategoryContainer.style.display = 'none';
+            }
+        };
+
+        const hideSubcategories = () => {
+            const subcategoryContainer = transactionModalEl.querySelector('#subcategory-container');
+            const subsubcategoryContainer = transactionModalEl.querySelector('#subsubcategory-container');
+            const specificFieldsContainer = transactionModalEl.querySelector('#specific-fields-container');
+            if (subcategoryContainer) subcategoryContainer.style.display = 'none';
+            if (subsubcategoryContainer) subsubcategoryContainer.style.display = 'none';
+            if (specificFieldsContainer) specificFieldsContainer.style.display = 'none';
+        };
+
+        const updateSpecificFields = () => {
+            const typeRadio = transactionModalEl.querySelector('input[name="type"]:checked');
+            const categorySelect = transactionModalEl.querySelector('#category');
+            const subcategorySelect = transactionModalEl.querySelector('#subcategory');
+            const specificFieldsContainer = transactionModalEl.querySelector('#specific-fields-container');
+            const specificFieldsContent = transactionModalEl.querySelector('#specific-fields-content');
+
+            if (!typeRadio || !categorySelect.value || !subcategorySelect.value) {
+                if (specificFieldsContainer) specificFieldsContainer.style.display = 'none';
+                return;
+            }
+
+            const type = typeRadio.value;
+            const category = categorySelect.value;
+            const subcategory = subcategorySelect.value;
+
+            const fields = getSpecificFields(type, category, subcategory);
+
+            if (fields.length === 0) {
+                specificFieldsContainer.style.display = 'none';
+                return;
+            }
+
+            // Generar campos específicos con mejor layout
+            let fieldsHtml = '';
+            fields.forEach((field, index) => {
+                const isRequired = field.required ? 'required' : '';
+                const placeholder = field.placeholder ? `placeholder="${field.placeholder}"` : '';
+                const step = field.step ? `step="${field.step}"` : '';
+                const min = field.min ? `min="${field.min}"` : '';
+
+                // Determinar si el campo debe ocupar toda la fila
+                const isFullWidth = field.type === 'textarea' || field.field === 'descripcion' || field.field === 'observaciones';
+                const colClass = isFullWidth ? 'md:col-span-2' : '';
+
+                fieldsHtml += `<div class="${colClass} dynamic-field specific-field">`;
+                fieldsHtml += `<label for="specific-${field.field}" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">`;
+                fieldsHtml += `${field.label}${field.required ? ' <span class="text-red-500">*</span>' : ''}`;
+                fieldsHtml += `</label>`;
+
+                if (field.type === 'select') {
+                    fieldsHtml += `<select id="specific-${field.field}" name="specific-${field.field}" class="w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-md focus:ring-2 focus:ring-blue-500 transition-colors" ${isRequired}>`;
+                    fieldsHtml += `<option value="">Seleccionar...</option>`;
+                    field.options.forEach(option => {
+                        fieldsHtml += `<option value="${option}">${option}</option>`;
+                    });
+                    fieldsHtml += `</select>`;
+                } else if (field.type === 'textarea') {
+                    fieldsHtml += `<textarea id="specific-${field.field}" name="specific-${field.field}" rows="3" class="w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-md focus:ring-2 focus:ring-blue-500 transition-colors resize-none" ${placeholder} ${isRequired}></textarea>`;
+                } else {
+                    const inputClass = field.type === 'date' || field.type === 'time' ? 'w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-md focus:ring-2 focus:ring-blue-500 transition-colors' : 'w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-md focus:ring-2 focus:ring-blue-500 transition-colors';
+                    fieldsHtml += `<input type="${field.type}" id="specific-${field.field}" name="specific-${field.field}" class="${inputClass}" ${placeholder} ${step} ${min} ${isRequired}>`;
+                }
+
+                fieldsHtml += `</div>`;
+            });
+
+            specificFieldsContent.innerHTML = fieldsHtml;
+            specificFieldsContainer.style.display = 'block';
+
+            // Activar indicador de detalles
+            const detailsIndicator = transactionModalEl.querySelector('#details-indicator');
+            if (detailsIndicator) {
+                detailsIndicator.classList.remove('opacity-50');
+                detailsIndicator.classList.add('opacity-100');
+            }
+
+            // Scroll suave hacia la sección de campos específicos
+            setTimeout(() => {
+                const specificFieldsContainer = transactionModalEl.querySelector('#specific-fields-container');
+                if (specificFieldsContainer) {
+                    specificFieldsContainer.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'nearest'
+                    });
+                }
+            }, 100);
+        };
+
+        // ===== GESTIÓN DE CATEGORÍAS =====
+        const openCategoriesModal = () => {
+            renderCategoriesModal();
+            openModal(categoriesModalEl);
+            lucide.createIcons();
+        };
+
+        const renderCategoriesModal = () => {
+            const currentStructure = getCurrentCategoryStructure();
+
+            categoriesModalEl.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 w-full max-w-4xl m-4 rounded-2xl shadow-xl flex flex-col h-[80vh]">
+                    <div class="flex justify-between items-center p-6 border-b dark:border-gray-700">
+                        <h3 class="text-xl font-semibold flex items-center gap-2">
+                            <i data-lucide="folder-tree" class="text-indigo-500"></i>
+                            Gestionar Categorías
+                        </h3>
+                        <button class="js-close-modal p-1 rounded-full hover:bg-slate-200 dark:hover:bg-gray-700">
+                            <i data-lucide="x"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex-1 flex overflow-hidden">
+                        <!-- Tabs -->
+                        <div class="w-48 border-r dark:border-gray-700 p-4">
+                            <div class="space-y-2">
+                                <button class="category-tab w-full text-left px-3 py-2 rounded-md bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300" data-type="income">
+                                    <i data-lucide="arrow-down-circle" class="w-4 h-4 inline mr-2"></i>
+                                    Ingresos
+                                </button>
+                                <button class="category-tab w-full text-left px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-gray-700" data-type="expense">
+                                    <i data-lucide="arrow-up-circle" class="w-4 h-4 inline mr-2"></i>
+                                    Gastos
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Content Area -->
+                        <div class="flex-1 p-6 overflow-y-auto">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 id="current-type-title" class="text-lg font-semibold">Categorías de Ingresos</h4>
+                                <button id="add-main-category-btn" class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                                    <i data-lucide="plus" class="w-4 h-4"></i>
+                                    Agregar Categoría
+                                </button>
+                            </div>
+
+                            <div id="categories-tree" class="space-y-2">
+                                <!-- Categories will be rendered here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 border-t dark:border-gray-700 bg-slate-50 dark:bg-gray-800/50">
+                        <div class="flex justify-between items-center">
+                            <p class="text-sm text-slate-500 dark:text-slate-400">
+                                💡 Las categorías en uso no pueden eliminarse
+                            </p>
+                            <button id="reset-categories-btn" class="text-sm text-red-600 dark:text-red-400 hover:underline">
+                                Restaurar Categorías por Defecto
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+
+            // Event listeners
+            categoriesModalEl.querySelector('.js-close-modal').addEventListener('click', () => closeModal(categoriesModalEl));
+
+            // Tab switching
+            categoriesModalEl.querySelectorAll('.category-tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    // Update active tab
+                    categoriesModalEl.querySelectorAll('.category-tab').forEach(t => {
+                        t.className = 'category-tab w-full text-left px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-gray-700';
+                    });
+                    e.target.classList.add('bg-green-100', 'dark:bg-green-900/50', 'text-green-700', 'dark:text-green-300');
+                    if (e.target.dataset.type === 'expense') {
+                        e.target.classList.remove('bg-green-100', 'dark:bg-green-900/50', 'text-green-700', 'dark:text-green-300');
+                        e.target.classList.add('bg-red-100', 'dark:bg-red-900/50', 'text-red-700', 'dark:text-red-300');
+                    }
+
+                    // Update content
+                    const type = e.target.dataset.type;
+                    categoriesModalEl.querySelector('#current-type-title').textContent =
+                        type === 'income' ? 'Categorías de Ingresos' : 'Categorías de Gastos';
+                    renderCategoriesTree(type);
+                });
+            });
+
+            // Add main category button
+            categoriesModalEl.querySelector('#add-main-category-btn').addEventListener('click', () => {
+                const activeTab = categoriesModalEl.querySelector('.category-tab.bg-green-100, .category-tab.bg-red-100');
+                const type = activeTab ? activeTab.dataset.type : 'income';
+                showAddCategoryForm(type, null);
+            });
+
+            // Reset categories button
+            categoriesModalEl.querySelector('#reset-categories-btn').addEventListener('click', resetCategoriesToDefault);
+
+            // Initial render
+            renderCategoriesTree('income');
+        };
+
+        const renderCategoriesTree = (type) => {
+            const treeContainer = categoriesModalEl.querySelector('#categories-tree');
+            const currentStructure = getCurrentCategoryStructure();
+            const categories = currentStructure[type] || {};
+
+            let html = '';
+
+            Object.keys(categories).forEach(categoryName => {
+                const subcategories = categories[categoryName] || {};
+                const categoryId = `cat-${type}-${categoryName.replace(/\s+/g, '-')}`;
+
+                html += `
+                    <div class="category-item border rounded-lg p-3 bg-white dark:bg-gray-700">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <button class="expand-btn text-slate-400 hover:text-slate-600" data-target="${categoryId}">
+                                    <i data-lucide="chevron-right" class="w-4 h-4 transition-transform"></i>
+                                </button>
+                                <span class="font-medium">${categoryName}</span>
+                                <span class="text-xs text-slate-500 bg-slate-100 dark:bg-gray-600 px-2 py-1 rounded">
+                                    ${Object.keys(subcategories).length} subcategorías
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button class="add-subcategory-btn p-1 text-slate-400 hover:text-green-600"
+                                        data-type="${type}" data-category="${categoryName}" title="Agregar subcategoría">
+                                    <i data-lucide="plus" class="w-4 h-4"></i>
+                                </button>
+                                <button class="edit-category-btn p-1 text-slate-400 hover:text-blue-600"
+                                        data-type="${type}" data-category="${categoryName}" title="Editar nombre">
+                                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                </button>
+                                <button class="delete-category-btn p-1 text-slate-400 hover:text-red-600"
+                                        data-type="${type}" data-category="${categoryName}" title="Eliminar categoría">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="${categoryId}" class="subcategories-container hidden mt-3 ml-6 space-y-2">
+                            ${Object.keys(subcategories).map(subName => {
+                                const subItems = subcategories[subName] || [];
+                                const subId = `sub-${type}-${categoryName.replace(/\s+/g, '-')}-${subName.replace(/\s+/g, '-')}`;
+
+                                return `
+                                    <div class="subcategory-item border-l-2 border-slate-200 dark:border-gray-600 pl-3">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-2">
+                                                <button class="expand-btn text-slate-400 hover:text-slate-600" data-target="${subId}">
+                                                    <i data-lucide="chevron-right" class="w-3 h-3 transition-transform"></i>
+                                                </button>
+                                                <span class="text-sm font-medium">${subName}</span>
+                                                <span class="text-xs text-slate-500 bg-slate-100 dark:bg-gray-600 px-1 py-0.5 rounded">
+                                                    ${subItems.length} items
+                                                </span>
+                                            </div>
+                                            <div class="flex items-center gap-1">
+                                                <button class="add-subsubcategory-btn p-1 text-slate-400 hover:text-green-600"
+                                                        data-type="${type}" data-category="${categoryName}" data-subcategory="${subName}" title="Agregar item">
+                                                    <i data-lucide="plus" class="w-3 h-3"></i>
+                                                </button>
+                                                <button class="edit-subcategory-btn p-1 text-slate-400 hover:text-blue-600"
+                                                        data-type="${type}" data-category="${categoryName}" data-subcategory="${subName}" title="Editar nombre">
+                                                    <i data-lucide="edit-3" class="w-3 h-3"></i>
+                                                </button>
+                                                <button class="delete-subcategory-btn p-1 text-slate-400 hover:text-red-600"
+                                                        data-type="${type}" data-category="${categoryName}" data-subcategory="${subName}" title="Eliminar subcategoría">
+                                                    <i data-lucide="trash-2" class="w-3 h-3"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div id="${subId}" class="subsubcategories-container hidden mt-2 ml-4 space-y-1">
+                                            ${subItems.map(itemName => `
+                                                <div class="flex items-center justify-between py-1">
+                                                    <span class="text-sm text-slate-600 dark:text-slate-400">${itemName}</span>
+                                                    <div class="flex items-center gap-1">
+                                                        <button class="edit-subsubcategory-btn p-1 text-slate-400 hover:text-blue-600"
+                                                                data-type="${type}" data-category="${categoryName}" data-subcategory="${subName}" data-subsubcategory="${itemName}" title="Editar nombre">
+                                                            <i data-lucide="edit-3" class="w-3 h-3"></i>
+                                                        </button>
+                                                        <button class="delete-subsubcategory-btn p-1 text-slate-400 hover:text-red-600"
+                                                                data-type="${type}" data-category="${categoryName}" data-subcategory="${subName}" data-subsubcategory="${itemName}" title="Eliminar item">
+                                                            <i data-lucide="trash-2" class="w-3 h-3"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            if (html === '') {
+                html = `
+                    <div class="text-center py-8 text-slate-500 dark:text-slate-400">
+                        <i data-lucide="folder-plus" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
+                        <p>No hay categorías de ${type === 'income' ? 'ingresos' : 'gastos'} todavía.</p>
+                        <p class="text-sm">Haz clic en "Agregar Categoría" para comenzar.</p>
+                    </div>
+                `;
+            }
+
+            treeContainer.innerHTML = html;
+
+            // Add event listeners
+            addCategoryTreeEventListeners();
+        };
+
+        const addCategoryTreeEventListeners = () => {
+            const treeContainer = categoriesModalEl.querySelector('#categories-tree');
+
+            // Expand/collapse buttons
+            treeContainer.querySelectorAll('.expand-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const targetId = e.currentTarget.dataset.target;
+                    const target = document.getElementById(targetId);
+                    const icon = e.currentTarget.querySelector('i');
+
+                    if (target.classList.contains('hidden')) {
+                        target.classList.remove('hidden');
+                        icon.style.transform = 'rotate(90deg)';
+                    } else {
+                        target.classList.add('hidden');
+                        icon.style.transform = 'rotate(0deg)';
+                    }
+                });
+            });
+
+            // Add buttons
+            treeContainer.querySelectorAll('.add-subcategory-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const { type, category } = e.currentTarget.dataset;
+                    showAddCategoryForm(type, category);
+                });
+            });
+
+            treeContainer.querySelectorAll('.add-subsubcategory-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const { type, category, subcategory } = e.currentTarget.dataset;
+                    showAddCategoryForm(type, category, subcategory);
+                });
+            });
+
+            // Edit buttons
+            treeContainer.querySelectorAll('.edit-category-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const { type, category } = e.currentTarget.dataset;
+                    showEditCategoryForm(type, category);
+                });
+            });
+
+            treeContainer.querySelectorAll('.edit-subcategory-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const { type, category, subcategory } = e.currentTarget.dataset;
+                    showEditCategoryForm(type, category, subcategory);
+                });
+            });
+
+            treeContainer.querySelectorAll('.edit-subsubcategory-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const { type, category, subcategory, subsubcategory } = e.currentTarget.dataset;
+                    showEditCategoryForm(type, category, subcategory, subsubcategory);
+                });
+            });
+
+            // Delete buttons
+            treeContainer.querySelectorAll('.delete-category-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const { type, category } = e.currentTarget.dataset;
+                    confirmDeleteCategory(type, category);
+                });
+            });
+
+            treeContainer.querySelectorAll('.delete-subcategory-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const { type, category, subcategory } = e.currentTarget.dataset;
+                    confirmDeleteCategory(type, category, subcategory);
+                });
+            });
+
+            treeContainer.querySelectorAll('.delete-subsubcategory-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const { type, category, subcategory, subsubcategory } = e.currentTarget.dataset;
+                    confirmDeleteCategory(type, category, subcategory, subsubcategory);
+                });
+            });
+        };
+
+        // ===== FUNCIONES CRUD PARA CATEGORÍAS =====
+        const showAddCategoryForm = (type, parentCategory = null, parentSubcategory = null) => {
+            const level = parentSubcategory ? 'item' : parentCategory ? 'subcategoría' : 'categoría';
+            const title = `Agregar ${level}`;
+
+            const formHtml = `
+                <div class="fixed inset-0 z-60 flex items-center justify-center bg-black bg-opacity-50">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+                        <h4 class="text-lg font-semibold mb-4">${title}</h4>
+                        <form id="add-category-form">
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium mb-2">Nombre del ${level}</label>
+                                <input type="text" id="category-name-input"
+                                       class="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
+                                       placeholder="Ingresa el nombre..." required maxlength="50">
+                            </div>
+                            <div class="flex justify-end gap-2">
+                                <button type="button" class="cancel-btn px-4 py-2 text-sm border rounded-md hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    Cancelar
+                                </button>
+                                <button type="submit" class="px-4 py-2 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                                    Agregar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', formHtml);
+            const formContainer = document.body.lastElementChild;
+            const form = formContainer.querySelector('#add-category-form');
+            const input = formContainer.querySelector('#category-name-input');
+
+            input.focus();
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const name = input.value.trim();
+                if (name) {
+                    await addCategory(type, name, parentCategory, parentSubcategory);
+                    formContainer.remove();
+                }
+            });
+
+            formContainer.querySelector('.cancel-btn').addEventListener('click', () => {
+                formContainer.remove();
+            });
+
+            formContainer.addEventListener('click', (e) => {
+                if (e.target === formContainer) formContainer.remove();
+            });
+        };
+
+        const showEditCategoryForm = (type, category, subcategory = null, subsubcategory = null) => {
+            const currentName = subsubcategory || subcategory || category;
+            const level = subsubcategory ? 'item' : subcategory ? 'subcategoría' : 'categoría';
+
+            const formHtml = `
+                <div class="fixed inset-0 z-60 flex items-center justify-center bg-black bg-opacity-50">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+                        <h4 class="text-lg font-semibold mb-4">Editar ${level}</h4>
+                        <form id="edit-category-form">
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium mb-2">Nombre del ${level}</label>
+                                <input type="text" id="category-name-input"
+                                       class="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
+                                       value="${currentName}" required maxlength="50">
+                            </div>
+                            <div class="flex justify-end gap-2">
+                                <button type="button" class="cancel-btn px-4 py-2 text-sm border rounded-md hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    Cancelar
+                                </button>
+                                <button type="submit" class="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                                    Guardar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', formHtml);
+            const formContainer = document.body.lastElementChild;
+            const form = formContainer.querySelector('#edit-category-form');
+            const input = formContainer.querySelector('#category-name-input');
+
+            input.focus();
+            input.select();
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const newName = input.value.trim();
+                if (newName && newName !== currentName) {
+                    await editCategory(type, category, newName, subcategory, subsubcategory);
+                    formContainer.remove();
+                } else {
+                    formContainer.remove();
+                }
+            });
+
+            formContainer.querySelector('.cancel-btn').addEventListener('click', () => {
+                formContainer.remove();
+            });
+
+            formContainer.addEventListener('click', (e) => {
+                if (e.target === formContainer) formContainer.remove();
+            });
+        };
+
+        const addCategory = async (type, name, parentCategory = null, parentSubcategory = null) => {
+            try {
+                const currentStructure = getCurrentCategoryStructure();
+                const newStructure = JSON.parse(JSON.stringify(currentStructure));
+
+                if (!newStructure[type]) newStructure[type] = {};
+
+                if (parentSubcategory) {
+                    // Agregar sub-subcategoría
+                    if (!newStructure[type][parentCategory][parentSubcategory]) {
+                        newStructure[type][parentCategory][parentSubcategory] = [];
+                    }
+                    newStructure[type][parentCategory][parentSubcategory].push(name);
+                } else if (parentCategory) {
+                    // Agregar subcategoría
+                    if (!newStructure[type][parentCategory]) {
+                        newStructure[type][parentCategory] = {};
+                    }
+                    newStructure[type][parentCategory][name] = [];
+                } else {
+                    // Agregar categoría principal
+                    newStructure[type][name] = {};
+                }
+
+                await saveCategoryStructure(newStructure);
+                showSuccessMessage(`${name} agregado exitosamente`);
+            } catch (error) {
+                console.error('Error adding category:', error);
+                showErrorMessage('Error al agregar la categoría');
+            }
+        };
+
+        const editCategory = async (type, category, newName, subcategory = null, subsubcategory = null) => {
+            try {
+                const currentStructure = getCurrentCategoryStructure();
+                const newStructure = JSON.parse(JSON.stringify(currentStructure));
+
+                if (subsubcategory) {
+                    // Editar sub-subcategoría
+                    const items = newStructure[type][category][subcategory];
+                    const index = items.indexOf(subsubcategory);
+                    if (index !== -1) {
+                        items[index] = newName;
+                    }
+                } else if (subcategory) {
+                    // Editar subcategoría
+                    const subcategories = newStructure[type][category];
+                    const items = subcategories[subcategory];
+                    delete subcategories[subcategory];
+                    subcategories[newName] = items;
+                } else {
+                    // Editar categoría principal
+                    const categoryData = newStructure[type][category];
+                    delete newStructure[type][category];
+                    newStructure[type][newName] = categoryData;
+                }
+
+                await saveCategoryStructure(newStructure);
+                showSuccessMessage(`Nombre actualizado a "${newName}"`);
+            } catch (error) {
+                console.error('Error editing category:', error);
+                showErrorMessage('Error al editar la categoría');
+            }
+        };
+
+        const confirmDeleteCategory = async (type, category, subcategory = null, subsubcategory = null) => {
+            const itemName = subsubcategory || subcategory || category;
+            const level = subsubcategory ? 'item' : subcategory ? 'subcategoría' : 'categoría';
+
+            // Verificar si está en uso
+            const inUse = isCategoryInUse(type, category, subcategory, subsubcategory);
+            if (inUse) {
+                showErrorMessage(`No se puede eliminar "${itemName}" porque está siendo usado en transacciones existentes.`);
+                return;
+            }
+
+            if (confirm(`¿Estás seguro de que quieres eliminar ${level} "${itemName}"?`)) {
+                await deleteCategory(type, category, subcategory, subsubcategory);
+            }
+        };
+
+        const deleteCategory = async (type, category, subcategory = null, subsubcategory = null) => {
+            try {
+                const currentStructure = getCurrentCategoryStructure();
+                const newStructure = JSON.parse(JSON.stringify(currentStructure));
+
+                if (subsubcategory) {
+                    // Eliminar sub-subcategoría
+                    const items = newStructure[type][category][subcategory];
+                    const index = items.indexOf(subsubcategory);
+                    if (index !== -1) {
+                        items.splice(index, 1);
+                    }
+                } else if (subcategory) {
+                    // Eliminar subcategoría
+                    delete newStructure[type][category][subcategory];
+                } else {
+                    // Eliminar categoría principal
+                    delete newStructure[type][category];
+                }
+
+                await saveCategoryStructure(newStructure);
+                showSuccessMessage('Eliminado exitosamente');
+            } catch (error) {
+                console.error('Error deleting category:', error);
+                showErrorMessage('Error al eliminar la categoría');
+            }
+        };
+
+        const saveCategoryStructure = async (structure) => {
+            if (!categoriesDocRef) return;
+            await setDoc(categoriesDocRef, structure);
+        };
+
+        const isCategoryInUse = (type, category, subcategory = null, subsubcategory = null) => {
+            return transactions.some(t => {
+                if (t.type !== type || t.category !== category) return false;
+                if (subcategory && t.subcategory !== subcategory) return false;
+                if (subsubcategory && t.subsubcategory !== subsubcategory) return false;
+                return true;
+            });
+        };
+
+        const resetCategoriesToDefault = async () => {
+            if (confirm('¿Estás seguro de que quieres restaurar las categorías por defecto? Esto eliminará todas las categorías personalizadas.')) {
+                try {
+                    await saveCategoryStructure(categoryStructure);
+                    showSuccessMessage('Categorías restauradas por defecto');
+                } catch (error) {
+                    console.error('Error resetting categories:', error);
+                    showErrorMessage('Error al restaurar las categorías');
+                }
+            }
+        };
+
+        const showSuccessMessage = (message) => {
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-70';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        };
+
+        const showErrorMessage = (message) => {
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-md shadow-lg z-70';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        };
+
+        // ===== FORMULARIO DE PASIVOS =====
+        const openLiabilityForm = (id = null) => {
+            const liability = id ? liabilities.find(l => l.id === id) : null;
+
+            liabilityFormModalEl.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 w-full max-w-2xl m-4 rounded-2xl shadow-xl flex flex-col max-h-[90vh]">
+                    <div class="flex justify-between items-center p-6 border-b dark:border-gray-700">
+                        <h3 class="text-xl font-semibold">${id ? 'Editar' : 'Nuevo'} Pasivo</h3>
+                        <button class="js-close-modal p-1 rounded-full hover:bg-slate-200 dark:hover:bg-gray-700">
+                            <i data-lucide="x"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex-1 overflow-y-auto p-6">
+                        <form id="liability-form" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="liability-name" class="block text-sm font-medium mb-1">Nombre del Pasivo</label>
+                                    <input type="text" id="liability-name" value="${liability?.name || ''}"
+                                           class="w-full px-3 py-2 bg-slate-50 dark:bg-gray-700 border rounded-md"
+                                           placeholder="Ej: Hipoteca casa, Tarjeta de crédito..." required>
+                                </div>
+
+                                <div>
+                                    <label for="liability-category" class="block text-sm font-medium mb-1">Categoría</label>
+                                    <select id="liability-category" class="w-full px-3 py-2 bg-slate-50 dark:bg-gray-700 border rounded-md" required>
+                                        <option value="">Seleccionar categoría</option>
+                                        <option value="Hipotecas" ${liability?.category === 'Hipotecas' ? 'selected' : ''}>Hipotecas</option>
+                                        <option value="Préstamos Personales" ${liability?.category === 'Préstamos Personales' ? 'selected' : ''}>Préstamos Personales</option>
+                                        <option value="Tarjetas de Crédito" ${liability?.category === 'Tarjetas de Crédito' ? 'selected' : ''}>Tarjetas de Crédito</option>
+                                        <option value="Préstamos Vehiculares" ${liability?.category === 'Préstamos Vehiculares' ? 'selected' : ''}>Préstamos Vehiculares</option>
+                                        <option value="Préstamos Estudiantiles" ${liability?.category === 'Préstamos Estudiantiles' ? 'selected' : ''}>Préstamos Estudiantiles</option>
+                                        <option value="Deudas Comerciales" ${liability?.category === 'Deudas Comerciales' ? 'selected' : ''}>Deudas Comerciales</option>
+                                        <option value="Otros" ${liability?.category === 'Otros' ? 'selected' : ''}>Otros</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="liability-subcategory" class="block text-sm font-medium mb-1">Subcategoría (opcional)</label>
+                                <input type="text" id="liability-subcategory" value="${liability?.subcategory || ''}"
+                                       class="w-full px-3 py-2 bg-slate-50 dark:bg-gray-700 border rounded-md"
+                                       placeholder="Ej: Banco específico, tipo de tarjeta...">
+                            </div>
+
+                            <div>
+                                <label for="liability-description" class="block text-sm font-medium mb-1">Descripción</label>
+                                <textarea id="liability-description" rows="2"
+                                          class="w-full px-3 py-2 bg-slate-50 dark:bg-gray-700 border rounded-md"
+                                          placeholder="Detalles adicionales sobre este pasivo...">${liability?.description || ''}</textarea>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="liability-balance" class="block text-sm font-medium mb-1">Saldo Actual</label>
+                                    <input type="number" id="liability-balance" value="${liability?.currentBalance || ''}"
+                                           min="0" step="0.01" class="w-full px-3 py-2 bg-slate-50 dark:bg-gray-700 border rounded-md"
+                                           placeholder="0.00" required>
+                                </div>
+
+                                <div>
+                                    <label for="liability-original" class="block text-sm font-medium mb-1">Monto Original (opcional)</label>
+                                    <input type="number" id="liability-original" value="${liability?.originalAmount || ''}"
+                                           min="0" step="0.01" class="w-full px-3 py-2 bg-slate-50 dark:bg-gray-700 border rounded-md"
+                                           placeholder="0.00">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="liability-payment" class="block text-sm font-medium mb-1">Cuota Mensual (opcional)</label>
+                                    <input type="number" id="liability-payment" value="${liability?.monthlyPayment || ''}"
+                                           min="0" step="0.01" class="w-full px-3 py-2 bg-slate-50 dark:bg-gray-700 border rounded-md"
+                                           placeholder="0.00">
+                                </div>
+
+                                <div>
+                                    <label for="liability-rate" class="block text-sm font-medium mb-1">Tasa de Interés % (opcional)</label>
+                                    <input type="number" id="liability-rate" value="${liability?.interestRate || ''}"
+                                           min="0" max="100" step="0.01" class="w-full px-3 py-2 bg-slate-50 dark:bg-gray-700 border rounded-md"
+                                           placeholder="0.00">
+                                </div>
+
+                                <div>
+                                    <label for="liability-months" class="block text-sm font-medium mb-1">Meses Restantes (opcional)</label>
+                                    <input type="number" id="liability-months" value="${liability?.monthsRemaining || ''}"
+                                           min="0" class="w-full px-3 py-2 bg-slate-50 dark:bg-gray-700 border rounded-md"
+                                           placeholder="0">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="p-6 border-t dark:border-gray-700 bg-slate-50 dark:bg-gray-800/50">
+                        <div class="flex gap-3">
+                            <button type="button" class="js-close-modal flex-1 px-4 py-2 text-sm font-medium border border-slate-300 dark:border-gray-600 rounded-md hover:bg-slate-100 dark:hover:bg-gray-700">
+                                Cancelar
+                            </button>
+                            <button type="submit" form="liability-form" class="flex-1 px-4 py-2 text-sm font-medium bg-red-600 text-white rounded-md hover:bg-red-700">
+                                ${id ? 'Guardar Cambios' : 'Agregar Pasivo'}
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+
+            liabilityFormModalEl.querySelector('.js-close-modal').addEventListener('click', () => closeModal(liabilityFormModalEl));
+            liabilityFormModalEl.querySelector('#liability-form').addEventListener('submit', (e) => saveLiability(e, id));
+
+            openModal(liabilityFormModalEl);
+            lucide.createIcons();
+        };
+
+        const saveLiability = async (e, id = null) => {
+            e.preventDefault();
+
+            const liabilityData = {
+                name: liabilityFormModalEl.querySelector('#liability-name').value,
+                category: liabilityFormModalEl.querySelector('#liability-category').value,
+                subcategory: liabilityFormModalEl.querySelector('#liability-subcategory').value,
+                description: liabilityFormModalEl.querySelector('#liability-description').value,
+                currentBalance: parseFloat(liabilityFormModalEl.querySelector('#liability-balance').value) || 0,
+                originalAmount: parseFloat(liabilityFormModalEl.querySelector('#liability-original').value) || null,
+                monthlyPayment: parseFloat(liabilityFormModalEl.querySelector('#liability-payment').value) || null,
+                interestRate: parseFloat(liabilityFormModalEl.querySelector('#liability-rate').value) || null,
+                monthsRemaining: parseInt(liabilityFormModalEl.querySelector('#liability-months').value) || null,
+                lastUpdated: new Date(),
+                userId: currentUser.uid
+            };
+
+            try {
+                if (id) {
+                    await updateDoc(doc(db, 'liabilities', id), liabilityData);
+                    showSuccessMessage('Pasivo actualizado correctamente');
+                } else {
+                    await addDoc(collection(db, 'liabilities'), liabilityData);
+                    showSuccessMessage('Pasivo agregado correctamente');
+                }
+
+                closeModal(liabilityFormModalEl);
+                await loadLiabilities();
+                renderLiabilitiesList();
+                renderPatrimony();
+            } catch (error) {
+                console.error('Error saving liability:', error);
+                showErrorMessage('Error al guardar el pasivo');
+            }
+        };
+
+        const deleteLiability = async (id) => {
+            if (!confirm('¿Estás seguro de que quieres eliminar este pasivo?')) return;
+
+            try {
+                await deleteDoc(doc(db, 'liabilities', id));
+                showSuccessMessage('Pasivo eliminado correctamente');
+                await loadLiabilities();
+                renderLiabilitiesList();
+                renderPatrimony();
+            } catch (error) {
+                console.error('Error deleting liability:', error);
+                showErrorMessage('Error al eliminar el pasivo');
+            }
+        };
+
+        // ===== GESTIÓN DE ACTIVOS =====
+        const openAssetsModal = () => {
+            renderAssetsModal();
+            openModal(assetsModalEl);
+            lucide.createIcons();
+        };
+
+        const renderAssetsModal = () => {
+            assetsModalEl.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 w-full max-w-4xl m-4 rounded-2xl shadow-xl flex flex-col h-[80vh]">
+                    <div class="flex justify-between items-center p-6 border-b dark:border-gray-700">
+                        <h3 class="text-xl font-semibold flex items-center gap-2">
+                            <i data-lucide="trending-up" class="text-green-500"></i>
+                            Gestionar Activos
+                        </h3>
+                        <button class="js-close-modal p-1 rounded-full hover:bg-slate-200 dark:hover:bg-gray-700">
+                            <i data-lucide="x"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex-1 p-6 overflow-y-auto">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-lg font-semibold">Mis Activos</h4>
+                            <button id="add-asset-btn" class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700">
+                                <i data-lucide="plus" class="w-4 h-4"></i>
+                                Agregar Activo
+                            </button>
+                        </div>
+
+                        <div id="assets-list" class="space-y-3">
+                            <!-- Assets will be rendered here -->
+                        </div>
+                    </div>
+
+                    <div class="p-4 border-t dark:border-gray-700 bg-slate-50 dark:bg-gray-800/50">
+                        <div class="flex justify-between items-center">
+                            <p class="text-sm text-slate-500 dark:text-slate-400">
+                                💡 Mantén actualizados los valores de tus activos
+                            </p>
+                            <p class="text-lg font-semibold text-green-600 dark:text-green-400">
+                                Total: <span id="modal-total-assets">${formatCurrency(assets.reduce((sum, a) => sum + (a.currentValue || 0), 0))}</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>`;
+
+            assetsModalEl.querySelector('.js-close-modal').addEventListener('click', () => closeModal(assetsModalEl));
+            assetsModalEl.querySelector('#add-asset-btn').addEventListener('click', () => openAssetForm());
+
+            renderAssetsList();
+        };
+
+        const renderAssetsList = () => {
+            const assetsList = assetsModalEl.querySelector('#assets-list');
+
+            if (assets.length === 0) {
+                assetsList.innerHTML = `
+                    <div class="text-center py-8 text-slate-500 dark:text-slate-400">
+                        <i data-lucide="trending-up" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
+                        <p>No tienes activos registrados todavía.</p>
+                        <p class="text-sm">Agrega tus primeros activos para comenzar a construir tu patrimonio.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            assets.forEach(asset => {
+                html += `
+                    <div class="bg-slate-50 dark:bg-gray-700 p-4 rounded-lg">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <h5 class="font-semibold">${asset.name}</h5>
+                                <p class="text-sm text-slate-500 dark:text-slate-400">${asset.category} › ${asset.subcategory || 'General'}</p>
+                                <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">${asset.description || 'Sin descripción'}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-lg font-semibold text-green-600 dark:text-green-400">${formatCurrency(asset.currentValue || 0)}</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Actualizado: ${asset.lastUpdated?.toDate().toLocaleDateString('es-ES') || 'Nunca'}</p>
+                            </div>
+                            <div class="flex flex-col gap-1 ml-2">
+                                <button class="edit-asset-btn p-1 text-slate-400 hover:text-blue-600" data-id="${asset.id}">
+                                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                </button>
+                                <button class="delete-asset-btn p-1 text-slate-400 hover:text-red-600" data-id="${asset.id}">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            assetsList.innerHTML = html;
+
+            // Add event listeners
+            assetsList.querySelectorAll('.edit-asset-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => openAssetForm(e.target.closest('button').dataset.id));
+            });
+
+            assetsList.querySelectorAll('.delete-asset-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => deleteAsset(e.target.closest('button').dataset.id));
+            });
+        };
+
+        const openAssetForm = (assetId = null) => {
+            const asset = assetId ? assets.find(a => a.id === assetId) : null;
+            const isEditing = !!asset;
+
+            const formHtml = `
+                <div class="fixed inset-0 z-60 flex items-center justify-center bg-black bg-opacity-50">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+                        <h4 class="text-lg font-semibold mb-4">${isEditing ? 'Editar' : 'Agregar'} Activo</h4>
+                        <form id="asset-form">
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium mb-2">Nombre del Activo</label>
+                                <input type="text" id="asset-name" value="${asset?.name || ''}"
+                                       class="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
+                                       placeholder="Ej: Casa principal, Carro, Cuenta de ahorros..." required>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium mb-2">Categoría</label>
+                                <select id="asset-category" class="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required>
+                                    <option value="">Selecciona una categoría</option>
+                                    ${Object.keys(categoryStructure.assets).map(cat =>
+                                        `<option value="${cat}" ${asset?.category === cat ? 'selected' : ''}>${cat}</option>`
+                                    ).join('')}
+                                </select>
+                            </div>
+
+                            <div class="mb-4" id="asset-subcategory-container" style="display: none;">
+                                <label class="block text-sm font-medium mb-2">Subcategoría</label>
+                                <select id="asset-subcategory" class="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600">
+                                    <option value="">Selecciona una subcategoría</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium mb-2">Valor Actual</label>
+                                <input type="number" id="asset-value" value="${asset?.currentValue || ''}"
+                                       min="0" step="0.01" class="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
+                                       placeholder="0.00" required>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium mb-2">Descripción (opcional)</label>
+                                <textarea id="asset-description" rows="2"
+                                          class="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
+                                          placeholder="Detalles adicionales...">${asset?.description || ''}</textarea>
+                            </div>
+
+                            <div class="flex justify-end gap-2">
+                                <button type="button" class="cancel-btn px-4 py-2 text-sm border rounded-md hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    Cancelar
+                                </button>
+                                <button type="submit" class="px-4 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700">
+                                    ${isEditing ? 'Actualizar' : 'Agregar'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', formHtml);
+            const formContainer = document.body.lastElementChild;
+            const form = formContainer.querySelector('#asset-form');
+            const categorySelect = formContainer.querySelector('#asset-category');
+            const subcategorySelect = formContainer.querySelector('#asset-subcategory');
+            const subcategoryContainer = formContainer.querySelector('#asset-subcategory-container');
+
+            // Handle category change
+            categorySelect.addEventListener('change', (e) => {
+                const category = e.target.value;
+                if (category && categoryStructure.assets[category]) {
+                    const subcategories = Object.keys(categoryStructure.assets[category]);
+                    if (subcategories.length > 0) {
+                        subcategorySelect.innerHTML = '<option value="">Selecciona una subcategoría</option>' +
+                            subcategories.map(sub => `<option value="${sub}">${sub}</option>`).join('');
+                        subcategoryContainer.style.display = 'block';
+                    } else {
+                        subcategoryContainer.style.display = 'none';
+                    }
+                } else {
+                    subcategoryContainer.style.display = 'none';
+                }
+            });
+
+            // Initialize subcategory if editing
+            if (asset && asset.category) {
+                setTimeout(() => {
+                    categorySelect.dispatchEvent(new Event('change'));
+                    if (asset.subcategory) {
+                        setTimeout(() => {
+                            subcategorySelect.value = asset.subcategory;
+                        }, 50);
+                    }
+                }, 50);
+            }
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = {
+                    name: form.querySelector('#asset-name').value.trim(),
+                    category: form.querySelector('#asset-category').value,
+                    subcategory: form.querySelector('#asset-subcategory').value || null,
+                    currentValue: parseFloat(form.querySelector('#asset-value').value),
+                    description: form.querySelector('#asset-description').value.trim() || null,
+                    lastUpdated: serverTimestamp()
+                };
+
+                try {
+                    if (isEditing) {
+                        await updateDoc(doc(assetsCollection, assetId), formData);
+                        showSuccessMessage('Activo actualizado exitosamente');
+                    } else {
+                        await addDoc(assetsCollection, { ...formData, createdAt: serverTimestamp() });
+                        showSuccessMessage('Activo agregado exitosamente');
+                    }
+                    formContainer.remove();
+                    renderAssetsList();
+
+                    // Update modal total
+                    const modalTotal = assetsModalEl.querySelector('#modal-total-assets');
+                    if (modalTotal) {
+                        const newTotal = assets.reduce((sum, a) => sum + (a.currentValue || 0), 0);
+                        modalTotal.textContent = formatCurrency(newTotal);
+                    }
+                } catch (error) {
+                    console.error('Error saving asset:', error);
+                    showErrorMessage('Error al guardar el activo');
+                }
+            });
+
+            formContainer.querySelector('.cancel-btn').addEventListener('click', () => {
+                formContainer.remove();
+            });
+
+            formContainer.addEventListener('click', (e) => {
+                if (e.target === formContainer) formContainer.remove();
+            });
+        };
+
+        const deleteAsset = async (assetId) => {
+            if (confirm('¿Estás seguro de que quieres eliminar este activo?')) {
+                try {
+                    await deleteDoc(doc(assetsCollection, assetId));
+                    showSuccessMessage('Activo eliminado exitosamente');
+                    renderAssetsList();
+                } catch (error) {
+                    console.error('Error deleting asset:', error);
+                    showErrorMessage('Error al eliminar el activo');
+                }
+            }
+        };
+
+        // ===== GESTIÓN DE PASIVOS =====
+        const openLiabilitiesModal = () => {
+            renderLiabilitiesModal();
+            openModal(liabilitiesModalEl);
+            lucide.createIcons();
+        };
+
+        const renderLiabilitiesModal = () => {
+            liabilitiesModalEl.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 w-full max-w-4xl m-4 rounded-2xl shadow-xl flex flex-col h-[80vh]">
+                    <div class="flex justify-between items-center p-6 border-b dark:border-gray-700">
+                        <h3 class="text-xl font-semibold flex items-center gap-2">
+                            <i data-lucide="trending-down" class="text-red-500"></i>
+                            Gestionar Pasivos
+                        </h3>
+                        <button class="js-close-modal p-1 rounded-full hover:bg-slate-200 dark:hover:bg-gray-700">
+                            <i data-lucide="x"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex-1 p-6 overflow-y-auto">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-lg font-semibold">Mis Pasivos</h4>
+                            <button id="add-liability-btn" class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700">
+                                <i data-lucide="plus" class="w-4 h-4"></i>
+                                Agregar Pasivo
+                            </button>
+                        </div>
+
+                        <div id="liabilities-list" class="space-y-3">
+                            <!-- Liabilities will be rendered here -->
+                        </div>
+                    </div>
+
+                    <div class="p-4 border-t dark:border-gray-700 bg-slate-50 dark:bg-gray-800/50">
+                        <div class="flex justify-between items-center">
+                            <p class="text-sm text-slate-500 dark:text-slate-400">
+                                💡 Mantén actualizados los saldos de tus deudas
+                            </p>
+                            <p class="text-lg font-semibold text-red-600 dark:text-red-400">
+                                Total: <span id="modal-total-liabilities">${formatCurrency(liabilities.reduce((sum, l) => sum + (l.currentBalance || 0), 0))}</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>`;
+
+            liabilitiesModalEl.querySelector('.js-close-modal').addEventListener('click', () => closeModal(liabilitiesModalEl));
+            liabilitiesModalEl.querySelector('#add-liability-btn').addEventListener('click', () => openLiabilityForm());
+
+            renderLiabilitiesList();
+
+            // Actualizar total en el modal
+            const modalTotalLiabilities = liabilitiesModalEl.querySelector('#modal-total-liabilities');
+            if (modalTotalLiabilities) {
+                modalTotalLiabilities.textContent = formatCurrency(liabilities.reduce((sum, l) => sum + (l.currentBalance || 0), 0));
+            }
+        };
+
+        const renderLiabilitiesList = () => {
+            const liabilitiesList = liabilitiesModalEl.querySelector('#liabilities-list');
+
+            if (liabilities.length === 0) {
+                liabilitiesList.innerHTML = `
+                    <div class="text-center py-8 text-slate-500 dark:text-slate-400">
+                        <i data-lucide="credit-card" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
+                        <p>No tienes pasivos registrados todavía.</p>
+                        <p class="text-sm">Agrega tus deudas y obligaciones para tener un control completo de tu patrimonio.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            liabilities.forEach(liability => {
+                const monthsRemaining = liability.monthsRemaining || 0;
+                const monthlyPayment = liability.monthlyPayment || 0;
+
+                html += `
+                    <div class="bg-slate-50 dark:bg-gray-700 p-4 rounded-lg">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <h5 class="font-semibold">${liability.name}</h5>
+                                <p class="text-sm text-slate-500 dark:text-slate-400">${liability.category} › ${liability.subcategory || 'General'}</p>
+                                <div class="flex gap-4 mt-2 text-xs text-slate-400 dark:text-slate-500">
+                                    ${monthlyPayment > 0 ? `<span>Cuota: ${formatCurrency(monthlyPayment)}</span>` : ''}
+                                    ${monthsRemaining > 0 ? `<span>Faltan: ${monthsRemaining} meses</span>` : ''}
+                                    ${liability.interestRate ? `<span>Tasa: ${liability.interestRate}%</span>` : ''}
+                                </div>
+                                <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">${liability.description || 'Sin descripción'}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-lg font-semibold text-red-600 dark:text-red-400">${formatCurrency(liability.currentBalance || 0)}</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Actualizado: ${liability.lastUpdated?.toDate().toLocaleDateString('es-ES') || 'Nunca'}</p>
+                            </div>
+                            <div class="flex flex-col gap-1 ml-2">
+                                <button class="edit-liability-btn p-1 text-slate-400 hover:text-blue-600" data-id="${liability.id}">
+                                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                </button>
+                                <button class="delete-liability-btn p-1 text-slate-400 hover:text-red-600" data-id="${liability.id}">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            liabilitiesList.innerHTML = html;
+
+            // Add event listeners
+            liabilitiesList.querySelectorAll('.edit-liability-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => openLiabilityForm(e.target.closest('button').dataset.id));
+            });
+
+            liabilitiesList.querySelectorAll('.delete-liability-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => deleteLiability(e.target.closest('button').dataset.id));
+            });
+        };
+
+        const handleTransactionFormSubmit = async (e) => {
+            e.preventDefault();
+            const form = e.target;
+
+            // Recopilar datos básicos del formulario
+            const formData = {
+                description: form.description.value,
+                amount: parseFloat(form.amount.value),
+                type: form.type.value,
+                category: form.category.value,
+                transactionDate: form['transaction-date'].value
+            };
+
+            // Agregar subcategorías si están seleccionadas
+            const subcategory = form.subcategory?.value;
+            const subsubcategory = form.subsubcategory?.value;
+
+            if (subcategory) formData.subcategory = subcategory;
+            if (subsubcategory) formData.subsubcategory = subsubcategory;
+
+            // Recopilar campos específicos
+            const specificFields = {};
+            const specificInputs = form.querySelectorAll('[name^="specific-"]');
+
+            specificInputs.forEach(input => {
+                const fieldName = input.name.replace('specific-', '');
+                let value = input.value.trim();
+
+                // Convertir valores según el tipo
+                if (input.type === 'number' && value) {
+                    value = parseFloat(value);
+                } else if (input.type === 'date' && value) {
+                    value = value; // Mantener como string de fecha
+                }
+
+                if (value !== '' && value !== null && value !== undefined) {
+                    specificFields[fieldName] = value;
+                }
+            });
+
+            // Agregar campos específicos si existen
+            if (Object.keys(specificFields).length > 0) {
+                formData.specificDetails = specificFields;
+            }
+
+            try {
+                if (currentEditingId) {
+                    await updateDoc(doc(transactionsCollection, currentEditingId), formData);
+                    showSuccessMessage('Transacción actualizada exitosamente');
+                } else {
+                    await addDoc(transactionsCollection, { ...formData, createdAt: serverTimestamp() });
+                    showSuccessMessage('Transacción agregada exitosamente');
+                }
+                closeModal(transactionModalEl);
+            } catch (error) {
+                console.error("Error saving transaction:", error);
+                showErrorMessage('Error al guardar la transacción');
+            }
+        };
+
+        const handleTransactionListClick = (e) => {
+            const editBtn = e.target.closest('.edit-btn');
+            const deleteBtn = e.target.closest('.delete-btn');
+            if (editBtn) openTransactionModal(editBtn.dataset.id);
+            if (deleteBtn) deleteDoc(doc(transactionsCollection, deleteBtn.dataset.id));
+        };
+
+        const openBudgetModal = () => {
+            budgetModalEl.innerHTML = `<div class="bg-white dark:bg-gray-800 w-full max-w-sm m-4 p-6 rounded-2xl shadow-xl"><div class="flex justify-between items-center mb-4"><h3 class="text-xl font-semibold">Establecer Presupuesto</h3><button class="js-close-modal p-1 rounded-full"><i data-lucide="x"></i></button></div><form id="budget-form-dynamic"><div class="mb-4"><label for="budget-amount" class="block text-sm font-medium">Monto del Presupuesto Mensual</label><input type="number" id="budget-amount" value="${monthlyBudget > 0 ? monthlyBudget : ''}" min="0" step="1" class="w-full px-3 py-2 bg-slate-50 dark:bg-gray-700 border rounded-md" required></div><button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-md font-semibold">Guardar</button></form></div>`;
+            openModal(budgetModalEl);
+            lucide.createIcons();
+            budgetModalEl.querySelector('.js-close-modal').addEventListener('click', () => closeModal(budgetModalEl));
+            budgetModalEl.querySelector('#budget-form-dynamic').addEventListener('submit', handleBudgetFormSubmit);
+        };
+
+        const handleBudgetFormSubmit = async (e) => {
+            e.preventDefault();
+            const newAmount = parseFloat(e.target['budget-amount'].value);
+            if (newAmount >= 0) { await setDoc(budgetDocRef, { amount: newAmount }); closeModal(budgetModalEl); }
+        };
+
+        const openAiChatModal = () => {
+            aiChatHistory = [];
+            aiChatModalEl.innerHTML = `<div class="bg-white dark:bg-gray-800 w-full max-w-2xl m-4 rounded-2xl shadow-xl flex flex-col h-[80vh]"><div class="flex justify-between items-center p-4 border-b dark:border-gray-700"><h3 class="text-xl font-semibold flex items-center gap-2"><i data-lucide="brain-circuit" class="text-purple-500"></i>Asistente FinGenius</h3><button class="js-close-modal p-1 rounded-full"><i data-lucide="x"></i></button></div><div id="ai-chat-messages" class="flex-1 p-4 overflow-y-auto space-y-4"></div><div class="p-4 border-t dark:border-gray-700"><form id="ai-chat-form" class="flex gap-2"><input type="text" id="ai-chat-input" class="flex-1 px-3 py-2 bg-slate-50 dark:bg-gray-700 border rounded-md" placeholder="Pregúntale a FinGenius..." required><button type="submit" class="bg-purple-600 text-white p-2 rounded-md"><i data-lucide="send"></i></button></form></div></div>`;
+            openModal(aiChatModalEl);
+            lucide.createIcons();
+            aiChatModalEl.querySelector('.js-close-modal').addEventListener('click', () => closeModal(aiChatModalEl));
+            aiChatModalEl.querySelector('#ai-chat-form').addEventListener('submit', handleAiChatSubmit);
+            addAiMessage("¡Hola! Soy FinGenius. ¿En qué puedo ayudarte con tus finanzas hoy?");
+        };
+
+        const addChatMessage = (message, sender) => {
+            const messagesContainer = aiChatModalEl.querySelector('#ai-chat-messages');
+            const bubble = document.createElement('div');
+            bubble.className = `w-fit max-w-lg rounded-xl px-4 py-2 ${sender === 'user' ? 'chat-bubble-user self-end' : 'chat-bubble-ai self-start'}`;
+            bubble.innerHTML = message;
+            messagesContainer.appendChild(bubble);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        };
+
+        const addAiMessage = (text) => addChatMessage(marked.parse(text), 'ai');
+        const addUserMessage = (text) => addChatMessage(text, 'user');
+
+        const handleAiChatSubmit = async (e) => {
+            e.preventDefault();
+            const input = e.target.querySelector('#ai-chat-input');
+            const userMessage = input.value.trim();
+            if (!userMessage) return;
+            addUserMessage(userMessage); input.value = '';
+            addChatMessage('<div class="animate-spin"><i data-lucide="loader-2"></i></div>', 'ai');
+            const transactionData = transactions.map(t => {
+                let categoryInfo = t.category;
+                if (t.subcategory) categoryInfo += ` › ${t.subcategory}`;
+                if (t.subsubcategory) categoryInfo += ` › ${t.subsubcategory}`;
+                return `${t.type}: ${t.description} (${categoryInfo}) - ${formatCurrency(t.amount)}`;
+            }).join('\n');
+            const contextPrompt = `System: Eres un asesor financiero amigable llamado 'FinGenius'. Responde las preguntas del usuario basándote en los siguientes datos financieros. Sé conciso y útil. Datos actuales:\n${transactionData}\nPresupuesto Mensual: ${formatCurrency(monthlyBudget)}\n---`;
+            aiChatHistory.push({ role: "user", parts: [{ text: userMessage }] });
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: contextPrompt }] }, ...aiChatHistory] }) });
+                if (!response.ok) throw new Error('API Error');
+                const result = await response.json();
+                const aiResponse = result.candidates[0].content.parts[0].text;
+                aiChatHistory.push({ role: "model", parts: [{ text: aiResponse }] });
+                aiChatModalEl.querySelector('.animate-spin').parentElement.remove();
+                addAiMessage(aiResponse);
+            } catch (error) {
+                aiChatModalEl.querySelector('.animate-spin').parentElement.remove();
+                addAiMessage("Lo siento, tuve un problema para conectarme. Intenta de nuevo.");
+            }
+        };
+
+        const openTipsModal = async () => {
+            tipsModalEl.innerHTML = `<div class="bg-white dark:bg-gray-800 w-full max-w-2xl m-4 p-6 rounded-2xl shadow-xl"><div class="text-center py-8"><i data-lucide="loader-2" class="w-12 h-12 mx-auto animate-spin text-teal-500"></i><p class="mt-4">Buscando consejos personalizados...</p></div></div>`;
+            openModal(tipsModalEl);
+            lucide.createIcons();
+
+            // Verificación rápida de API key
+            console.log("API Key configurada:", GEMINI_API_KEY ? "Sí" : "No");
+            console.log("Longitud de API Key:", GEMINI_API_KEY ? GEMINI_API_KEY.length : 0);
+            console.log("Número de transacciones:", transactions.length);
+            console.log("Transacciones de gastos:", transactions.filter(t => t.type === 'expense').length);
+
+            await handleGenerateTips();
+        };
+
+        const handleGenerateTips = async () => {
+            const transactionData = transactions.filter(t => t.type === 'expense').map(t => {
+                let categoryInfo = t.category;
+                if (t.subcategory) categoryInfo += ` › ${t.subcategory}`;
+                if (t.subsubcategory) categoryInfo += ` › ${t.subsubcategory}`;
+                return `${t.description} (${categoryInfo}): ${formatCurrency(t.amount)}`;
+            }).join('\n');
+            if (transactionData.length === 0) {
+                displayTipsError("No hay suficientes datos de gastos para generar consejos.");
+                return;
+            }
+
+            const prompt = `Eres un analista financiero experto. Analiza la siguiente lista de transacciones y genera una lista de 2 a 4 consejos prácticos. Tu respuesta DEBE ser un objeto JSON válido y nada más, sin markdown. El formato debe ser: {"tips": [{"title": "string", "short_description": "string", "details": "string", "actionable_advice": "string"}]}. Transacciones:\n${transactionData}`;
+
+            try {
+                console.log("Enviando solicitud a Gemini API...");
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+
+                console.log("Respuesta recibida, status:", response.status);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error("Error de API:", response.status, errorText);
+                    throw new Error(`API Error: ${response.status} - ${errorText}`);
+                }
+
+                const result = await response.json();
+                console.log("Resultado de la API:", result);
+
+                if (!result.candidates || !result.candidates[0] || !result.candidates[0].content) {
+                    throw new Error("Respuesta de API inválida: no se encontraron candidatos");
+                }
+
+                const textResponse = result.candidates[0].content.parts[0].text;
+                console.log("Texto de respuesta:", textResponse);
+
+                const cleanedResponse = textResponse.replace(/```json|```/g, '').trim();
+                const jsonResponse = JSON.parse(cleanedResponse);
+
+                financialTips = jsonResponse.tips || [];
+                if (financialTips.length > 0) {
+                    currentTipIndex = 0;
+                    displayTip(currentTipIndex);
+                } else {
+                    displayTipsError("No se encontraron consejos específicos en este momento.");
+                }
+            } catch (error) {
+                console.error("Error detallado generando tips:", error);
+                let errorMessage = "No se pudieron generar los consejos. ";
+
+                if (error.message.includes("API Error: 400")) {
+                    errorMessage += "Problema con la solicitud a la API.";
+                } else if (error.message.includes("API Error: 403")) {
+                    errorMessage += "API key inválida o sin permisos.";
+                } else if (error.message.includes("API Error: 429")) {
+                    errorMessage += "Límite de solicitudes excedido.";
+                } else if (error.message.includes("JSON")) {
+                    errorMessage += "Error procesando la respuesta.";
+                } else {
+                    errorMessage += "Inténtalo de nuevo.";
+                }
+
+                displayTipsError(errorMessage);
+            }
+        };
+
+        const displayTip = (index) => {
+            const tip = financialTips[index];
+            tipsModalEl.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 w-full max-w-2xl m-4 rounded-2xl shadow-xl flex flex-col h-auto max-h-[80vh]">
+                    <div class="flex justify-between items-center p-4 border-b dark:border-gray-700"><h3 class="text-xl font-semibold flex items-center gap-2"><i data-lucide="lightbulb" class="text-teal-500"></i>Tips Financieros</h3><button class="js-close-modal p-1 rounded-full"><i data-lucide="x"></i></button></div>
+                    <div class="flex-1 p-6 overflow-y-auto">
+                        <h4 class="text-2xl font-bold text-slate-800 dark:text-slate-100">${tip.title}</h4>
+                        <p class="text-lg mt-2 text-slate-600 dark:text-slate-300">${tip.short_description}</p>
+                        <details class="mt-4"><summary class="cursor-pointer font-semibold text-indigo-600 dark:text-indigo-400">Ver detalles</summary><div class="mt-2 prose dark:prose-dark max-w-none">${marked.parse(tip.details + "\n\n**Sugerencia:** " + tip.actionable_advice)}</div></details>
+                    </div>
+                    <div class="flex justify-between items-center p-4 border-t dark:border-gray-700">
+                        <button id="prev-tip-btn" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md bg-slate-200 dark:bg-gray-700 hover:bg-slate-300 dark:hover:bg-gray-600 disabled:opacity-50"><i data-lucide="arrow-left"></i> Anterior</button>
+                        <span class="text-sm font-medium">${index + 1} / ${financialTips.length}</span>
+                        <button id="next-tip-btn" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md bg-slate-200 dark:bg-gray-700 hover:bg-slate-300 dark:hover:bg-gray-600 disabled:opacity-50">Siguiente <i data-lucide="arrow-right"></i></button>
+                    </div>
+                </div>`;
+            lucide.createIcons();
+            tipsModalEl.querySelector('.js-close-modal').addEventListener('click', () => closeModal(tipsModalEl));
+            const prevBtn = tipsModalEl.querySelector('#prev-tip-btn');
+            const nextBtn = tipsModalEl.querySelector('#next-tip-btn');
+            prevBtn.disabled = index === 0;
+            nextBtn.disabled = index === financialTips.length - 1;
+            prevBtn.addEventListener('click', () => displayTip(--currentTipIndex));
+            nextBtn.addEventListener('click', () => displayTip(++currentTipIndex));
+        };
+
+        const displayTipsError = (message) => {
+            tipsModalEl.innerHTML = `<div class="bg-white dark:bg-gray-800 w-full max-w-md m-4 p-6 rounded-2xl shadow-xl text-center"><p>${message}</p><button id="test-api-btn" class="mt-2 px-4 py-2 bg-yellow-600 text-white rounded-md mr-2">Probar API</button><button class="js-close-modal mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md">Cerrar</button></div>`;
+            tipsModalEl.querySelector('.js-close-modal').addEventListener('click', () => closeModal(tipsModalEl));
+            tipsModalEl.querySelector('#test-api-btn').addEventListener('click', testApiConnection);
+        };
+
+        const testApiConnection = async () => {
+            console.log("Probando conexión con API...");
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{ text: "Responde solo con: 'API funcionando correctamente'" }]
+                        }]
+                    })
+                });
+
+                console.log("Status de prueba:", response.status);
+
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log("Prueba exitosa:", result);
+                    alert("✅ API funcionando correctamente");
+                } else {
+                    const errorText = await response.text();
+                    console.error("Error en prueba:", response.status, errorText);
+                    alert(`❌ Error ${response.status}: ${errorText}`);
+                }
+            } catch (error) {
+                console.error("Error de conexión:", error);
+                alert(`❌ Error de conexión: ${error.message}`);
+            }
+        };
+
+        const initAppEventListeners = () => {
+            addTransactionBtn.addEventListener('click', () => openTransactionModal());
+            transactionListEl.addEventListener('click', handleTransactionListClick);
+            editBudgetBtn.addEventListener('click', openBudgetModal);
+            aiAssistantBtn.addEventListener('click', openAiChatModal);
+            tipsBtn.addEventListener('click', openTipsModal);
+            manageCategoriesBtn.addEventListener('click', openCategoriesModal);
+            manageAssetsBtn.addEventListener('click', openAssetsModal);
+            manageLiabilitiesBtn.addEventListener('click', openLiabilitiesModal);
+        };
+
+        const initAuth = () => {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            onAuthStateChanged(auth, user => user ? showApp(user) : showAuth());
+            authForm.addEventListener('submit', handleAuthFormSubmit);
+            authToggleBtn.addEventListener('click', toggleAuthMode);
+            forgotPasswordBtn.addEventListener('click', handlePasswordReset);
+            logoutBtn.addEventListener('click', handleLogout);
+            themeToggle.addEventListener('click', toggleTheme);
+            initAppEventListeners();
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            applyTheme(savedTheme);
+            initAuth();
+        });
+    </script>
+</body>
+</html>
