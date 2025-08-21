@@ -7,42 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- 🔐 Configuración de API Keys -->
-    <!-- Para uso local: config.js (no incluido en GitHub) -->
-    <!-- Para GitHub Pages: config-demo.js (modo demostración) -->
-    <script>
-        // Detectar si estamos en GitHub Pages o local
-        const isGitHubPages = window.location.hostname.includes('github.io');
-
-        if (isGitHubPages) {
-            // Cargar config-demo.js para GitHub Pages
-            console.log('🌐 Detectado GitHub Pages - Cargando config-demo.js');
-            const demoScript = document.createElement('script');
-            demoScript.src = 'config-demo.js';
-            demoScript.onload = function() {
-                console.log('✅ config-demo.js cargado exitosamente');
-            };
-            demoScript.onerror = function() {
-                console.error('❌ Error cargando config-demo.js');
-            };
-            document.head.appendChild(demoScript);
-        } else {
-            // Intentar cargar config.js para uso local
-            console.log('🏠 Detectado uso local - Intentando cargar config.js');
-            const script = document.createElement('script');
-            script.src = 'config.js';
-            script.onload = function() {
-                console.log('✅ config.js cargado exitosamente');
-            };
-            script.onerror = function() {
-                console.warn('⚠️ config.js no encontrado, cargando config-demo.js como fallback');
-                const demoScript = document.createElement('script');
-                demoScript.src = 'config-demo.js';
-                document.head.appendChild(demoScript);
-            };
-            document.head.appendChild(script);
-        }
-    </script>
+    <!-- 🔐 Configuración de API Keys para GitHub Pages -->
+    <script src="config-demo.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; }
@@ -2798,19 +2764,26 @@
             const savedTheme = localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
             applyTheme(savedTheme);
 
-            // Esperar a que se cargue la configuración antes de inicializar
-            const waitForConfig = () => {
-                if (window.APP_CONFIG) {
-                    console.log('✅ Configuración detectada, inicializando aplicación');
-                    initAuth();
-                } else {
-                    console.log('⏳ Esperando configuración...');
-                    setTimeout(waitForConfig, 100);
-                }
-            };
-
-            // Dar un poco de tiempo para que se cargue el script de configuración
-            setTimeout(waitForConfig, 200);
+            // Verificar que la configuración esté disponible
+            if (window.APP_CONFIG) {
+                console.log('✅ Configuración cargada, inicializando aplicación');
+                initAuth();
+            } else {
+                console.error('❌ Error: Configuración no disponible');
+                // Mostrar mensaje de error al usuario
+                document.body.innerHTML = `
+                    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: #1a1a1a; color: white; font-family: Arial;">
+                        <div style="text-align: center; padding: 2rem; border-radius: 10px; background: #2a2a2a;">
+                            <h2>🔧 Error de Configuración</h2>
+                            <p>No se pudo cargar la configuración de la aplicación.</p>
+                            <p>Por favor, recarga la página.</p>
+                            <button onclick="location.reload()" style="padding: 10px 20px; margin-top: 1rem; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                🔄 Recargar Página
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
         });
     </script>
 </body>
