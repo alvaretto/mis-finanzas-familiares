@@ -255,6 +255,9 @@
 
             if (window.APP_CONFIG.isPublicDeployment) {
                 console.log('🌐 Configuración cargada para GitHub Pages (despliegue público)');
+                console.log('🔥 Firebase Config:', firebaseConfig);
+                console.log('🌍 Dominio actual:', window.location.hostname);
+                console.log('📍 URL completa:', window.location.href);
                 // Mostrar banner informativo para GitHub Pages
                 showPublicDeploymentBanner();
             } else {
@@ -699,7 +702,42 @@
                     await createUserWithEmailAndPassword(auth, email, password);
                 }
             } catch (error) {
-                authError.textContent = 'Error: ' + (error.code === 'auth/invalid-credential' ? 'Credenciales incorrectas.' : 'Inténtalo de nuevo.');
+                console.error('Error de autenticación:', error);
+                console.error('Código de error:', error.code);
+                console.error('Mensaje de error:', error.message);
+
+                let errorMessage = 'Error: ';
+                switch (error.code) {
+                    case 'auth/invalid-credential':
+                        errorMessage += 'Credenciales incorrectas.';
+                        break;
+                    case 'auth/user-not-found':
+                        errorMessage += 'Usuario no encontrado.';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage += 'Contraseña incorrecta.';
+                        break;
+                    case 'auth/email-already-in-use':
+                        errorMessage += 'El email ya está en uso.';
+                        break;
+                    case 'auth/weak-password':
+                        errorMessage += 'La contraseña es muy débil.';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage += 'Email inválido.';
+                        break;
+                    case 'auth/network-request-failed':
+                        errorMessage += 'Error de conexión. Verifica tu internet.';
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage += 'Demasiados intentos. Espera un momento.';
+                        break;
+                    default:
+                        errorMessage += `${error.code}: ${error.message}`;
+                        break;
+                }
+
+                authError.textContent = errorMessage;
             }
         };
         
