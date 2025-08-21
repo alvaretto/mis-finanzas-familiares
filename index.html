@@ -235,26 +235,30 @@
         // 🔐 CONFIGURACIÓN SEGURA - Sistema híbrido para local y GitHub Pages
         let GEMINI_API_KEY, firebaseConfig, appId;
 
-        // Verificar si existe configuración externa
-        if (window.APP_CONFIG) {
-            // Configuración cargada (local o GitHub Pages)
-            ({ GEMINI_API_KEY, firebaseConfig, appId } = window.APP_CONFIG);
+        // Función para inicializar configuración
+        function initializeConfiguration() {
+            // Verificar si existe configuración externa
+            if (window.APP_CONFIG) {
+                // Configuración cargada (local o GitHub Pages)
+                ({ GEMINI_API_KEY, firebaseConfig, appId } = window.APP_CONFIG);
 
-            if (window.APP_CONFIG.isPublicDeployment) {
-                console.log('🌐 Configuración cargada para GitHub Pages (despliegue público)');
-                console.log('🔥 Firebase Config:', firebaseConfig);
-                console.log('🌍 Dominio actual:', window.location.hostname);
-                console.log('📍 URL completa:', window.location.href);
-                // Mostrar banner informativo para GitHub Pages
-                showPublicDeploymentBanner();
+                if (window.APP_CONFIG.isPublicDeployment) {
+                    console.log('🌐 Configuración cargada para GitHub Pages (despliegue público)');
+                    console.log('🔥 Firebase Config:', firebaseConfig);
+                    console.log('🌍 Dominio actual:', window.location.hostname);
+                    console.log('📍 URL completa:', window.location.href);
+                    // Mostrar banner informativo para GitHub Pages
+                    showPublicDeploymentBanner();
+                } else {
+                    console.log('✅ Configuración cargada desde config.js (uso local)');
+                }
+                return true;
             } else {
-                console.log('✅ Configuración cargada desde config.js (uso local)');
+                // Fallback si no se carga ninguna configuración
+                console.error('❌ No se pudo cargar ninguna configuración');
+                showConfigurationError();
+                return false;
             }
-        } else {
-            // Fallback si no se carga ninguna configuración
-            console.error('❌ No se pudo cargar ninguna configuración');
-            showConfigurationError();
-            return;
         }
 
         // Función para mostrar banner de despliegue público
@@ -2764,25 +2768,12 @@
             const savedTheme = localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
             applyTheme(savedTheme);
 
-            // Verificar que la configuración esté disponible
-            if (window.APP_CONFIG) {
-                console.log('✅ Configuración cargada, inicializando aplicación');
+            // Inicializar configuración y aplicación
+            if (initializeConfiguration()) {
+                console.log('✅ Configuración inicializada, cargando aplicación');
                 initAuth();
             } else {
-                console.error('❌ Error: Configuración no disponible');
-                // Mostrar mensaje de error al usuario
-                document.body.innerHTML = `
-                    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: #1a1a1a; color: white; font-family: Arial;">
-                        <div style="text-align: center; padding: 2rem; border-radius: 10px; background: #2a2a2a;">
-                            <h2>🔧 Error de Configuración</h2>
-                            <p>No se pudo cargar la configuración de la aplicación.</p>
-                            <p>Por favor, recarga la página.</p>
-                            <button onclick="location.reload()" style="padding: 10px 20px; margin-top: 1rem; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                                🔄 Recargar Página
-                            </button>
-                        </div>
-                    </div>
-                `;
+                console.error('❌ Error: No se pudo inicializar la configuración');
             }
         });
     </script>
