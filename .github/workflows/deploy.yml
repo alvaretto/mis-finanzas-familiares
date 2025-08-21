@@ -26,8 +26,8 @@ jobs:
 
       - name: 🔒 Generate Secure Config
         run: |
-          # Crear config-demo.js con credenciales reales desde secrets
-          cat > config-demo.js << 'EOF'
+          # Crear config.js con credenciales reales desde secrets
+          cat > config.js << 'EOF'
           // 🌐 CONFIGURACIÓN PARA GITHUB PAGES - GENERADA AUTOMÁTICAMENTE
           // Este archivo es generado dinámicamente por GitHub Actions
           // Las credenciales se almacenan de forma segura en GitHub Secrets
@@ -76,18 +76,18 @@ jobs:
           console.log('📂 Repositorio: https://github.com/alvaretto/mis-finanzas-familiares');
           EOF
           
-          echo "✅ config-demo.js generado con credenciales seguras"
+          echo "✅ config.js generado con credenciales seguras"
 
       - name: 🔍 Verificar Configuración
         run: |
-          echo "📋 Verificando que config-demo.js fue generado correctamente..."
-          if [ -f "config-demo.js" ]; then
-            echo "✅ config-demo.js existe"
-            echo "📏 Tamaño: $(wc -c < config-demo.js) bytes"
+          echo "📋 Verificando que config.js fue generado correctamente..."
+          if [ -f "config.js" ]; then
+            echo "✅ config.js existe"
+            echo "📏 Tamaño: $(wc -c < config.js) bytes"
             echo "📝 Primeras líneas:"
-            head -5 config-demo.js
+            head -5 config.js
           else
-            echo "❌ ERROR: config-demo.js no fue generado"
+            echo "❌ ERROR: config.js no fue generado"
             exit 1
           fi
 
