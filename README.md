@@ -291,6 +291,16 @@ Categoría Principal
 - ✅ **REVISA** el .gitignore antes de hacer commits
 - ✅ **ROTA** las API keys si se comprometen accidentalmente
 
+### 🌐 Para Compartir la Aplicación
+
+Si quieres que otros usen la aplicación:
+
+1. **Cada usuario debe crear su propio `config.js`**
+2. **Seguir la guía en `SECURITY.md`**
+3. **Usar sus propias credenciales**
+
+> **🔐 IMPORTANTE**: Nunca compartas tus API keys. Cada usuario debe configurar sus propias credenciales siguiendo las instrucciones de seguridad.
+
 ## 🐛 Solución de Problemas
 
 ### Problemas Comunes
