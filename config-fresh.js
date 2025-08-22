@@ -15,11 +15,7 @@ const firebaseConfig = {
     measurementId: "G-ZNWVMVEY6W"
 };
 
-<<<<<<< HEAD
 // 🏷️ ID de la aplicación
-=======
-// 🏷 ID de la aplicación
->>>>>>> d98c655d0f8405abbdaec096e0988894bbaf8773
 const appId = 'mis-finanzas-familiares-f7298';
 
 // 🚀 Exportar configuración para uso en la aplicación
