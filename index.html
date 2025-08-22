@@ -74,14 +74,37 @@
                     console.log('📱 Lista para acceso móvil');
 
                     // Inicializar aplicación después de cargar configuración
-                    if (typeof initializeConfiguration === 'function') {
-                        if (initializeConfiguration()) {
-                            console.log('✅ Configuración inicializada, cargando aplicación');
-                            if (typeof initAuth === 'function') {
-                                initAuth();
+                    console.log('🔄 Intentando inicializar aplicación...');
+
+                    // Esperar un momento para que el módulo se cargue
+                    setTimeout(() => {
+                        if (typeof initializeConfiguration === 'function') {
+                            if (initializeConfiguration()) {
+                                console.log('✅ Configuración inicializada, cargando aplicación');
+                                if (typeof initAuth === 'function') {
+                                    initAuth();
+                                }
                             }
+                        } else {
+                            console.log('⚠️ initializeConfiguration no disponible, reintentando...');
+                            // Reintentar después de más tiempo
+                            setTimeout(() => {
+                                if (typeof initializeConfiguration === 'function') {
+                                    if (initializeConfiguration()) {
+                                        console.log('✅ Configuración inicializada (segundo intento)');
+                                        if (typeof initAuth === 'function') {
+                                            initAuth();
+                                        }
+                                    }
+                                } else {
+                                    console.error('❌ Módulo JavaScript no se cargó correctamente');
+                                    // Forzar recarga de la página
+                                    console.log('🔄 Forzando recarga de página...');
+                                    location.reload();
+                                }
+                            }, 2000);
                         }
-                    }
+                    }, 500);
                 } else {
                     console.error('❌ Error cargando configuración segura');
                     showConfigurationError();
