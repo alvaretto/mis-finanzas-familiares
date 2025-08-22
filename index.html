@@ -8,25 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- 🔐 Configuración de API Keys -->
-    <!-- Local: config-fresh.js | GitHub Pages: config.js (generado automáticamente) -->
-    <script>
-        // Detectar si estamos en GitHub Pages o desarrollo local
-        const isGitHubPages = window.location.hostname === 'alvaretto.github.io';
-        const configFile = isGitHubPages ? 'config.js' : 'config-fresh.js';
-
-        // Cargar el archivo de configuración apropiado
-        const script = document.createElement('script');
-        script.src = configFile;
-        script.onerror = function() {
-            console.error(`❌ Error cargando ${configFile}`);
-            // Fallback: intentar cargar el otro archivo
-            const fallbackFile = isGitHubPages ? 'config-demo.js' : 'config.js';
-            const fallbackScript = document.createElement('script');
-            fallbackScript.src = fallbackFile;
-            document.head.appendChild(fallbackScript);
-        };
-        document.head.appendChild(script);
-    </script>
+    <script src="config-demo.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; }
