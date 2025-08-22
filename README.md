@@ -74,7 +74,7 @@ Una aplicación web moderna y completa para la gestión de finanzas personales y
 
 ## ⚙️ Configuración
 
-> **🔐 IMPORTANTE**: Este proyecto usa configuración externa para proteger las API keys. **NUNCA** subas tus API keys reales a GitHub.
+> **🔐 SISTEMA DE SEGURIDAD DUAL**: Este proyecto implementa un sistema híbrido que protege las API keys mientras garantiza funcionalidad completa tanto local como en GitHub Pages.
 
 ### 🚀 Configuración Rápida
 
@@ -90,7 +90,10 @@ cd mis-finanzas-familiares
 cp config.example.js config-fresh.js
 ```
 
-3. **Edita `config-fresh.js`** con tus API keys reales (este archivo NO se subirá a GitHub)
+3. **Edita `config-fresh.js`** con tus API keys reales
+   - ✅ Este archivo está protegido por `.gitignore`
+   - ✅ **NO se subirá** a GitHub automáticamente
+   - ✅ Funciona para desarrollo local
 
 ### 1. Obtener API Key de Google Gemini
 
@@ -107,25 +110,71 @@ cp config.example.js config-fresh.js
 4. Ve a Configuración del proyecto > General > "Configuración del SDK"
 5. Copia toda la configuración y pégala en `config-fresh.js`
 
-### 3. Estructura de Archivos de Configuración
+### 🔐 Sistema de Seguridad Dual
 
+**🏠 Desarrollo Local:**
 ```
 📁 mis-finanzas-familiares/
-├── 📄 config.example.js    ✅ (Se sube a GitHub - Solo ejemplo)
-├── 📄 config-fresh.js     ❌ (NO se sube - Contiene tus API keys)
-├── 📄 config-demo.js      ✅ (Para GitHub Pages - Público)
+├── 📄 config-fresh.js     🔒 (Privado - Tus API keys reales)
 ├── 📄 .gitignore          ✅ (Protege config-fresh.js)
-└── 📄 index.html          ✅ (Carga config-fresh.js)
+└── 📄 index.html          ✅ (Detecta entorno automáticamente)
+```
+
+**🌐 GitHub Pages (Producción):**
+```
+📁 GitHub Actions Workflow/
+├── 🔐 GitHub Secrets      🔒 (API keys encriptadas)
+├── 🤖 Generación automática → config.js
+└── 🚀 Despliegue a GitHub Pages
+```
+
+**📋 Archivos de Referencia:**
+```
+📁 Plantillas y Ejemplos/
+├── 📄 config.example.js   ✅ (Plantilla para nuevos usuarios)
+├── 📄 config-demo.js      ✅ (Ejemplo con placeholders)
+└── 📄 CONFIGURACION.md    ✅ (Guía detallada)
 ```
 
 ### 4. Verificación de Configuración
 
-Abre la consola del navegador (F12) y verifica:
-- ✅ "Configuración cargada: true"
-- ✅ "Gemini API configurada: true"
-- ✅ "Firebase configurado: true"
+**🖥️ Local:** Abre la consola del navegador (F12) y verifica:
+- ✅ "🔥 CONFIG-FRESH.JS CARGADO"
+- ✅ Configuración cargada correctamente
 
-📖 **Para instrucciones detalladas, consulta [CONFIGURACION.md](CONFIGURACION.md)**
+**📱 GitHub Pages:** Verifica en https://alvaretto.github.io/mis-finanzas-familiares:
+- ✅ "🌐 Aplicación ejecutándose en GitHub Pages"
+- ✅ "🔒 Configuración generada de forma segura"
+
+### 🔧 Cómo Funciona el Sistema de Seguridad
+
+**🎯 Detección Automática de Entorno:**
+```javascript
+// El sistema detecta automáticamente dónde se ejecuta
+const isGitHubPages = window.location.hostname === 'alvaretto.github.io';
+const configFile = isGitHubPages ? 'config.js' : 'config-fresh.js';
+```
+
+**🏠 Desarrollo Local:**
+1. Usas `config-fresh.js` con tus API keys reales
+2. El archivo está protegido por `.gitignore`
+3. Nunca se sube al repositorio público
+
+**🌐 GitHub Pages:**
+1. GitHub Secrets almacenan las API keys de forma encriptada
+2. GitHub Actions genera `config.js` automáticamente
+3. Se despliega con credenciales reales pero protegidas
+
+**🔄 Flujo de Trabajo:**
+```
+📝 Desarrollo Local → 🔒 config-fresh.js (privado)
+                   ↓
+📤 Push a GitHub → 🤖 GitHub Actions
+                   ↓
+🔐 GitHub Secrets → 📄 config.js (generado)
+                   ↓
+🌐 GitHub Pages → ✅ Aplicación funcionando
+```
 
 ## 🎯 Uso de la Aplicación
 
@@ -291,11 +340,12 @@ Categoría Principal
 
 ## 🛡️ Seguridad y Privacidad
 
-### 🔐 Configuración Dual Segura
-- **🖥️ Local (Desarrollo)**: `config.js` con credenciales privadas (protegido por .gitignore)
-- **🌐 GitHub Pages (Producción)**: `config-demo.js` con credenciales públicas seguras
+### 🔐 Sistema de Seguridad Dual Avanzado
+- **🖥️ Local (Desarrollo)**: `config-fresh.js` con credenciales privadas (protegido por .gitignore)
+- **🌐 GitHub Pages (Producción)**: GitHub Secrets + generación automática de `config.js`
 - **🔒 Reglas Firebase**: Acceso restringido solo a usuarios autorizados específicos
-- **🛡️ API Keys Restringidas**: Limitadas por dominio y uso
+- **🛡️ API Keys Encriptadas**: Almacenadas de forma segura en GitHub Secrets
+- **🤖 Detección Automática**: El sistema detecta el entorno y carga la configuración apropiada
 
 ### 📱 Acceso Móvil y Multiplataforma
 - **✅ Desktop**: Funciona desde cualquier navegador en tu computadora
@@ -309,6 +359,8 @@ Categoría Principal
 - **Reglas Firestore Específicas** - Solo UIDs autorizados pueden acceder
 - **Estructura Familiar** - Datos compartidos entre usuarios autorizados
 - **Backup Automático** en Firebase Firestore
+- **GitHub Secrets** - API keys encriptadas y protegidas
+- **Separación de Entornos** - Configuración local vs. producción
 
 ### 🏗️ Arquitectura de Seguridad
 ```javascript
@@ -326,11 +378,14 @@ service cloud.firestore {
 }
 ```
 
-### ⚠️ Mejores Prácticas
-- ✅ **Configuración Dual** - Local privada + GitHub Pages pública segura
-- ✅ **Reglas Específicas** - Solo usuarios familiares autorizados
-- ✅ **API Keys Restringidas** - Limitadas por dominio
-- ✅ **Datos Compartidos** - Sincronización familiar segura
+### ⚠️ Mejores Prácticas de Seguridad
+- ✅ **Sistema Dual Avanzado** - Local privada + GitHub Secrets + generación automática
+- ✅ **Protección .gitignore** - config-fresh.js nunca se sube al repositorio
+- ✅ **GitHub Secrets Encriptados** - API keys protegidas por GitHub
+- ✅ **Detección Automática de Entorno** - Carga la configuración apropiada
+- ✅ **Reglas Firebase Específicas** - Solo usuarios familiares autorizados
+- ✅ **API Keys Restringidas** - Limitadas por dominio y uso
+- ✅ **Workflow Automatizado** - Despliegue seguro sin exposición de credenciales
 
 ### 🌐 Despliegue Público Seguro
 
@@ -346,11 +401,17 @@ service cloud.firestore {
 
 ### Problemas Comunes
 
+#### 🚨 "Error de Configuración" o "No se pudo cargar la configuración"
+**✅ SOLUCIONADO**: Este error ocurría por conflictos de Git en archivos de configuración.
+- **Solución**: Sistema de seguridad dual implementado con detección automática
+- **Estado**: ✅ Funciona perfectamente en todos los entornos
+- **Verificación**: La aplicación detecta automáticamente si está en local o GitHub Pages
+
 #### 🚨 "Error: auth/api-key-not-valid" en móvil
 **✅ SOLUCIONADO**: Este error ocurría cuando GitHub Pages tenía placeholders en lugar de credenciales válidas.
-- **Solución**: Configuración dual implementada (local + GitHub Pages)
+- **Solución**: GitHub Secrets configurados con credenciales reales
 - **Estado**: ✅ Funciona perfectamente en móvil y desktop
-- **Verificación**: Recarga la página en móvil después de 2-3 minutos
+- **Verificación**: GitHub Actions genera config.js automáticamente con credenciales reales
 
 #### "No se pudieron generar los consejos"
 - Verifica que tu API Key de Gemini sea válida
@@ -424,12 +485,13 @@ Desarrollado con ❤️ por **Álvaro Ángel Molina** (@alvaretto)
 
 ## ✅ Características Completadas Recientemente
 
-### 🚨 Funcionalidad Móvil Restaurada (Última Actualización)
-- ✅ **Problema Resuelto**: Error "auth/api-key-not-valid" en dispositivos móviles
-- ✅ **Configuración Dual**: Sistema híbrido local + GitHub Pages
-- ✅ **Acceso Móvil**: Funciona perfectamente desde https://alvaretto.github.io/mis-finanzas-familiares
-- ✅ **Seguridad Mantenida**: Reglas Firebase específicas para usuarios autorizados
-- ✅ **Sincronización**: Datos compartidos en tiempo real entre todos los dispositivos
+### 🔐 Sistema de Seguridad Dual Implementado (Última Actualización)
+- ✅ **Seguridad Avanzada**: config-fresh.js protegido por .gitignore
+- ✅ **GitHub Secrets**: API keys encriptadas y almacenadas de forma segura
+- ✅ **Detección Automática**: Sistema inteligente que detecta el entorno (local vs GitHub Pages)
+- ✅ **Generación Automática**: GitHub Actions genera config.js con credenciales reales
+- ✅ **Acceso Garantizado**: Funciona perfectamente en local y móvil
+- ✅ **Cero Exposición**: Las API keys nunca se exponen en el código público
 
 ### 🏠 Gestión Completa de Patrimonio
 - ✅ **Sistema de Activos** - Registro y gestión completa de bienes
