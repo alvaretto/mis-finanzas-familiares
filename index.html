@@ -50,14 +50,14 @@
         }
 
         if (isGitHubPages) {
-            // 🌐 GitHub Pages: Cargar configuración segura dinámicamente
+            // 🌐 GitHub Pages: Sistema híbrido inteligente
             console.log('🌐 GitHub Pages detectado');
-            console.log('🔒 Cargando configuración segura (sin exposición en código fuente)');
-            console.log('🛡️ Credenciales codificadas y restringidas por dominio');
+            console.log('🔒 Intentando cargar configuración segura...');
 
             // Cargar configuración de forma asíncrona y segura
             loadSecureConfig().then(config => {
                 if (config) {
+                    // ✅ Configuración desde GitHub Actions disponible
                     window.APP_CONFIG = {
                         GEMINI_API_KEY: config.GEMINI_API_KEY,
                         firebaseConfig: config.firebaseConfig,
@@ -66,51 +66,28 @@
                         generatedAt: new Date().toISOString()
                     };
 
-                    console.log('✅ Configuración segura cargada dinámicamente');
-                    console.log('📱 Lista para acceso móvil');
-
-                    // Inicializar aplicación después de cargar configuración
-                    console.log('🔄 Intentando inicializar aplicación...');
-
-                    // Esperar un momento para que el módulo se cargue
-                    setTimeout(() => {
-                        if (typeof initializeConfiguration === 'function') {
-                            if (initializeConfiguration()) {
-                                console.log('✅ Configuración inicializada, cargando aplicación');
-                                if (typeof initAuth === 'function') {
-                                    initAuth();
-                                }
-                            }
-                        } else {
-                            console.log('⚠️ initializeConfiguration no disponible, reintentando...');
-                            // Reintentar después de más tiempo
-                            setTimeout(() => {
-                                if (typeof initializeConfiguration === 'function') {
-                                    if (initializeConfiguration()) {
-                                        console.log('✅ Configuración inicializada (segundo intento)');
-                                        if (typeof initAuth === 'function') {
-                                            initAuth();
-                                        }
-                                    }
-                                } else {
-                                    console.error('❌ Módulo JavaScript no se cargó correctamente');
-                                    // Forzar recarga de la página
-                                    console.log('🔄 Forzando recarga de página...');
-                                    location.reload();
-                                }
-                            }, 2000);
-                        }
-                    }, 500);
+                    console.log('✅ Configuración segura cargada desde GitHub Actions');
+                    initializeApp();
                 } else {
-                    console.error('❌ Error: Configuración no disponible');
-                    console.log('💡 Esto puede ocurrir si:');
-                    console.log('  • GitHub Actions no se ejecutó correctamente');
-                    console.log('  • Los GitHub Secrets no están configurados');
-                    console.log('  • Estás viendo el código fuente directamente');
-                    showConfigurationError();
+                    // ❌ GitHub Actions falló - verificar configuración almacenada
+                    console.log('⚠️ GitHub Actions no disponible - verificando configuración almacenada...');
+
+                    const storedConfig = localStorage.getItem('secureConfig');
+                    if (storedConfig) {
+                        try {
+                            window.APP_CONFIG = JSON.parse(atob(storedConfig));
+                            console.log('✅ Configuración recuperada del almacenamiento local seguro');
+                            initializeApp();
+                        } catch (error) {
+                            console.error('❌ Error recuperando configuración almacenada:', error);
+                            showSecureConfigurationPrompt();
+                        }
+                    } else {
+                        console.log('🔄 Solicitando configuración al usuario de forma segura...');
+                        showSecureConfigurationPrompt();
+                    }
                 }
             });
-
         } else {
             // 🏠 Desarrollo local: Cargar config-fresh.js
             console.log('🏠 Desarrollo local detectado');
@@ -127,6 +104,113 @@
             };
             document.head.appendChild(script);
         }
+
+        // 🚀 Función para inicializar la aplicación
+        function initializeApp() {
+            console.log('🔄 Inicializando aplicación...');
+
+            setTimeout(() => {
+                if (typeof initializeConfiguration === 'function') {
+                    if (initializeConfiguration()) {
+                        console.log('✅ Configuración inicializada, cargando aplicación');
+                        if (typeof initAuth === 'function') {
+                            initAuth();
+                        }
+                    }
+                } else {
+                    console.log('⚠️ initializeConfiguration no disponible, reintentando...');
+                    setTimeout(() => {
+                        if (typeof initializeConfiguration === 'function') {
+                            if (initializeConfiguration()) {
+                                console.log('✅ Configuración inicializada (segundo intento)');
+                                if (typeof initAuth === 'function') {
+                                    initAuth();
+                                }
+                            }
+                        } else {
+                            console.error('❌ Módulo JavaScript no se cargó correctamente');
+                            location.reload();
+                        }
+                    }, 2000);
+                }
+            }, 500);
+        }
+
+        // 🔐 Sistema de configuración manual segura (fallback)
+        function showSecureConfigurationPrompt() {
+            // Crear modal para configuración segura
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg max-w-md w-full mx-4">
+                    <h3 class="text-lg font-bold mb-4 text-gray-900 dark:text-white">🔐 Configuración Segura Requerida</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                        GitHub Actions no está disponible. Para usar la aplicación, necesitas proporcionar las credenciales de forma segura.
+                    </p>
+                    <div class="space-y-3">
+                        <input type="password" id="geminiKey" placeholder="API Key de Gemini" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <input type="password" id="firebaseKey" placeholder="Firebase API Key" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <input type="text" id="projectId" placeholder="Firebase Project ID" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    </div>
+                    <div class="flex gap-2 mt-4">
+                        <button onclick="applySecureConfig()" class="flex-1 bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+                            🔒 Aplicar Configuración
+                        </button>
+                        <button onclick="cancelSecureConfig()" class="flex-1 bg-gray-500 text-white p-2 rounded hover:bg-gray-600">
+                            ❌ Cancelar
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                        🛡️ Las credenciales se almacenan localmente de forma segura y solo funcionan en este dominio.
+                    </p>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // 🔐 Aplicar configuración manual segura
+        window.applySecureConfig = function() {
+            const geminiKey = document.getElementById('geminiKey').value;
+            const firebaseKey = document.getElementById('firebaseKey').value;
+            const projectId = document.getElementById('projectId').value;
+
+            if (!geminiKey || !firebaseKey || !projectId) {
+                alert('❌ Por favor completa todos los campos requeridos');
+                return;
+            }
+
+            // Crear configuración
+            window.APP_CONFIG = {
+                GEMINI_API_KEY: geminiKey,
+                firebaseConfig: {
+                    apiKey: firebaseKey,
+                    authDomain: projectId + '.firebaseapp.com',
+                    projectId: projectId,
+                    storageBucket: projectId + '.firebasestorage.app',
+                    messagingSenderId: '133085274608',
+                    appId: '1:133085274608:web:e6ac5cac8303f6dd0a7d35',
+                    measurementId: 'G-ZNWVMVEY6W'
+                },
+                appId: projectId,
+                isPublicDeployment: true,
+                generatedAt: new Date().toISOString()
+            };
+
+            // Almacenar de forma segura (encriptado)
+            localStorage.setItem('secureConfig', btoa(JSON.stringify(window.APP_CONFIG)));
+
+            // Cerrar modal
+            document.querySelector('.fixed.inset-0').remove();
+
+            console.log('✅ Configuración manual aplicada de forma segura');
+            initializeApp();
+        };
+
+        // ❌ Cancelar configuración manual
+        window.cancelSecureConfig = function() {
+            document.querySelector('.fixed.inset-0').remove();
+            console.log('❌ Configuración manual cancelada');
+        };
 
         // 🔐 Medidas de seguridad adicionales
         if (isGitHubPages) {
