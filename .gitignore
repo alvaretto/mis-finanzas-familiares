@@ -1,10 +1,6 @@
-# 🔐 ARCHIVOS DE CONFIGURACIÓN SENSIBLES
-# Estos archivos contienen API keys y no deben subirse al repositorio
-config.js
+# 🔐 ARCHIVO DE CONFIGURACIÓN LOCAL SENSIBLE
+# Este archivo contiene API keys y no debe subirse al repositorio
 config-fresh.js
-
-# ✅ ARCHIVOS PÚBLICOS DE CONFIGURACIÓN
-# config-demo.js SÍ se sube (modo demostración para GitHub Pages)
 
 # 📝 ARCHIVOS DE DESARROLLO
 *.log
