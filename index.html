@@ -41,10 +41,14 @@
             console.log('🔒 Aplicando configuración segura embebida');
             console.log('🛡️ Credenciales restringidas por dominio y Firebase');
 
-            // Aplicar configuración directamente
-            window.GEMINI_API_KEY = GITHUB_PAGES_CONFIG.GEMINI_API_KEY;
-            window.firebaseConfig = GITHUB_PAGES_CONFIG.firebaseConfig;
-            window.appId = GITHUB_PAGES_CONFIG.appId;
+            // Aplicar configuración directamente en el formato esperado
+            window.APP_CONFIG = {
+                GEMINI_API_KEY: GITHUB_PAGES_CONFIG.GEMINI_API_KEY,
+                firebaseConfig: GITHUB_PAGES_CONFIG.firebaseConfig,
+                appId: GITHUB_PAGES_CONFIG.appId,
+                isPublicDeployment: true,
+                generatedAt: new Date().toISOString()
+            };
 
             console.log('✅ Configuración de GitHub Pages aplicada');
             console.log('📱 Lista para acceso móvil');
