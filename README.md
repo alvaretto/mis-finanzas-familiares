@@ -12,7 +12,7 @@ Una aplicación web moderna y completa para la gestión de finanzas personales y
 - ✅ **Desktop/Laptop** - Experiencia completa en cualquier navegador
 - ✅ **Tablets** - Interfaz optimizada para pantallas táctiles
 
-> **🔧 Última actualización:** Problema de configuración resuelto - La aplicación ahora carga correctamente en todos los dispositivos.
+> **🔧 Última actualización:** Sistema de seguridad implementado - Configuración dual local/GitHub Pages funcionando correctamente.
 
 ## 🌟 Características Principales
 
