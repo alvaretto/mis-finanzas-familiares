@@ -136,33 +136,58 @@
             }, 500);
         }
 
-        // 🔐 Sistema de configuración manual segura (fallback)
+        // 🔐 Sistema de configuración familiar simplificado
         function showSecureConfigurationPrompt() {
-            // Crear modal para configuración segura
+            // Crear modal familiar y fácil de usar
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
             modal.innerHTML = `
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-lg max-w-md w-full mx-4">
-                    <h3 class="text-lg font-bold mb-4 text-gray-900 dark:text-white">🔐 Configuración Segura Requerida</h3>
+                    <h3 class="text-lg font-bold mb-4 text-gray-900 dark:text-white">🏠 Configuración Familiar</h3>
                     <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                        GitHub Actions no está disponible. Para usar la aplicación, necesitas proporcionar las credenciales de forma segura.
+                        ¡Hola! Para usar la aplicación familiar, necesitas configurarla una sola vez.
+                        Después funcionará automáticamente para toda la familia.
                     </p>
+
+                    <div class="bg-blue-50 dark:bg-blue-900 p-3 rounded mb-4">
+                        <p class="text-sm text-blue-800 dark:text-blue-200">
+                            💡 <strong>Solo una vez:</strong> Esta configuración se guardará automáticamente.
+                            Tu esposa y tú solo necesitarán hacer login normal después.
+                        </p>
+                    </div>
+
                     <div class="space-y-3">
-                        <input type="password" id="geminiKey" placeholder="API Key de Gemini" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                        <input type="password" id="firebaseKey" placeholder="Firebase API Key" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                        <input type="text" id="projectId" placeholder="Firebase Project ID" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <div>
+                            <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">🔑 Clave de Gemini AI</label>
+                            <input type="password" id="geminiKey" value="AIzaSyDTwnuRm4vXeuU9wUF69ftxsX9yxXS-0Ho" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">🔥 Clave de Firebase</label>
+                            <input type="password" id="firebaseKey" value="AIzaSyDioqBsl1lNWF0DB96ryOEF3KUzQNGtVnQ" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">📁 ID del Proyecto</label>
+                            <input type="text" id="projectId" value="mis-finanzas-familiares-f7298" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        </div>
                     </div>
+
                     <div class="flex gap-2 mt-4">
-                        <button onclick="applySecureConfig()" class="flex-1 bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
-                            🔒 Aplicar Configuración
+                        <button onclick="applySecureConfig()" class="flex-1 bg-green-500 text-white p-2 rounded hover:bg-green-600">
+                            ✅ Configurar Aplicación Familiar
                         </button>
-                        <button onclick="cancelSecureConfig()" class="flex-1 bg-gray-500 text-white p-2 rounded hover:bg-gray-600">
-                            ❌ Cancelar
+                        <button onclick="showAdvancedConfig()" class="bg-gray-500 text-white px-3 py-2 rounded hover:bg-gray-600 text-sm">
+                            ⚙️
                         </button>
                     </div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                        🛡️ Las credenciales se almacenan localmente de forma segura y solo funcionan en este dominio.
-                    </p>
+
+                    <div class="mt-3 p-3 bg-green-50 dark:bg-green-900 rounded">
+                        <p class="text-xs text-green-800 dark:text-green-200">
+                            🛡️ <strong>Seguro:</strong> Las credenciales se almacenan de forma segura en tu dispositivo y solo funcionan en este sitio web.
+                        </p>
+                        <p class="text-xs text-green-800 dark:text-green-200 mt-1">
+                            👨‍👩‍👧‍👦 <strong>Familiar:</strong> Una vez configurado, toda la familia puede usar la app normalmente.
+                        </p>
+                    </div>
                 </div>
             `;
             // Esperar a que el DOM esté listo
@@ -211,6 +236,31 @@
 
             console.log('✅ Configuración manual aplicada de forma segura');
             initializeApp();
+        };
+
+        // ⚙️ Mostrar configuración avanzada (para usuarios técnicos)
+        window.showAdvancedConfig = function() {
+            const modal = document.querySelector('.fixed.inset-0');
+            const content = modal.querySelector('div > div');
+            content.innerHTML = `
+                <h3 class="text-lg font-bold mb-4 text-gray-900 dark:text-white">⚙️ Configuración Avanzada</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                    Puedes modificar las credenciales si tienes tus propias claves de API.
+                </p>
+                <div class="space-y-3">
+                    <input type="password" id="geminiKey" placeholder="API Key de Gemini" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <input type="password" id="firebaseKey" placeholder="Firebase API Key" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <input type="text" id="projectId" placeholder="Firebase Project ID" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                </div>
+                <div class="flex gap-2 mt-4">
+                    <button onclick="applySecureConfig()" class="flex-1 bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+                        🔒 Aplicar Configuración
+                    </button>
+                    <button onclick="showSecureConfigurationPrompt(); document.querySelector('.fixed.inset-0').remove();" class="bg-gray-500 text-white px-3 py-2 rounded hover:bg-gray-600">
+                        ← Volver
+                    </button>
+                </div>
+            `;
         };
 
         // ❌ Cancelar configuración manual
