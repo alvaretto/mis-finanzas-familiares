@@ -27,25 +27,37 @@ jobs:
       - name: 🔒 Generate Secure Config
         run: |
           echo "🔐 Generando config.js con GitHub Secrets..."
+
+          # Verificar que los secrets existen
+          if [ -z "${{ secrets.GEMINI_API_KEY }}" ]; then
+            echo "❌ ERROR: GEMINI_API_KEY no está configurado"
+            exit 1
+          fi
+
+          if [ -z "${{ secrets.FIREBASE_API_KEY }}" ]; then
+            echo "❌ ERROR: FIREBASE_API_KEY no está configurado"
+            exit 1
+          fi
+
           # Crear config.js con credenciales reales desde secrets
           cat > config.js << 'EOF'
           // 🌐 CONFIGURACIÓN PARA GITHUB PAGES - GENERADA AUTOMÁTICAMENTE
           // Este archivo es generado dinámicamente por GitHub Actions
           // Las credenciales se almacenan de forma segura en GitHub Secrets
-          
+
           // ⚠️ IMPORTANTE: Esta configuración es pública pero segura
           // - Firebase está configurado con reglas de seguridad apropiadas
           // - API Key de Gemini restringida solo para alvaretto.github.io
           // - Los datos están protegidos por autenticación Firebase
           // - Ideal para acceso móvil y uso familiar desde múltiples dispositivos
-          
+
           // 🔒 CONFIGURACIÓN DUAL:
           // - GitHub Pages: Usa este archivo (generado automáticamente)
-          // - Local: Usa config.js para desarrollo con credenciales privadas
-          
+          // - Local: Usa config-fresh.js para desarrollo con credenciales privadas
+
           // 🔐 API Key de Gemini (restringida por dominio)
           const GEMINI_API_KEY = "${{ secrets.GEMINI_API_KEY }}";
-          
+
           // 🔥 Configuración de Firebase (con reglas de seguridad estrictas)
           const firebaseConfig = {
               apiKey: "${{ secrets.FIREBASE_API_KEY }}",
@@ -56,10 +68,10 @@ jobs:
               appId: "${{ secrets.FIREBASE_APP_ID }}",
               measurementId: "${{ secrets.FIREBASE_MEASUREMENT_ID }}"
           };
-          
+
           // 🏷️ ID de la aplicación
           const appId = '${{ secrets.FIREBASE_PROJECT_ID }}';
-          
+
           // 🚀 Exportar configuración para uso en GitHub Pages
           window.APP_CONFIG = {
               GEMINI_API_KEY,
@@ -68,7 +80,7 @@ jobs:
               isPublicDeployment: true,
               generatedAt: new Date().toISOString()
           };
-          
+
           // 📢 Mensaje informativo
           console.log('🌐 Aplicación ejecutándose en GitHub Pages');
           console.log('🔒 Configuración generada de forma segura');
@@ -76,11 +88,18 @@ jobs:
           console.log('📱 Listo para acceso desde móviles');
           console.log('📂 Repositorio: https://github.com/alvaretto/mis-finanzas-familiares');
           EOF
-          
+
           echo "✅ config.js generado con credenciales seguras"
           echo "📋 Verificando contenido generado..."
           ls -la config.js
           echo "📏 Tamaño del archivo: $(wc -c < config.js) bytes"
+          echo "🔍 Verificando que el archivo contiene credenciales..."
+          if grep -q "secrets.GEMINI_API_KEY" config.js; then
+            echo "❌ ERROR: Los secrets no se expandieron correctamente"
+            exit 1
+          else
+            echo "✅ Los secrets se expandieron correctamente"
+          fi
 
       - name: 🔍 Verificar Configuración
         run: |
