@@ -2,6 +2,8 @@
 
 Una aplicación web moderna y completa para la gestión de finanzas personales y familiares, con inteligencia artificial integrada y sistema de categorías personalizable.
 
+![Aplicación de Finanzas Familiares](photo_2025-08-21_10-02-57.jpg)
+
 ## 🌐 **ACCESO DIRECTO**
 **✅ Aplicación Funcionando:** https://alvaretto.github.io/mis-finanzas-familiares
 
@@ -9,6 +11,8 @@ Una aplicación web moderna y completa para la gestión de finanzas personales y
 - ✅ **Móviles Android/iOS** - Acceso completo desde el navegador
 - ✅ **Desktop/Laptop** - Experiencia completa en cualquier navegador
 - ✅ **Tablets** - Interfaz optimizada para pantallas táctiles
+
+> **🔧 Última actualización:** Problema de configuración resuelto - La aplicación ahora carga correctamente en todos los dispositivos.
 
 ## 🌟 Características Principales
 
@@ -76,24 +80,24 @@ Una aplicación web moderna y completa para la gestión de finanzas personales y
 
 1. **Clona el proyecto**:
 ```bash
-git clone [URL_DEL_REPOSITORIO]
-cd FinazasFamiGem
+git clone https://github.com/alvaretto/mis-finanzas-familiares.git
+cd mis-finanzas-familiares
 ```
 
 2. **Configura las API Keys de forma segura**:
 ```bash
 # Copia el archivo de ejemplo
-cp config.example.js config.js
+cp config.example.js config-fresh.js
 ```
 
-3. **Edita `config.js`** con tus API keys reales (este archivo NO se subirá a GitHub)
+3. **Edita `config-fresh.js`** con tus API keys reales (este archivo NO se subirá a GitHub)
 
 ### 1. Obtener API Key de Google Gemini
 
 1. Ve a [Google AI Studio](https://aistudio.google.com/app/apikey)
 2. Crea una nueva API Key
 3. Copia la API Key generada
-4. Pégala en `config.js` reemplazando `TU_API_KEY_DE_GEMINI_AQUI`
+4. Pégala en `config-fresh.js` reemplazando `TU_API_KEY_DE_GEMINI_AQUI`
 
 ### 2. Configurar Firebase
 
@@ -101,17 +105,17 @@ cp config.example.js config.js
 2. Habilita **Authentication** con Email/Password
 3. Crea una base de datos **Firestore**
 4. Ve a Configuración del proyecto > General > "Configuración del SDK"
-5. Copia toda la configuración y pégala en `config.js`
+5. Copia toda la configuración y pégala en `config-fresh.js`
 
 ### 3. Estructura de Archivos de Configuración
 
 ```
-📁 FinazasFamiGem/
+📁 mis-finanzas-familiares/
 ├── 📄 config.example.js    ✅ (Se sube a GitHub - Solo ejemplo)
-├── 📄 config.js           ❌ (NO se sube - Contiene tus API keys)
-├── 📄 .gitignore          ✅ (Protege config.js)
-├── 📄 CONFIGURACION.md    ✅ (Guía detallada)
-└── 📄 index.html          ✅ (Sin API keys hardcodeadas)
+├── 📄 config-fresh.js     ❌ (NO se sube - Contiene tus API keys)
+├── 📄 config-demo.js      ✅ (Para GitHub Pages - Público)
+├── 📄 .gitignore          ✅ (Protege config-fresh.js)
+└── 📄 index.html          ✅ (Carga config-fresh.js)
 ```
 
 ### 4. Verificación de Configuración
