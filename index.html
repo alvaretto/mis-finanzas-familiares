@@ -354,11 +354,15 @@
         <div id="liability-form-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden"></div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, query, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
+    <!-- Firebase SDK v9 - Compatibilidad -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <script>
+        // 🚀 MEGA RADICAL: Usar Firebase v9 compat para máxima compatibilidad
+        console.log('🔥 Inicializando Firebase v9 compat...');
 
         // 🔐 CONFIGURACIÓN SEGURA - Sistema híbrido para local y GitHub Pages
         let GEMINI_API_KEY, firebaseConfig, appId;
@@ -816,9 +820,9 @@
             authError.textContent = '';
             try {
                 if (isLoginMode) {
-                    await signInWithEmailAndPassword(auth, email, password);
+                    await auth.signInWithEmailAndPassword(email, password);
                 } else {
-                    await createUserWithEmailAndPassword(auth, email, password);
+                    await auth.createUserWithEmailAndPassword(email, password);
                 }
             } catch (error) {
                 console.error('Error de autenticación:', error);
@@ -867,7 +871,7 @@
                 return;
             }
             try {
-                await sendPasswordResetEmail(auth, email);
+                await auth.sendPasswordResetEmail(email);
                 authError.textContent = 'Correo de restablecimiento enviado. Revisa tu bandeja de entrada.';
             } catch (error) {
                 authError.textContent = 'Error al enviar el correo. Verifica la dirección.';
@@ -880,7 +884,7 @@
             if (unsubscribeCategoriesListener) unsubscribeCategoriesListener();
             if (unsubscribeAssetsListener) unsubscribeAssetsListener();
             if (unsubscribeLiabilitiesListener) unsubscribeLiabilitiesListener();
-            await signOut(auth);
+            await auth.signOut();
         };
 
         const showApp = (user) => {
@@ -2880,16 +2884,27 @@
         };
 
         const initAuth = () => {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-            onAuthStateChanged(auth, user => user ? showApp(user) : showAuth());
+            console.log('🔥 Inicializando Firebase con configuración compat...');
+
+            // Usar Firebase v9 compat
+            app = firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            db = firebase.firestore();
+
+            console.log('✅ Firebase inicializado correctamente');
+
+            // Configurar listener de autenticación
+            auth.onAuthStateChanged(user => user ? showApp(user) : showAuth());
+
+            // Configurar event listeners
             authForm.addEventListener('submit', handleAuthFormSubmit);
             authToggleBtn.addEventListener('click', toggleAuthMode);
             forgotPasswordBtn.addEventListener('click', handlePasswordReset);
             logoutBtn.addEventListener('click', handleLogout);
             themeToggle.addEventListener('click', toggleTheme);
             initAppEventListeners();
+
+            console.log('✅ Event listeners configurados');
         };
 
         document.addEventListener('DOMContentLoaded', () => {
