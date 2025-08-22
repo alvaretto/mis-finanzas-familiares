@@ -165,7 +165,14 @@
                     </p>
                 </div>
             `;
-            document.body.appendChild(modal);
+            // Esperar a que el DOM esté listo
+            if (document.body) {
+                document.body.appendChild(modal);
+            } else {
+                document.addEventListener('DOMContentLoaded', () => {
+                    document.body.appendChild(modal);
+                });
+            }
         }
 
         // 🔐 Aplicar configuración manual segura
