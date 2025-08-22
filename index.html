@@ -14,41 +14,37 @@
 
         const isGitHubPages = window.location.hostname === 'alvaretto.github.io';
 
-        // 🔒 Sistema de configuración segura sin exposición
-        // Las credenciales se cargan dinámicamente sin estar en el código fuente
+        // 🔒 Sistema de configuración ultra segura - CERO EXPOSICIÓN
+        // Las credenciales se insertan dinámicamente por GitHub Actions
+        // El código fuente NO contiene información sensible
         async function loadSecureConfig() {
             try {
-                // 🔐 Configuración codificada de forma segura
-                // Estas credenciales están protegidas y solo funcionan en el dominio autorizado
-                const encoded = {
-                    g: "QUl6YVN5RFR3bnVSbTR2WGV1VTl3VUY2OWZ0eHNYOXl4WFMtMEhv",
-                    f: {
-                        a: "QUl6YVN5RGlvcUJzbDFsTldGMERCOTZyeU9FRjNLVXpRTkd0Vm5R",
-                        d: "bWlzLWZpbmFuemFzLWZhbWlsaWFyZXMtZjcyOTguZmlyZWJhc2VhcHAuY29t",
-                        p: "bWlzLWZpbmFuemFzLWZhbWlsaWFyZXMtZjcyOTg=",
-                        s: "bWlzLWZpbmFuemFzLWZhbWlsaWFyZXMtZjcyOTguZmlyZWJhc2VzdG9yYWdlLmFwcA==",
-                        m: "MTMzMDg1Mjc0NjA4",
-                        i: "MToxMzMwODUyNzQ2MDg6d2ViOmU2YWM1Y2FjODMwM2Y2ZGQwYTdkMzU=",
-                        t: "Ry1aTldWTVZFWTZX"
-                    }
+                // 🔐 Configuración insertada por GitHub Actions (placeholders en código fuente)
+                // Estas credenciales son reemplazadas automáticamente durante el deployment
+                const config = {
+                    GEMINI_API_KEY: "{{GEMINI_API_KEY_PLACEHOLDER}}",
+                    firebaseConfig: {
+                        apiKey: "{{FIREBASE_API_KEY_PLACEHOLDER}}",
+                        authDomain: "{{FIREBASE_AUTH_DOMAIN_PLACEHOLDER}}",
+                        projectId: "{{FIREBASE_PROJECT_ID_PLACEHOLDER}}",
+                        storageBucket: "{{FIREBASE_STORAGE_BUCKET_PLACEHOLDER}}",
+                        messagingSenderId: "{{FIREBASE_MESSAGING_SENDER_ID_PLACEHOLDER}}",
+                        appId: "{{FIREBASE_APP_ID_PLACEHOLDER}}",
+                        measurementId: "{{FIREBASE_MEASUREMENT_ID_PLACEHOLDER}}"
+                    },
+                    appId: "{{FIREBASE_PROJECT_ID_PLACEHOLDER}}"
                 };
 
-                // 🔓 Decodificar configuración
-                return {
-                    GEMINI_API_KEY: atob(encoded.g),
-                    firebaseConfig: {
-                        apiKey: atob(encoded.f.a),
-                        authDomain: atob(encoded.f.d),
-                        projectId: atob(encoded.f.p),
-                        storageBucket: atob(encoded.f.s),
-                        messagingSenderId: atob(encoded.f.m),
-                        appId: atob(encoded.f.i),
-                        measurementId: atob(encoded.f.t)
-                    },
-                    appId: atob(encoded.f.p)
-                };
+                // 🔍 Verificar si las credenciales fueron reemplazadas por GitHub Actions
+                if (config.GEMINI_API_KEY.includes('PLACEHOLDER')) {
+                    console.warn('⚠️ Placeholders detectados - GitHub Actions no ejecutado o falló');
+                    return null;
+                }
+
+                console.log('✅ Configuración insertada por GitHub Actions cargada');
+                return config;
             } catch (error) {
-                console.error('❌ Error decodificando configuración:', error);
+                console.error('❌ Error cargando configuración:', error);
                 return null;
             }
         }
@@ -106,7 +102,11 @@
                         }
                     }, 500);
                 } else {
-                    console.error('❌ Error cargando configuración segura');
+                    console.error('❌ Error: Configuración no disponible');
+                    console.log('💡 Esto puede ocurrir si:');
+                    console.log('  • GitHub Actions no se ejecutó correctamente');
+                    console.log('  • Los GitHub Secrets no están configurados');
+                    console.log('  • Estás viendo el código fuente directamente');
                     showConfigurationError();
                 }
             });

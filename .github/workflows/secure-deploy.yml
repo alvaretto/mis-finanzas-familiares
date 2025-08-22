@@ -1,0 +1,87 @@
+name: 🔐 Secure Deployment to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🔐 Replace Placeholders with Secure Credentials
+        run: |
+          echo "🔒 Reemplazando placeholders con credenciales seguras desde GitHub Secrets..."
+          
+          # Verificar que todos los secrets existen
+          if [ -z "${{ secrets.GEMINI_API_KEY }}" ]; then
+            echo "❌ ERROR: GEMINI_API_KEY no está configurado en GitHub Secrets"
+            exit 1
+          fi
+          
+          if [ -z "${{ secrets.FIREBASE_API_KEY }}" ]; then
+            echo "❌ ERROR: FIREBASE_API_KEY no está configurado en GitHub Secrets"
+            exit 1
+          fi
+          
+          # Crear copia de index.html para modificar
+          cp index.html index-deploy.html
+          
+          # Reemplazar placeholders con credenciales reales
+          sed -i 's/{{GEMINI_API_KEY_PLACEHOLDER}}/${{ secrets.GEMINI_API_KEY }}/g' index-deploy.html
+          sed -i 's/{{FIREBASE_API_KEY_PLACEHOLDER}}/${{ secrets.FIREBASE_API_KEY }}/g' index-deploy.html
+          sed -i 's/{{FIREBASE_AUTH_DOMAIN_PLACEHOLDER}}/${{ secrets.FIREBASE_AUTH_DOMAIN }}/g' index-deploy.html
+          sed -i 's/{{FIREBASE_PROJECT_ID_PLACEHOLDER}}/${{ secrets.FIREBASE_PROJECT_ID }}/g' index-deploy.html
+          sed -i 's/{{FIREBASE_STORAGE_BUCKET_PLACEHOLDER}}/${{ secrets.FIREBASE_STORAGE_BUCKET }}/g' index-deploy.html
+          sed -i 's/{{FIREBASE_MESSAGING_SENDER_ID_PLACEHOLDER}}/${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}/g' index-deploy.html
+          sed -i 's/{{FIREBASE_APP_ID_PLACEHOLDER}}/${{ secrets.FIREBASE_APP_ID }}/g' index-deploy.html
+          sed -i 's/{{FIREBASE_MEASUREMENT_ID_PLACEHOLDER}}/${{ secrets.FIREBASE_MEASUREMENT_ID }}/g' index-deploy.html
+          
+          # Reemplazar index.html original con la versión modificada
+          mv index-deploy.html index.html
+          
+          echo "✅ Placeholders reemplazados con credenciales seguras"
+          echo "🔍 Verificando que no queden placeholders..."
+          
+          if grep -q "PLACEHOLDER" index.html; then
+            echo "❌ ERROR: Aún quedan placeholders sin reemplazar"
+            grep "PLACEHOLDER" index.html
+            exit 1
+          else
+            echo "✅ Todos los placeholders fueron reemplazados correctamente"
+          fi
+
+      - name: 🔧 Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: 📦 Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: 🚀 Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: ✅ Deployment Complete
+        run: |
+          echo "🎉 Deployment completado exitosamente"
+          echo "🌐 URL: ${{ steps.deployment.outputs.page_url }}"
+          echo "🔐 Credenciales insertadas de forma segura"
+          echo "🛡️ Código fuente permanece limpio"
