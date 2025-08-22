@@ -8,7 +8,51 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- 🔐 Configuración de API Keys -->
-    <script src="config-demo.js"></script>
+    <!-- Sistema dual: Local usa config-fresh.js, GitHub Pages usa config.js generado por Actions -->
+    <script>
+        // Detectar si estamos en GitHub Pages o desarrollo local
+        const isGitHubPages = window.location.hostname === 'alvaretto.github.io';
+
+        if (isGitHubPages) {
+            // GitHub Pages: Usar config.js generado por GitHub Actions
+            console.log('🌐 Detectado: GitHub Pages');
+            console.log('📄 Cargando: config.js (generado por GitHub Actions)');
+
+            const script = document.createElement('script');
+            script.src = 'config.js';
+            script.onload = function() {
+                console.log('✅ config.js cargado correctamente');
+            };
+            script.onerror = function() {
+                console.error('❌ Error cargando config.js');
+                console.log('🔄 Intentando fallback a config-demo.js...');
+
+                // Fallback a config-demo.js si config.js falla
+                const fallbackScript = document.createElement('script');
+                fallbackScript.src = 'config-demo.js';
+                fallbackScript.onload = function() {
+                    console.log('⚠️ Usando config-demo.js como fallback');
+                };
+                document.head.appendChild(fallbackScript);
+            };
+            document.head.appendChild(script);
+        } else {
+            // Desarrollo local: Usar config-fresh.js
+            console.log('🏠 Detectado: Desarrollo local');
+            console.log('📄 Cargando: config-fresh.js');
+
+            const script = document.createElement('script');
+            script.src = 'config-fresh.js';
+            script.onload = function() {
+                console.log('✅ config-fresh.js cargado correctamente');
+            };
+            script.onerror = function() {
+                console.error('❌ Error cargando config-fresh.js');
+                console.log('💡 Asegúrate de que config-fresh.js existe y tiene las credenciales correctas');
+            };
+            document.head.appendChild(script);
+        }
+    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; }

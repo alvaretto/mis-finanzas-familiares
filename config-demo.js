@@ -12,22 +12,22 @@
 // - GitHub Pages: Usa este archivo (config-demo.js) para acceso público
 // - Local: Usa config.js para desarrollo con tus credenciales privadas
 
-// 🔐 API Key de Gemini (restringida para alvaretto.github.io)
-const GEMINI_API_KEY = "AIzaSyDTwnuRm4vXeuU9wUF69ftxsX9yxXS-0Ho";
+// 🔐 API Key de Gemini - SERÁ REEMPLAZADA POR GITHUB ACTIONS
+const GEMINI_API_KEY = "{{GEMINI_API_KEY}}";
 
-// 🔥 Configuración de Firebase (con reglas de seguridad estrictas)
+// 🔥 Configuración de Firebase - SERÁ REEMPLAZADA POR GITHUB ACTIONS
 const firebaseConfig = {
-    apiKey: "AIzaSyDioqBsl1lNWF0DB96ryOEF3KUzQNGtVnQ",
-    authDomain: "mis-finanzas-familiares-f7298.firebaseapp.com",
-    projectId: "mis-finanzas-familiares-f7298",
-    storageBucket: "mis-finanzas-familiares-f7298.firebasestorage.app",
-    messagingSenderId: "133085274608",
-    appId: "1:133085274608:web:e6ac5cac8303f6dd0a7d35",
-    measurementId: "G-ZNWVMVEY6W"
+    apiKey: "{{FIREBASE_API_KEY}}",
+    authDomain: "{{FIREBASE_AUTH_DOMAIN}}",
+    projectId: "{{FIREBASE_PROJECT_ID}}",
+    storageBucket: "{{FIREBASE_STORAGE_BUCKET}}",
+    messagingSenderId: "{{FIREBASE_MESSAGING_SENDER_ID}}",
+    appId: "{{FIREBASE_APP_ID}}",
+    measurementId: "{{FIREBASE_MEASUREMENT_ID}}"
 };
 
 // 🏷️ ID de la aplicación
-const appId = 'mis-finanzas-familiares-f7298';
+const appId = '{{FIREBASE_PROJECT_ID}}';
 
 // 🚀 Exportar configuración para uso en GitHub Pages
 window.APP_CONFIG = {
