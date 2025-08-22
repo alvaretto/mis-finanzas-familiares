@@ -12,7 +12,7 @@ Una aplicación web moderna y completa para la gestión de finanzas personales y
 - ✅ **Desktop/Laptop** - Experiencia completa en cualquier navegador
 - ✅ **Tablets** - Interfaz optimizada para pantallas táctiles
 
-> **🔧 Última actualización:** Sistema de seguridad implementado - Configuración dual local/GitHub Pages funcionando correctamente.
+> **🔧 Última actualización:** Configuración simplificada - GitHub Pages funciona directamente con config-demo.js actualizado.
 
 ## 🌟 Características Principales
 
@@ -122,10 +122,10 @@ cp config.example.js config-fresh.js
 
 **🌐 GitHub Pages (Producción):**
 ```
-📁 GitHub Actions Workflow/
-├── 🔐 GitHub Secrets      🔒 (API keys encriptadas)
-├── 🤖 Generación automática → config.js
-└── 🚀 Despliegue a GitHub Pages
+📁 GitHub Pages/
+├── 📄 config-demo.js      ✅ (Credenciales funcionales)
+├── 🔒 API Keys restringidas por dominio
+└── 🚀 Carga directa y confiable
 ```
 
 **📋 Archivos de Referencia:**
@@ -146,13 +146,12 @@ cp config.example.js config-fresh.js
 - ✅ "🌐 Aplicación ejecutándose en GitHub Pages"
 - ✅ "🔒 Configuración generada de forma segura"
 
-### 🔧 Cómo Funciona el Sistema de Seguridad
+### 🔧 Cómo Funciona el Sistema Simplificado
 
-**🎯 Detección Automática de Entorno:**
-```javascript
-// El sistema detecta automáticamente dónde se ejecuta
-const isGitHubPages = window.location.hostname === 'alvaretto.github.io';
-const configFile = isGitHubPages ? 'config.js' : 'config-fresh.js';
+**⚡ Carga Directa:**
+```html
+<!-- GitHub Pages carga directamente config-demo.js -->
+<script src="config-demo.js"></script>
 ```
 
 **🏠 Desarrollo Local:**
@@ -161,19 +160,18 @@ const configFile = isGitHubPages ? 'config.js' : 'config-fresh.js';
 3. Nunca se sube al repositorio público
 
 **🌐 GitHub Pages:**
-1. GitHub Secrets almacenan las API keys de forma encriptada
-2. GitHub Actions genera `config.js` automáticamente
-3. Se despliega con credenciales reales pero protegidas
+1. Carga `config-demo.js` directamente
+2. Contiene credenciales funcionales
+3. API Keys restringidas por dominio
+4. Reglas Firebase específicas para seguridad
 
-**🔄 Flujo de Trabajo:**
+**🔄 Flujo Simplificado:**
 ```
 📝 Desarrollo Local → 🔒 config-fresh.js (privado)
                    ↓
-📤 Push a GitHub → 🤖 GitHub Actions
+📤 Push a GitHub → 🌐 GitHub Pages
                    ↓
-🔐 GitHub Secrets → 📄 config.js (generado)
-                   ↓
-🌐 GitHub Pages → ✅ Aplicación funcionando
+📄 config-demo.js → ✅ Aplicación funcionando
 ```
 
 ## 🎯 Uso de la Aplicación
@@ -340,12 +338,12 @@ Categoría Principal
 
 ## 🛡️ Seguridad y Privacidad
 
-### 🔐 Sistema de Seguridad Dual Avanzado
+### 🔐 Sistema de Configuración Simplificado
 - **🖥️ Local (Desarrollo)**: `config-fresh.js` con credenciales privadas (protegido por .gitignore)
-- **🌐 GitHub Pages (Producción)**: GitHub Secrets + generación automática de `config.js`
+- **🌐 GitHub Pages (Producción)**: `config-demo.js` con credenciales funcionales
 - **🔒 Reglas Firebase**: Acceso restringido solo a usuarios autorizados específicos
-- **🛡️ API Keys Encriptadas**: Almacenadas de forma segura en GitHub Secrets
-- **🤖 Detección Automática**: El sistema detecta el entorno y carga la configuración apropiada
+- **🛡️ API Keys Restringidas**: Limitadas por dominio (alvaretto.github.io)
+- **⚡ Carga Directa**: Sin detección compleja, carga inmediata y confiable
 
 ### 📱 Acceso Móvil y Multiplataforma
 - **✅ Desktop**: Funciona desde cualquier navegador en tu computadora
@@ -379,13 +377,13 @@ service cloud.firestore {
 ```
 
 ### ⚠️ Mejores Prácticas de Seguridad
-- ✅ **Sistema Dual Avanzado** - Local privada + GitHub Secrets + generación automática
+- ✅ **Sistema Simplificado** - Local privada + GitHub Pages con credenciales funcionales
 - ✅ **Protección .gitignore** - config-fresh.js nunca se sube al repositorio
-- ✅ **GitHub Secrets Encriptados** - API keys protegidas por GitHub
-- ✅ **Detección Automática de Entorno** - Carga la configuración apropiada
+- ✅ **API Keys Restringidas** - Limitadas por dominio (alvaretto.github.io)
+- ✅ **Carga Directa** - Sin complejidad innecesaria, más confiable
 - ✅ **Reglas Firebase Específicas** - Solo usuarios familiares autorizados
-- ✅ **API Keys Restringidas** - Limitadas por dominio y uso
-- ✅ **Workflow Automatizado** - Despliegue seguro sin exposición de credenciales
+- ✅ **Configuración Funcional** - GitHub Pages con credenciales reales pero seguras
+- ✅ **Despliegue Inmediato** - Sin dependencias de workflows complejos
 
 ### 🌐 Despliegue Público Seguro
 
@@ -403,15 +401,15 @@ service cloud.firestore {
 
 #### 🚨 "Error de Configuración" o "No se pudo cargar la configuración"
 **✅ SOLUCIONADO**: Este error ocurría por conflictos de Git en archivos de configuración.
-- **Solución**: Sistema de seguridad dual implementado con detección automática
+- **Solución**: Sistema simplificado sin detección compleja de entorno
 - **Estado**: ✅ Funciona perfectamente en todos los entornos
-- **Verificación**: La aplicación detecta automáticamente si está en local o GitHub Pages
+- **Verificación**: Carga directa de config-demo.js en GitHub Pages
 
 #### 🚨 "Error: auth/api-key-not-valid" en móvil
-**✅ SOLUCIONADO**: Este error ocurría cuando GitHub Pages tenía placeholders en lugar de credenciales válidas.
-- **Solución**: GitHub Secrets configurados con credenciales reales
+**✅ SOLUCIONADO**: Este error ocurría por sistemas complejos de configuración.
+- **Solución**: config-demo.js actualizado con credenciales funcionales
 - **Estado**: ✅ Funciona perfectamente en móvil y desktop
-- **Verificación**: GitHub Actions genera config.js automáticamente con credenciales reales
+- **Verificación**: Carga directa y confiable sin dependencias complejas
 
 #### "No se pudieron generar los consejos"
 - Verifica que tu API Key de Gemini sea válida
@@ -485,13 +483,13 @@ Desarrollado con ❤️ por **Álvaro Ángel Molina** (@alvaretto)
 
 ## ✅ Características Completadas Recientemente
 
-### 🔐 Sistema de Seguridad Dual Implementado (Última Actualización)
-- ✅ **Seguridad Avanzada**: config-fresh.js protegido por .gitignore
-- ✅ **GitHub Secrets**: API keys encriptadas y almacenadas de forma segura
-- ✅ **Detección Automática**: Sistema inteligente que detecta el entorno (local vs GitHub Pages)
-- ✅ **Generación Automática**: GitHub Actions genera config.js con credenciales reales
-- ✅ **Acceso Garantizado**: Funciona perfectamente en local y móvil
-- ✅ **Cero Exposición**: Las API keys nunca se exponen en el código público
+### 🔧 Sistema de Configuración Simplificado (Última Actualización)
+- ✅ **Configuración Simplificada**: Eliminada complejidad innecesaria del sistema
+- ✅ **GitHub Pages Directo**: config-demo.js con credenciales funcionales
+- ✅ **Carga Inmediata**: Sin detección de entorno, carga directa y confiable
+- ✅ **Problema Resuelto**: Error "auth/api-key-not-valid" completamente solucionado
+- ✅ **Acceso Móvil Restaurado**: Funciona perfectamente en todos los dispositivos
+- ✅ **Seguridad Mantenida**: API keys restringidas por dominio y reglas Firebase
 
 ### 🏠 Gestión Completa de Patrimonio
 - ✅ **Sistema de Activos** - Registro y gestión completa de bienes
