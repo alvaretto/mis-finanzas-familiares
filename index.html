@@ -8,49 +8,75 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- 🔐 Configuración de API Keys -->
-    <!-- Sistema dual: Local usa config-fresh.js, GitHub Pages usa config.js generado por Actions -->
+    <!-- Sistema seguro: GitHub Pages usa config.js generado por Actions con GitHub Secrets -->
     <script>
-        // Detectar si estamos en GitHub Pages o desarrollo local
+        // Detectar si estamos en GitHub Pages
         const isGitHubPages = window.location.hostname === 'alvaretto.github.io';
 
-        if (isGitHubPages) {
-            // GitHub Pages: Usar config.js generado por GitHub Actions
-            console.log('🌐 Detectado: GitHub Pages');
-            console.log('📄 Cargando: config.js (generado por GitHub Actions)');
+        // Función para mostrar error de configuración
+        function showConfigError(message) {
+            console.error('❌ Error de configuración:', message);
+            // El error ya se muestra en la UI, no necesitamos hacer nada más
+        }
 
-            const script = document.createElement('script');
-            script.src = 'config.js';
-            script.onload = function() {
-                console.log('✅ config.js cargado correctamente');
-            };
-            script.onerror = function() {
-                console.error('❌ Error cargando config.js');
-                console.log('🔄 Intentando fallback a config-demo.js...');
+        // Función para cargar configuración
+        function loadConfig() {
+            if (isGitHubPages) {
+                // GitHub Pages: Intentar cargar config.js generado por GitHub Actions
+                console.log('🌐 Detectado: GitHub Pages');
+                console.log('📄 Intentando cargar: config.js (generado por GitHub Actions)');
 
-                // Fallback a config-demo.js si config.js falla
-                const fallbackScript = document.createElement('script');
-                fallbackScript.src = 'config-demo.js';
-                fallbackScript.onload = function() {
-                    console.log('⚠️ Usando config-demo.js como fallback');
+                const script = document.createElement('script');
+                script.src = 'config.js?v=' + Date.now(); // Cache busting
+
+                script.onload = function() {
+                    console.log('✅ config.js cargado correctamente desde GitHub Actions');
+                    console.log('🔒 Configuración generada de forma segura');
                 };
-                document.head.appendChild(fallbackScript);
-            };
-            document.head.appendChild(script);
-        } else {
-            // Desarrollo local: Usar config-fresh.js
-            console.log('🏠 Detectado: Desarrollo local');
-            console.log('📄 Cargando: config-fresh.js');
 
-            const script = document.createElement('script');
-            script.src = 'config-fresh.js';
-            script.onload = function() {
-                console.log('✅ config-fresh.js cargado correctamente');
-            };
-            script.onerror = function() {
-                console.error('❌ Error cargando config-fresh.js');
-                console.log('💡 Asegúrate de que config-fresh.js existe y tiene las credenciales correctas');
-            };
-            document.head.appendChild(script);
+                script.onerror = function() {
+                    console.warn('⚠️ config.js no disponible, usando fallback seguro');
+
+                    // Fallback: cargar config-demo.js (solo placeholders, no funcionará pero es seguro)
+                    const fallbackScript = document.createElement('script');
+                    fallbackScript.src = 'config-demo.js';
+                    fallbackScript.onload = function() {
+                        console.log('📄 config-demo.js cargado (solo placeholders)');
+                        showConfigError('GitHub Actions no generó config.js correctamente');
+                    };
+                    fallbackScript.onerror = function() {
+                        showConfigError('No se pudo cargar ningún archivo de configuración');
+                    };
+                    document.head.appendChild(fallbackScript);
+                };
+
+                document.head.appendChild(script);
+            } else {
+                // Desarrollo local: Usar config-fresh.js
+                console.log('🏠 Detectado: Desarrollo local');
+                console.log('📄 Cargando: config-fresh.js');
+
+                const script = document.createElement('script');
+                script.src = 'config-fresh.js';
+
+                script.onload = function() {
+                    console.log('✅ config-fresh.js cargado correctamente');
+                };
+
+                script.onerror = function() {
+                    console.error('❌ Error cargando config-fresh.js');
+                    showConfigError('config-fresh.js no encontrado. Crea el archivo siguiendo las instrucciones del README.');
+                };
+
+                document.head.appendChild(script);
+            }
+        }
+
+        // Cargar configuración cuando el DOM esté listo
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadConfig);
+        } else {
+            loadConfig();
         }
     </script>
     <style>

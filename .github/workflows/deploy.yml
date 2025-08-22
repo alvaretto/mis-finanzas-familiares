@@ -26,6 +26,7 @@ jobs:
 
       - name: 🔒 Generate Secure Config
         run: |
+          echo "🔐 Generando config.js con GitHub Secrets..."
           # Crear config.js con credenciales reales desde secrets
           cat > config.js << 'EOF'
           // 🌐 CONFIGURACIÓN PARA GITHUB PAGES - GENERADA AUTOMÁTICAMENTE
@@ -77,6 +78,9 @@ jobs:
           EOF
           
           echo "✅ config.js generado con credenciales seguras"
+          echo "📋 Verificando contenido generado..."
+          ls -la config.js
+          echo "📏 Tamaño del archivo: $(wc -c < config.js) bytes"
 
       - name: 🔍 Verificar Configuración
         run: |
