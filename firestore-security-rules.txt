@@ -1,0 +1,55 @@
+// 🔒 REGLAS DE SEGURIDAD PARA FIRESTORE
+// Copia estas reglas en Firebase Console > Firestore Database > Rules
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 👤 DATOS DE USUARIOS - Solo el usuario autenticado puede acceder a sus datos
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // 📊 TRANSACCIONES - Solo el propietario puede acceder
+      match /transactions/{transactionId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // 🏷️ CATEGORÍAS - Solo el propietario puede acceder
+      match /categories/{categoryId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // 💰 ACTIVOS - Solo el propietario puede acceder
+      match /assets/{assetId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // 💳 PASIVOS - Solo el propietario puede acceder
+      match /liabilities/{liabilityId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // ⚙️ CONFIGURACIONES - Solo el propietario puede acceder
+      match /settings/{settingId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+    
+    // ❌ DENEGAR TODO LO DEMÁS
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+// 📝 INSTRUCCIONES PARA APLICAR:
+// 1. Ve a Firebase Console: https://console.firebase.google.com/
+// 2. Selecciona tu proyecto: mis-finanzas-familiares-f7298
+// 3. Ve a Firestore Database > Rules
+// 4. Copia y pega las reglas de arriba
+// 5. Haz clic en "Publicar"
+
+// ✅ ESTAS REGLAS GARANTIZAN:
+// - Solo usuarios autenticados pueden acceder a datos
+// - Cada usuario solo ve sus propios datos
+// - No hay acceso cruzado entre usuarios
+// - Protección completa contra acceso no autorizado

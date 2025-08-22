@@ -2,6 +2,14 @@
 
 Una aplicación web moderna y completa para la gestión de finanzas personales y familiares, con inteligencia artificial integrada y sistema de categorías personalizable.
 
+## 🌐 **ACCESO DIRECTO**
+**✅ Aplicación Funcionando:** https://alvaretto.github.io/mis-finanzas-familiares
+
+**📱 Funciona perfectamente en:**
+- ✅ **Móviles Android/iOS** - Acceso completo desde el navegador
+- ✅ **Desktop/Laptop** - Experiencia completa en cualquier navegador
+- ✅ **Tablets** - Interfaz optimizada para pantallas táctiles
+
 ## 🌟 Características Principales
 
 ### 📊 Gestión Financiera Completa
@@ -226,24 +234,31 @@ Categoría Principal
 ## 📱 Características por Dispositivo
 
 ### 💻 Desktop
-- Interfaz completa con todas las funcionalidades
-- Gráficos interactivos de tamaño completo
-- Modales amplios para gestión detallada
-- Formularios en grid de 2 columnas
-- Hover effects y animaciones completas
+- **✅ Funcionalidad Completa**: Interfaz completa con todas las funcionalidades
+- **📊 Gráficos Interactivos**: Visualizaciones de tamaño completo
+- **🖱️ Experiencia Rica**: Hover effects y animaciones completas
+- **📝 Formularios Amplios**: Grid de 2 columnas para entrada eficiente
+- **🔧 Configuración Local**: Usa `config.js` con credenciales privadas
 
-### 📱 Móvil
-- Diseño adaptativo optimizado
-- Botones de fácil acceso táctil
-- Navegación simplificada
-- Formularios en columna única
-- Scroll optimizado para touch
+### 📱 Móvil ✅ TOTALMENTE FUNCIONAL
+- **🌐 Acceso Directo**: https://alvaretto.github.io/mis-finanzas-familiares
+- **✅ Sin Errores**: Problema "auth/api-key-not-valid" resuelto
+- **👆 Optimizado Touch**: Botones de fácil acceso táctil
+- **📱 Diseño Responsivo**: Navegación simplificada y formularios en columna única
+- **🔄 Sincronización**: Datos compartidos en tiempo real con desktop
+- **🔐 Seguridad**: Acceso solo para usuarios autorizados
 
 ### 📊 Tablet
-- Experiencia híbrida optimizada
-- Aprovecha el espacio disponible
-- Interfaz balanceada
-- Grid adaptativo según orientación
+- **🎯 Experiencia Híbrida**: Optimizada para pantallas medianas
+- **📐 Grid Adaptativo**: Se ajusta según orientación (vertical/horizontal)
+- **⚖️ Interfaz Balanceada**: Aprovecha el espacio disponible
+- **🔄 Sincronización**: Datos compartidos entre todos los dispositivos
+
+### 🌐 Acceso Multiplataforma
+- **🖥️ Desktop**: Navegador local con configuración privada
+- **📱 Android/iOS**: Navegador móvil via GitHub Pages
+- **💻 Laptop**: Cualquier navegador moderno
+- **📊 Tablet**: Experiencia optimizada para pantallas táctiles
 
 ## 🔧 Personalización
 
@@ -272,28 +287,66 @@ Categoría Principal
 
 ## 🛡️ Seguridad y Privacidad
 
-### 🔐 Protección de API Keys
-- **Configuración Externa** - API keys en archivo separado no incluido en GitHub
-- **Archivo .gitignore** - Protege automáticamente archivos sensibles
-- **Validación de Configuración** - Alertas si las API keys no están configuradas
-- **Ejemplo Seguro** - Plantilla sin credenciales reales
+### 🔐 Configuración Dual Segura
+- **🖥️ Local (Desarrollo)**: `config.js` con credenciales privadas (protegido por .gitignore)
+- **🌐 GitHub Pages (Producción)**: `config-demo.js` con credenciales públicas seguras
+- **🔒 Reglas Firebase**: Acceso restringido solo a usuarios autorizados específicos
+- **🛡️ API Keys Restringidas**: Limitadas por dominio y uso
+
+### 📱 Acceso Móvil y Multiplataforma
+- **✅ Desktop**: Funciona desde cualquier navegador en tu computadora
+- **✅ Móvil**: Acceso completo desde https://alvaretto.github.io/mis-finanzas-familiares
+- **✅ Tablet**: Experiencia optimizada para todos los dispositivos
+- **🔄 Sincronización**: Datos compartidos en tiempo real entre dispositivos
 
 ### 🔒 Seguridad de Datos
 - **Datos Encriptados** en tránsito y en reposo
-- **Autenticación Segura** con Firebase Auth
-- **No Compartimos Datos** - Tu información es privada
+- **Autenticación Firebase** con email/contraseña
+- **Reglas Firestore Específicas** - Solo UIDs autorizados pueden acceder
+- **Estructura Familiar** - Datos compartidos entre usuarios autorizados
 - **Backup Automático** en Firebase Firestore
-- **Reglas de Firestore** - Solo usuarios autenticados pueden acceder
+
+### 🏗️ Arquitectura de Seguridad
+```javascript
+// Reglas Firebase para uso familiar
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /artifacts/{appId}/shared_transactions/family_data/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid in [
+        'UID_USUARIO_1',  // Usuario autorizado 1
+        'UID_USUARIO_2'   // Usuario autorizado 2
+      ];
+    }
+  }
+}
+```
 
 ### ⚠️ Mejores Prácticas
-- ✅ **NUNCA** subas API keys reales a repositorios públicos
-- ✅ **USA** siempre archivos de configuración externos
-- ✅ **REVISA** el .gitignore antes de hacer commits
-- ✅ **ROTA** las API keys si se comprometen accidentalmente
+- ✅ **Configuración Dual** - Local privada + GitHub Pages pública segura
+- ✅ **Reglas Específicas** - Solo usuarios familiares autorizados
+- ✅ **API Keys Restringidas** - Limitadas por dominio
+- ✅ **Datos Compartidos** - Sincronización familiar segura
+
+### 🌐 Despliegue Público Seguro
+
+**✅ GitHub Pages Configurado:**
+- **URL Pública**: https://alvaretto.github.io/mis-finanzas-familiares
+- **Acceso Móvil**: Funciona perfectamente en dispositivos móviles
+- **Seguridad**: Reglas Firebase específicas para usuarios autorizados
+- **Sincronización**: Datos compartidos entre todos los dispositivos
+
+> **🔐 IMPORTANTE**: La aplicación está configurada para uso familiar específico con reglas de seguridad estrictas que solo permiten acceso a usuarios autorizados.
 
 ## 🐛 Solución de Problemas
 
 ### Problemas Comunes
+
+#### 🚨 "Error: auth/api-key-not-valid" en móvil
+**✅ SOLUCIONADO**: Este error ocurría cuando GitHub Pages tenía placeholders en lugar de credenciales válidas.
+- **Solución**: Configuración dual implementada (local + GitHub Pages)
+- **Estado**: ✅ Funciona perfectamente en móvil y desktop
+- **Verificación**: Recarga la página en móvil después de 2-3 minutos
 
 #### "No se pudieron generar los consejos"
 - Verifica que tu API Key de Gemini sea válida
@@ -303,21 +356,46 @@ Categoría Principal
 #### "Error de conexión a Firebase"
 - Verifica tu configuración de Firebase
 - Asegúrate de que Firestore esté habilitado
-- Revisa las reglas de seguridad de Firestore
+- **IMPORTANTE**: Usa las reglas Firebase específicas para tu estructura de datos
+- Verifica que tu UID esté en la lista de usuarios autorizados
 
 #### Las categorías no se guardan
 - Verifica que tengas permisos de escritura en Firestore
 - Asegúrate de estar autenticado correctamente
+- Confirma que las reglas Firebase permitan acceso a tu UID específico
 
 #### Los activos/pasivos no se muestran
 - Verifica la configuración de Firebase
-- Asegúrate de que las colecciones 'assets' y 'liabilities' tengan permisos
+- Asegúrate de que las colecciones usen la estructura correcta: `artifacts/{appId}/shared_transactions/family_data/`
 - Revisa que el usuario esté autenticado correctamente
 
 #### Los formularios extensos no se desplazan correctamente
 - Asegúrate de usar un navegador moderno con soporte para scroll-behavior
 - Verifica que JavaScript esté habilitado
 - Revisa la consola para errores de CSS o JavaScript
+
+#### 📱 Problemas específicos de móvil
+- **Cache del navegador**: Fuerza la recarga (pull to refresh)
+- **Conexión**: Verifica que tengas conexión estable a internet
+- **Navegador**: Usa Chrome, Firefox o Safari actualizados
+- **Cookies**: Asegúrate de que las cookies estén habilitadas
+
+### 🔧 Configuración Firebase Correcta
+
+**⚠️ IMPORTANTE**: Usa estas reglas específicas en Firebase Console:
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /artifacts/{appId}/shared_transactions/family_data/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid in [
+        'TU_UID_AQUI',           // Reemplaza con tu UID real
+        'UID_DE_TU_ESPOSA_AQUI'  // Reemplaza con el UID de tu esposa
+      ];
+    }
+  }
+}
+```
 
 ### Logs de Depuración
 Abre las herramientas de desarrollador (F12) y revisa la consola para mensajes de error detallados.
@@ -341,6 +419,13 @@ Desarrollado con ❤️ por **Álvaro Ángel Molina** (@alvaretto)
 ---
 
 ## ✅ Características Completadas Recientemente
+
+### 🚨 Funcionalidad Móvil Restaurada (Última Actualización)
+- ✅ **Problema Resuelto**: Error "auth/api-key-not-valid" en dispositivos móviles
+- ✅ **Configuración Dual**: Sistema híbrido local + GitHub Pages
+- ✅ **Acceso Móvil**: Funciona perfectamente desde https://alvaretto.github.io/mis-finanzas-familiares
+- ✅ **Seguridad Mantenida**: Reglas Firebase específicas para usuarios autorizados
+- ✅ **Sincronización**: Datos compartidos en tiempo real entre todos los dispositivos
 
 ### 🏠 Gestión Completa de Patrimonio
 - ✅ **Sistema de Activos** - Registro y gestión completa de bienes
