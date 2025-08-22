@@ -1118,35 +1118,35 @@
         const setupRealtimeListeners = () => {
             if (!db) return;
             const basePath = `artifacts/${appId}/shared_transactions/family_data`;
-            transactionsCollection = collection(db, `${basePath}/transactions`);
-            budgetDocRef = doc(db, `${basePath}/budget`, 'monthly');
-            categoriesDocRef = doc(db, `${basePath}/categories`, 'structure');
-            assetsCollection = collection(db, `${basePath}/assets`);
-            liabilitiesCollection = collection(db, `${basePath}/liabilities`);
+            transactionsCollection = firebase.firestore().collection(`${basePath}/transactions`);
+            budgetDocRef = firebase.firestore().doc(`${basePath}/budget/monthly`);
+            categoriesDocRef = firebase.firestore().doc(`${basePath}/categories/structure`);
+            assetsCollection = firebase.firestore().collection(`${basePath}/assets`);
+            liabilitiesCollection = firebase.firestore().collection(`${basePath}/liabilities`);
 
-            unsubscribeListener = onSnapshot(query(transactionsCollection), (snapshot) => {
+            unsubscribeListener = transactionsCollection.onSnapshot((snapshot) => {
                 transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 updateAllUI();
             });
 
-            unsubscribeBudgetListener = onSnapshot(budgetDocRef, (doc) => {
-                monthlyBudget = doc.exists() ? doc.data().amount : 0;
+            unsubscribeBudgetListener = budgetDocRef.onSnapshot((doc) => {
+                monthlyBudget = doc.exists ? doc.data().amount : 0;
                 updateAllUI();
             });
 
-            unsubscribeCategoriesListener = onSnapshot(categoriesDocRef, (doc) => {
-                userCategoryStructure = doc.exists() ? doc.data() : null;
+            unsubscribeCategoriesListener = categoriesDocRef.onSnapshot((doc) => {
+                userCategoryStructure = doc.exists ? doc.data() : null;
                 if (!categoriesModalEl.classList.contains('hidden')) {
                     renderCategoriesModal();
                 }
             });
 
-            unsubscribeAssetsListener = onSnapshot(query(assetsCollection), (snapshot) => {
+            unsubscribeAssetsListener = assetsCollection.onSnapshot((snapshot) => {
                 assets = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 updateAllUI();
             });
 
-            unsubscribeLiabilitiesListener = onSnapshot(query(liabilitiesCollection), (snapshot) => {
+            unsubscribeLiabilitiesListener = liabilitiesCollection.onSnapshot((snapshot) => {
                 liabilities = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 updateAllUI();
             });
@@ -1155,7 +1155,7 @@
         const loadLiabilities = async () => {
             if (!liabilitiesCollection) return;
             try {
-                const snapshot = await getDocs(query(liabilitiesCollection));
+                const snapshot = await liabilitiesCollection.get();
                 liabilities = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             } catch (error) {
                 console.error('Error loading liabilities:', error);
@@ -2221,7 +2221,7 @@
 
         const saveCategoryStructure = async (structure) => {
             if (!categoriesDocRef) return;
-            await setDoc(categoriesDocRef, structure);
+            await categoriesDocRef.set(structure);
         };
 
         const isCategoryInUse = (type, category, subcategory = null, subsubcategory = null) => {
@@ -2392,10 +2392,10 @@
 
             try {
                 if (id) {
-                    await updateDoc(doc(db, 'liabilities', id), liabilityData);
+                    await liabilitiesCollection.doc(id).update(liabilityData);
                     showSuccessMessage('Pasivo actualizado correctamente');
                 } else {
-                    await addDoc(collection(db, 'liabilities'), liabilityData);
+                    await liabilitiesCollection.add(liabilityData);
                     showSuccessMessage('Pasivo agregado correctamente');
                 }
 
@@ -2413,7 +2413,7 @@
             if (!confirm('¿Estás seguro de que quieres eliminar este pasivo?')) return;
 
             try {
-                await deleteDoc(doc(db, 'liabilities', id));
+                await liabilitiesCollection.doc(id).delete();
                 showSuccessMessage('Pasivo eliminado correctamente');
                 await loadLiabilities();
                 renderLiabilitiesList();
@@ -2638,10 +2638,10 @@
 
                 try {
                     if (isEditing) {
-                        await updateDoc(doc(assetsCollection, assetId), formData);
+                        await assetsCollection.doc(assetId).update(formData);
                         showSuccessMessage('Activo actualizado exitosamente');
                     } else {
-                        await addDoc(assetsCollection, { ...formData, createdAt: serverTimestamp() });
+                        await assetsCollection.add({ ...formData, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
                         showSuccessMessage('Activo agregado exitosamente');
                     }
                     formContainer.remove();
@@ -2671,7 +2671,7 @@
         const deleteAsset = async (assetId) => {
             if (confirm('¿Estás seguro de que quieres eliminar este activo?')) {
                 try {
-                    await deleteDoc(doc(assetsCollection, assetId));
+                    await assetsCollection.doc(assetId).delete();
                     showSuccessMessage('Activo eliminado exitosamente');
                     renderAssetsList();
                 } catch (error) {
@@ -2847,10 +2847,10 @@
 
             try {
                 if (currentEditingId) {
-                    await updateDoc(doc(transactionsCollection, currentEditingId), formData);
+                    await transactionsCollection.doc(currentEditingId).update(formData);
                     showSuccessMessage('Transacción actualizada exitosamente');
                 } else {
-                    await addDoc(transactionsCollection, { ...formData, createdAt: serverTimestamp() });
+                    await transactionsCollection.add({ ...formData, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
                     showSuccessMessage('Transacción agregada exitosamente');
                 }
                 closeModal(transactionModalEl);
@@ -2864,7 +2864,7 @@
             const editBtn = e.target.closest('.edit-btn');
             const deleteBtn = e.target.closest('.delete-btn');
             if (editBtn) openTransactionModal(editBtn.dataset.id);
-            if (deleteBtn) deleteDoc(doc(transactionsCollection, deleteBtn.dataset.id));
+            if (deleteBtn) transactionsCollection.doc(deleteBtn.dataset.id).delete();
         };
 
         const openBudgetModal = () => {
@@ -2878,7 +2878,7 @@
         const handleBudgetFormSubmit = async (e) => {
             e.preventDefault();
             const newAmount = parseFloat(e.target['budget-amount'].value);
-            if (newAmount >= 0) { await setDoc(budgetDocRef, { amount: newAmount }); closeModal(budgetModalEl); }
+            if (newAmount >= 0) { await budgetDocRef.set({ amount: newAmount }); closeModal(budgetModalEl); }
         };
 
         const openAiChatModal = () => {
