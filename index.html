@@ -109,31 +109,37 @@
         function initializeApp() {
             console.log('🔄 Inicializando aplicación...');
 
-            setTimeout(() => {
-                if (typeof initializeConfiguration === 'function') {
-                    if (initializeConfiguration()) {
-                        console.log('✅ Configuración inicializada, cargando aplicación');
-                        if (typeof initAuth === 'function') {
-                          initAuth();
-                        }
-                    }
-                } else {
-                    console.log('⚠️ initializeConfiguration no disponible, reintentando...');
-                    setTimeout(() => {
-                        if (typeof initializeConfiguration === 'function') {
-                            if (initializeConfiguration()) {
-                                console.log('✅ Configuración inicializada (segundo intento)');
-                                if (typeof initAuth === 'function') {
-                                  initAuth();
-                                }
+            const checkConfigInterval = setInterval(() => {
+                if (typeof window.firebaseConfig !== 'undefined' && window.firebaseConfig) {
+                    clearInterval(checkConfigInterval);
+                    console.log('✅ Configuración de Firebase detectada.');
+                    if (typeof initializeConfiguration === 'function') {
+                        if (initializeConfiguration()) {
+                            console.log('✅ Configuración inicializada, cargando autenticación.');
+                            if (typeof initAuth === 'function') {
+                                initAuth();
+                            } else {
+                                console.error('❌ La función initAuth no está definida.');
                             }
                         } else {
-                            console.error('❌ Módulo JavaScript no se cargó correctamente');
-                            location.reload();
+                             console.error('❌ Falló initializeConfiguration.');
                         }
-                    }, 2000);
+                    } else {
+                        console.error('❌ La función initializeConfiguration no está definida.');
+                    }
+                } else {
+                    console.log('⏳ Esperando configuración de Firebase...');
                 }
-            }, 500);
+            }, 500); // Revisa cada 500ms
+
+            // Timeout de seguridad para evitar bucles infinitos
+            setTimeout(() => {
+                if (typeof window.firebaseConfig === 'undefined' || !window.firebaseConfig) {
+                    clearInterval(checkConfigInterval);
+                    console.error('❌ Error crítico: La configuración de Firebase no se cargó después de 10 segundos.');
+                    // Aquí podrías mostrar un mensaje de error permanente al usuario
+                }
+            }, 10000);
         }
 
         // 🔐 Sistema de configuración familiar simplificado
