@@ -22,15 +22,26 @@ class AutomaticBackupSystem {
     // 🚀 Inicializar sistema de backups
     async initialize() {
         try {
+            // Verificar que Firebase esté disponible
+            if (typeof firebase === 'undefined' || !firebase.firestore) {
+                throw new Error('Firebase no está disponible');
+            }
+
+            // Verificar que window.appId esté definido
+            if (!window.appId) {
+                throw new Error('window.appId no está definido');
+            }
+
             await this.loadSettings();
             await this.loadBackupHistory();
             this.setupAutomaticBackups();
-            
+
             this.initialized = true;
             console.log('✅ Sistema de backups automáticos listo');
             return true;
         } catch (error) {
             console.error('❌ Error inicializando sistema de backups:', error);
+            this.showBackupNotification('Error inicializando sistema de backups: ' + error.message, 'error');
             return false;
         }
     }
@@ -114,9 +125,23 @@ class AutomaticBackupSystem {
 
     // 💾 Realizar backup automático
     async performAutomaticBackup() {
+        // Verificar que el sistema esté inicializado
+        if (!this.initialized) {
+            console.warn('⚠️ Sistema de backup no inicializado, intentando inicializar...');
+            const initialized = await this.initialize();
+            if (!initialized) {
+                throw new Error('No se pudo inicializar el sistema de backups');
+            }
+        }
+
         try {
             console.log('💾 Iniciando backup automático...');
-            
+
+            // Verificar autenticación
+            if (!firebase.auth().currentUser) {
+                throw new Error('Usuario no autenticado para realizar backup');
+            }
+
             const backupData = await this.collectAllData();
             const backupId = this.generateBackupId();
             const timestamp = new Date().toISOString();
@@ -135,47 +160,57 @@ class AutomaticBackupSystem {
                     totalAssets: backupData.assets?.length || 0,
                     totalLiabilities: backupData.liabilities?.length || 0,
                     aiDataIncluded: this.settings.includeAIData,
-                    compressed: this.settings.compressionEnabled
+                    compressed: this.settings.compressionEnabled,
+                    userEmail: firebase.auth().currentUser?.email || 'unknown'
                 }
             };
 
             // Comprimir si está habilitado
             if (this.settings.compressionEnabled) {
-                backup.data = this.compressData(backup.data);
-                backup.compressed = true;
+                try {
+                    backup.data = this.compressData(backup.data);
+                    backup.compressed = true;
+                } catch (compressionError) {
+                    console.warn('⚠️ Error comprimiendo, guardando sin comprimir:', compressionError);
+                    backup.compressed = false;
+                }
             }
 
             // Guardar backup
             await this.saveBackup(backup);
-            
+
             // Actualizar historial
             this.backupHistory.unshift({
                 id: backupId,
                 timestamp: timestamp,
                 type: 'automatic',
                 size: JSON.stringify(backup).length,
-                success: true
+                success: true,
+                transactionsCount: backupData.transactions?.length || 0
             });
 
             // Mantener solo los últimos N backups
             if (this.backupHistory.length > this.settings.maxBackupsToKeep) {
                 const oldBackups = this.backupHistory.splice(this.settings.maxBackupsToKeep);
-                await this.cleanupOldBackups(oldBackups);
+                // Limpiar en background para no bloquear
+                this.cleanupOldBackups(oldBackups).catch(error => {
+                    console.warn('⚠️ Error limpiando backups antiguos:', error);
+                });
             }
 
             // Guardar historial actualizado
             await this.saveBackupHistory();
-            
+
             this.lastBackupTime = timestamp;
             console.log('✅ Backup automático completado:', backupId);
-            
+
             // Mostrar notificación discreta
             this.showBackupNotification('Backup automático completado exitosamente');
-            
+
             return backupId;
         } catch (error) {
             console.error('❌ Error en backup automático:', error);
-            
+
             // Registrar error en historial
             this.backupHistory.unshift({
                 id: 'error-' + Date.now(),
@@ -184,9 +219,15 @@ class AutomaticBackupSystem {
                 success: false,
                 error: error.message
             });
-            
-            await this.saveBackupHistory();
-            this.showBackupNotification('Error en backup automático', 'error');
+
+            // Guardar historial incluso con error
+            try {
+                await this.saveBackupHistory();
+            } catch (historyError) {
+                console.error('❌ Error guardando historial de error:', historyError);
+            }
+
+            this.showBackupNotification('Error en backup automático: ' + error.message, 'error');
             throw error;
         }
     }
@@ -194,40 +235,85 @@ class AutomaticBackupSystem {
     // 📊 Recopilar todos los datos
     async collectAllData() {
         const data = {};
-        
+
         try {
-            // Transacciones
-            data.transactions = await this.getTransactions();
-            console.log('📊 Transacciones recopiladas:', data.transactions.length);
-
-            // Presupuesto
-            data.budget = await this.getBudget();
-            console.log('💰 Presupuesto recopilado');
-
-            // Categorías
-            data.categories = await this.getCategories();
-            console.log('🏷️ Categorías recopiladas');
-
-            // Activos
-            data.assets = await this.getAssets();
-            console.log('📈 Activos recopilados:', data.assets.length);
-
-            // Pasivos
-            data.liabilities = await this.getLiabilities();
-            console.log('📉 Pasivos recopilados:', data.liabilities.length);
-
-            // Datos de IA (si está habilitado)
-            if (this.settings.includeAIData) {
-                data.aiData = await this.getAIData();
-                console.log('🧠 Datos de IA recopilados');
+            // Verificar que estamos autenticados
+            if (!firebase.auth().currentUser) {
+                throw new Error('Usuario no autenticado');
             }
 
-            // Configuración de la aplicación
-            data.appSettings = await this.getAppSettings();
-            console.log('⚙️ Configuración recopilada');
+            // Transacciones (crítico)
+            try {
+                data.transactions = await this.getTransactions();
+                console.log('📊 Transacciones recopiladas:', data.transactions.length);
+            } catch (error) {
+                console.error('❌ Error crítico obteniendo transacciones:', error);
+                throw new Error('No se pudieron obtener las transacciones: ' + error.message);
+            }
+
+            // Presupuesto (no crítico)
+            try {
+                data.budget = await this.getBudget();
+                console.log('💰 Presupuesto recopilado');
+            } catch (error) {
+                console.warn('⚠️ Error obteniendo presupuesto, continuando:', error);
+                data.budget = {};
+            }
+
+            // Categorías (no crítico)
+            try {
+                data.categories = await this.getCategories();
+                console.log('🏷️ Categorías recopiladas');
+            } catch (error) {
+                console.warn('⚠️ Error obteniendo categorías, continuando:', error);
+                data.categories = {};
+            }
+
+            // Activos (no crítico)
+            try {
+                data.assets = await this.getAssets();
+                console.log('📈 Activos recopilados:', data.assets.length);
+            } catch (error) {
+                console.warn('⚠️ Error obteniendo activos, continuando:', error);
+                data.assets = [];
+            }
+
+            // Pasivos (no crítico)
+            try {
+                data.liabilities = await this.getLiabilities();
+                console.log('📉 Pasivos recopilados:', data.liabilities.length);
+            } catch (error) {
+                console.warn('⚠️ Error obteniendo pasivos, continuando:', error);
+                data.liabilities = [];
+            }
+
+            // Datos de IA (opcional)
+            if (this.settings.includeAIData) {
+                try {
+                    data.aiData = await this.getAIData();
+                    console.log('🧠 Datos de IA recopilados');
+                } catch (error) {
+                    console.warn('⚠️ Error obteniendo datos de IA, continuando:', error);
+                    data.aiData = {};
+                }
+            }
+
+            // Configuración de la aplicación (no crítico)
+            try {
+                data.appSettings = await this.getAppSettings();
+                console.log('⚙️ Configuración recopilada');
+            } catch (error) {
+                console.warn('⚠️ Error obteniendo configuración, continuando:', error);
+                data.appSettings = {};
+            }
+
+            // Verificar que tenemos al menos datos básicos
+            if (!data.transactions || data.transactions.length === 0) {
+                console.warn('⚠️ No se encontraron transacciones para respaldar');
+            }
 
         } catch (error) {
-            console.error('❌ Error recopilando datos:', error);
+            console.error('❌ Error crítico recopilando datos:', error);
             throw error;
         }
 
@@ -237,17 +323,31 @@ class AutomaticBackupSystem {
     // 📋 Obtener transacciones
     async getTransactions() {
         try {
+            // Intentar usar la función global existente primero
+            if (typeof getTransactions === 'function') {
+                const transactions = getTransactions();
+                if (transactions && transactions.length > 0) {
+                    console.log('📋 Usando transacciones de función global');
+                    return transactions;
+                }
+            }
+
+            // Fallback: obtener directamente de Firebase
             const snapshot = await firebase.firestore()
                 .collection(`artifacts/${window.appId}/shared_transactions/family_data/transactions`)
+                .orderBy('date', 'desc')
                 .get();
-            
-            return snapshot.docs.map(doc => ({
+
+            const transactions = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
             }));
+
+            console.log('📋 Transacciones obtenidas de Firebase:', transactions.length);
+            return transactions;
         } catch (error) {
-            console.warn('⚠️ Error obteniendo transacciones:', error);
-            return [];
+            console.error('❌ Error obteniendo transacciones:', error);
+            throw error; // Lanzar error para que sea manejado arriba
         }
     }
 
@@ -562,6 +662,113 @@ class AutomaticBackupSystem {
     resumeAutomaticBackups() {
         this.setupAutomaticBackups();
         console.log('▶️ Backups automáticos reanudados');
+    }
+
+    // 🔍 Diagnóstico del sistema
+    async runDiagnostics() {
+        const diagnostics = {
+            timestamp: new Date().toISOString(),
+            system: {
+                initialized: this.initialized,
+                firebaseAvailable: typeof firebase !== 'undefined',
+                firestoreAvailable: typeof firebase !== 'undefined' && !!firebase.firestore,
+                authAvailable: typeof firebase !== 'undefined' && !!firebase.auth,
+                userAuthenticated: firebase.auth()?.currentUser ? true : false,
+                appIdDefined: !!window.appId,
+                appId: window.appId
+            },
+            settings: this.settings,
+            history: {
+                totalBackups: this.backupHistory.length,
+                successfulBackups: this.backupHistory.filter(b => b.success).length,
+                failedBackups: this.backupHistory.filter(b => !b.success).length,
+                lastBackup: this.lastBackupTime
+            },
+            tests: {}
+        };
+
+        // Test de conexión a Firebase
+        try {
+            await firebase.firestore().doc('test/connection').get();
+            diagnostics.tests.firebaseConnection = 'OK';
+        } catch (error) {
+            diagnostics.tests.firebaseConnection = 'ERROR: ' + error.message;
+        }
+
+        // Test de obtención de transacciones
+        try {
+            const transactions = await this.getTransactions();
+            diagnostics.tests.transactionsAccess = `OK: ${transactions.length} transacciones`;
+        } catch (error) {
+            diagnostics.tests.transactionsAccess = 'ERROR: ' + error.message;
+        }
+
+        // Test de permisos de escritura
+        try {
+            const testDoc = firebase.firestore().doc(`artifacts/${window.appId}/backup_test/diagnostic`);
+            await testDoc.set({ test: true, timestamp: new Date().toISOString() });
+            await testDoc.delete();
+            diagnostics.tests.writePermissions = 'OK';
+        } catch (error) {
+            diagnostics.tests.writePermissions = 'ERROR: ' + error.message;
+        }
+
+        console.log('🔍 Diagnóstico del sistema de backups:', diagnostics);
+        return diagnostics;
+    }
+
+    // 🧪 Realizar backup de prueba
+    async performTestBackup() {
+        try {
+            console.log('🧪 Iniciando backup de prueba...');
+
+            // Crear datos de prueba mínimos
+            const testData = {
+                transactions: await this.getTransactions(),
+                metadata: {
+                    test: true,
+                    timestamp: new Date().toISOString(),
+                    userEmail: firebase.auth().currentUser?.email
+                }
+            };
+
+            const backupId = 'test-' + this.generateBackupId();
+            const backup = {
+                id: backupId,
+                timestamp: new Date().toISOString(),
+                type: 'test',
+                version: '1.0',
+                data: testData,
+                metadata: {
+                    totalTransactions: testData.transactions?.length || 0,
+                    isTest: true
+                }
+            };
+
+            // Guardar backup de prueba
+            await firebase.firestore()
+                .doc(`artifacts/${window.appId}/backups/${backupId}`)
+                .set(backup);
+
+            console.log('✅ Backup de prueba completado:', backupId);
+
+            // Limpiar backup de prueba después de 1 minuto
+            setTimeout(async () => {
+                try {
+                    await firebase.firestore()
+                        .doc(`artifacts/${window.appId}/backups/${backupId}`)
+                        .delete();
+                    console.log('🧹 Backup de prueba limpiado:', backupId);
+                } catch (error) {
+                    console.warn('⚠️ Error limpiando backup de prueba:', error);
+                }
+            }, 60000);
+
+            return backupId;
+        } catch (error) {
+            console.error('❌ Error en backup de prueba:', error);
+            throw error;
+        }
     }
 }
 

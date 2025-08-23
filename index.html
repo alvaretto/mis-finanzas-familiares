@@ -65,6 +65,50 @@
         // 🔐 Sistema simplificado - secure-config.js maneja toda la configuración
         console.log('🔐 Configuración manejada por secure-config.js');
 
+        // 🔍 Función de diagnóstico global para debugging
+        window.diagnosticarBackups = async function() {
+            console.log('🔍 Ejecutando diagnóstico del sistema de backups...');
+
+            if (!automaticBackupSystem) {
+                console.error('❌ Sistema de backups no inicializado');
+                return {
+                    error: 'Sistema de backups no inicializado',
+                    solution: 'Intenta abrir el panel de backups primero'
+                };
+            }
+
+            try {
+                const diagnostics = await automaticBackupSystem.runDiagnostics();
+                console.log('📊 Resultados del diagnóstico:', diagnostics);
+                return diagnostics;
+            } catch (error) {
+                console.error('❌ Error ejecutando diagnóstico:', error);
+                return {
+                    error: error.message,
+                    solution: 'Verifica la consola para más detalles'
+                };
+            }
+        };
+
+        // 🧪 Función de prueba rápida global
+        window.probarBackups = async function() {
+            console.log('🧪 Ejecutando prueba rápida del sistema de backups...');
+
+            if (!automaticBackupSystem) {
+                console.error('❌ Sistema de backups no inicializado');
+                return false;
+            }
+
+            try {
+                const testBackupId = await automaticBackupSystem.performTestBackup();
+                console.log('✅ Prueba exitosa. Backup de prueba:', testBackupId);
+                return true;
+            } catch (error) {
+                console.error('❌ Error en prueba:', error);
+                return false;
+            }
+        };
+
 
 
 
@@ -946,18 +990,30 @@
                 }
 
                 // 💾 Inicializar Sistema de Backups Automáticos
-                automaticBackupSystem = new AutomaticBackupSystem();
-                await automaticBackupSystem.initialize();
+                try {
+                    console.log('💾 Inicializando sistema de backups automáticos...');
+                    automaticBackupSystem = new AutomaticBackupSystem();
+                    const backupInitialized = await automaticBackupSystem.initialize();
 
-                multiExportSystem = new MultiExportSystem();
-                backupRestoreSystem = new BackupRestoreSystem();
-                backupManagementUI = new BackupManagementUI();
+                    if (backupInitialized) {
+                        multiExportSystem = new MultiExportSystem();
+                        backupRestoreSystem = new BackupRestoreSystem();
+                        backupManagementUI = new BackupManagementUI();
 
-                await backupManagementUI.initialize(
-                    automaticBackupSystem,
-                    multiExportSystem,
-                    backupRestoreSystem
-                );
+                        await backupManagementUI.initialize(
+                            automaticBackupSystem,
+                            multiExportSystem,
+                            backupRestoreSystem
+                        );
+
+                        console.log('✅ Sistema de backups inicializado correctamente');
+                    } else {
+                        console.warn('⚠️ Sistema de backups no se pudo inicializar completamente');
+                    }
+                } catch (backupError) {
+                    console.error('❌ Error inicializando sistema de backups:', backupError);
+                    // No lanzar error para no interrumpir la inicialización de otros sistemas
+                }
 
                 console.log('✅ Sistema de IA Avanzado inicializado correctamente');
                 console.log('💾 Sistema de Backups Automáticos inicializado correctamente');
@@ -3182,21 +3238,42 @@ ${aiMemorySystem.userProfile.behaviorInsights.slice(0, 3).map(insight => `- ${in
         // 💾 Abrir Gestión de Backups
         const openBackupManagement = async () => {
             try {
+                // Verificar autenticación
+                if (!firebase.auth().currentUser) {
+                    addAiMessage("❌ **Error de Autenticación**\n\nDebes estar autenticado para acceder al sistema de backups.\n\nPor favor, inicia sesión primero.");
+                    openAiChatModal();
+                    return;
+                }
+
+                // Verificar que window.appId esté definido
+                if (!window.appId) {
+                    addAiMessage("❌ **Error de Configuración**\n\nLa aplicación no está configurada correctamente (falta appId).\n\nPor favor, recarga la página e inténtalo de nuevo.");
+                    openAiChatModal();
+                    return;
+                }
+
                 // Inicializar sistemas de backup si no existen
                 if (!automaticBackupSystem) {
+                    console.log('💾 Inicializando sistema de backups automáticos...');
                     automaticBackupSystem = new AutomaticBackupSystem();
-                    await automaticBackupSystem.initialize();
+                    const initialized = await automaticBackupSystem.initialize();
+                    if (!initialized) {
+                        throw new Error('No se pudo inicializar el sistema de backups automáticos');
+                    }
                 }
 
                 if (!multiExportSystem) {
+                    console.log('📤 Inicializando sistema de exportación...');
                     multiExportSystem = new MultiExportSystem();
                 }
 
                 if (!backupRestoreSystem) {
+                    console.log('🔄 Inicializando sistema de restauración...');
                     backupRestoreSystem = new BackupRestoreSystem();
                 }
 
                 if (!backupManagementUI) {
+                    console.log('⚙️ Inicializando interfaz de gestión...');
                     backupManagementUI = new BackupManagementUI();
                     await backupManagementUI.initialize(
                         automaticBackupSystem,
@@ -3208,11 +3285,21 @@ ${aiMemorySystem.userProfile.behaviorInsights.slice(0, 3).map(insight => `- ${in
                 // Mostrar panel de gestión
                 await backupManagementUI.showBackupPanel();
 
-                console.log('💾 Panel de gestión de backups abierto');
+                console.log('💾 Panel de gestión de backups abierto exitosamente');
 
             } catch (error) {
                 console.error('❌ Error abriendo gestión de backups:', error);
-                addAiMessage("❌ **Error**\n\nHubo un problema al abrir la gestión de backups. Por favor, inténtalo de nuevo.\n\n**Error**: " + error.message);
+
+                let errorMessage = "❌ **Error del Sistema de Backups**\n\n";
+                errorMessage += "Hubo un problema al abrir la gestión de backups.\n\n";
+                errorMessage += "**Detalles del error**: " + error.message + "\n\n";
+                errorMessage += "**Posibles soluciones**:\n";
+                errorMessage += "• Recarga la página e inténtalo de nuevo\n";
+                errorMessage += "• Verifica tu conexión a internet\n";
+                errorMessage += "• Asegúrate de estar autenticado correctamente\n\n";
+                errorMessage += "Si el problema persiste, contacta al soporte técnico.";
+
+                addAiMessage(errorMessage);
                 openAiChatModal();
             }
         };

@@ -881,17 +881,41 @@ class BackupManagementUI {
         try {
             this.showNotification('Probando sistema de backups...', 'info');
 
-            // Realizar backup de prueba
-            if (this.backupSystem) {
-                await this.backupSystem.performAutomaticBackup();
-                this.showNotification('✅ Sistema de backups funcionando correctamente', 'success');
-            } else {
+            if (!this.backupSystem) {
                 throw new Error('Sistema de backup no disponible');
             }
+
+            // Ejecutar diagnósticos
+            const diagnostics = await this.backupSystem.runDiagnostics();
+            console.log('🔍 Diagnósticos:', diagnostics);
+
+            // Verificar problemas críticos
+            const criticalIssues = [];
+            if (!diagnostics.system.firebaseAvailable) criticalIssues.push('Firebase no disponible');
+            if (!diagnostics.system.userAuthenticated) criticalIssues.push('Usuario no autenticado');
+            if (!diagnostics.system.appIdDefined) criticalIssues.push('App ID no definido');
+            if (diagnostics.tests.firebaseConnection?.includes('ERROR')) criticalIssues.push('Error de conexión a Firebase');
+            if (diagnostics.tests.writePermissions?.includes('ERROR')) criticalIssues.push('Sin permisos de escritura');
+
+            if (criticalIssues.length > 0) {
+                throw new Error('Problemas críticos encontrados: ' + criticalIssues.join(', '));
+            }
+
+            // Realizar backup de prueba
+            const testBackupId = await this.backupSystem.performTestBackup();
+
+            this.showNotification(`✅ Sistema funcionando correctamente. Backup de prueba: ${testBackupId}`, 'success');
 
         } catch (error) {
             console.error('❌ Error probando sistema:', error);
             this.showNotification('❌ Error en sistema de backups: ' + error.message, 'error');
+
+            // Mostrar diagnósticos en consola para debugging
+            if (this.backupSystem) {
+                this.backupSystem.runDiagnostics().then(diag => {
+                    console.log('🔍 Diagnósticos detallados:', diag);
+                });
+            }
         }
     }
 
