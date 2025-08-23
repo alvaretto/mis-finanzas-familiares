@@ -114,7 +114,7 @@
                     if (initializeConfiguration()) {
                         console.log('✅ Configuración inicializada, cargando aplicación');
                         if (typeof initAuth === 'function') {
-                            initAuth();
+                          initAuth();
                         }
                     }
                 } else {
@@ -124,7 +124,7 @@
                             if (initializeConfiguration()) {
                                 console.log('✅ Configuración inicializada (segundo intento)');
                                 if (typeof initAuth === 'function') {
-                                    initAuth();
+                                  initAuth();
                                 }
                             }
                         } else {
@@ -459,6 +459,10 @@
                     <p id="user-email" class="font-semibold"></p>
                 </div>
                 <div class="flex items-center gap-2">
+                    <button id="predictive-dashboard-btn" class="flex items-center gap-1 px-3 py-1 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-gray-700 rounded-md transition-colors">
+                        <i data-lucide="bar-chart-3" class="w-3 h-3"></i>
+                        Dashboard Predictivo
+                    </button>
                     <button id="manage-categories-btn" class="flex items-center gap-1 px-3 py-1 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-gray-700 rounded-md transition-colors">
                         <i data-lucide="folder-tree" class="w-3 h-3"></i>
                         Categorías
@@ -559,6 +563,7 @@
         <div id="asset-form-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden"></div>
         <div id="liabilities-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden"></div>
         <div id="liability-form-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden"></div>
+        <div id="predictive-dashboard-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden"></div>
     </div>
 
     <!-- Firebase SDK v9 - Compatibilidad -->
@@ -570,6 +575,10 @@
     <!-- 🧠 Sistema de IA Avanzado - Desafío 1 -->
     <script src="ai-memory-system.js"></script>
     <script src="ai-learning-engine.js"></script>
+
+    <!-- 📊 Dashboard Predictivo - Desafío 2 -->
+    <script src="predictive-analytics.js"></script>
+    <script src="dashboard-predictivo.js"></script>
 
     <script>
         // 🚀 MEGA RADICAL: Usar Firebase v9 compat para máxima compatibilidad
@@ -991,6 +1000,7 @@
         const insightsBadge = document.getElementById('insights-badge');
         const forgotPasswordBtn = document.getElementById('forgot-password-btn');
         const manageCategoriesBtn = document.getElementById('manage-categories-btn');
+        const predictiveDashboardBtn = document.getElementById('predictive-dashboard-btn');
         const categoriesModalEl = document.getElementById('categories-modal');
         const manageAssetsBtn = document.getElementById('manage-assets-btn');
         const manageLiabilitiesBtn = document.getElementById('manage-liabilities-btn');
@@ -1113,6 +1123,11 @@
 
             // 🧠 Inicializar Sistema de IA Avanzado
             await initializeAdvancedAI(user.uid);
+
+            // Event Listeners
+            predictiveDashboardBtn.addEventListener('click', () => {
+                PredictiveDashboard.open(transactions, monthlyBudget);
+            });
 
             lucide.createIcons();
         };
@@ -1537,10 +1552,10 @@
                         <!-- Footer fijo con botones -->
                         <div class="border-t dark:border-gray-700 p-6 bg-slate-50 dark:bg-gray-800/50 flex-shrink-0">
                             <div class="flex gap-3">
-                                <button type="button" class="js-close-modal flex-1 px-4 py-3 text-sm font-medium border border-slate-300 dark:border-gray-600 rounded-md hover:bg-slate-100 dark:hover:bg-gray-700 transition-colors">
+                                <button type="button" class="js-close-modal flex-1 px-4 py-2 text-sm font-medium border border-slate-300 dark:border-gray-600 rounded-md hover:bg-slate-100 dark:hover:bg-gray-700 transition-colors">
                                     Cancelar
                                 </button>
-                                <button type="submit" form="transaction-form-dynamic" class="flex-1 px-4 py-3 text-sm font-medium bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">
+                                <button type="submit" form="transaction-form-dynamic" class="flex-1 px-4 py-2 text-sm font-medium bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">
                                     <i data-lucide="save" class="w-4 h-4 inline mr-2"></i>
                                     ${id ? 'Guardar Cambios' : 'Agregar Transacción'}
                                 </button>
@@ -2112,7 +2127,7 @@
 
         const showEditCategoryForm = (type, category, subcategory = null, subsubcategory = null) => {
             const currentName = subsubcategory || subcategory || category;
-            const level = subsubcategory ? 'item' : subcategory ? 'subcategoría' : 'categoría';
+            const level = subsubcategory ? 'item' : subcategoria ? 'subcategoría' : 'categoría';
 
             const formHtml = `
                 <div class="fixed inset-0 z-60 flex items-center justify-center bg-black bg-opacity-50">
@@ -2233,7 +2248,7 @@
 
         const confirmDeleteCategory = async (type, category, subcategory = null, subsubcategory = null) => {
             const itemName = subsubcategory || subcategory || category;
-            const level = subsubcategory ? 'item' : subcategory ? 'subcategoría' : 'categoría';
+            const level = subsubcategory ? 'item' : subcategoria ? 'subcategoría' : 'categoría';
 
             // Verificar si está en uso
             const inUse = isCategoryInUse(type, category, subcategory, subsubcategory);
@@ -2299,22 +2314,6 @@
                     showErrorMessage('Error al restaurar las categorías');
                 }
             }
-        };
-
-        const showSuccessMessage = (message) => {
-            const toast = document.createElement('div');
-            toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-70';
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        };
-
-        const showErrorMessage = (message) => {
-            const toast = document.createElement('div');
-            toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-md shadow-lg z-70';
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 5000);
         };
 
         // ===== FORMULARIO DE PASIVOS =====
@@ -2412,10 +2411,10 @@
 
                     <div class="p-6 border-t dark:border-gray-700 bg-slate-50 dark:bg-gray-800/50">
                         <div class="flex gap-3">
-                            <button type="button" class="js-close-modal flex-1 px-4 py-2 text-sm font-medium border border-slate-300 dark:border-gray-600 rounded-md hover:bg-slate-100 dark:hover:bg-gray-700">
+                            <button type="button" class="js-close-modal flex-1 px-4 py-2 text-sm font-medium border border-slate-300 dark:border-gray-600 rounded-md hover:bg-slate-100 dark:hover:bg-gray-700 transition-colors">
                                 Cancelar
                             </button>
-                            <button type="submit" form="liability-form" class="flex-1 px-4 py-2 text-sm font-medium bg-red-600 text-white rounded-md hover:bg-red-700">
+                            <button type="submit" form="liability-form" class="flex-1 px-4 py-2 text-sm font-medium bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
                                 ${id ? 'Guardar Cambios' : 'Agregar Pasivo'}
                             </button>
                         </div>
@@ -2554,6 +2553,11 @@
                             <div class="flex-1">
                                 <h5 class="font-semibold">${asset.name}</h5>
                                 <p class="text-sm text-slate-500 dark:text-slate-400">${asset.category} › ${asset.subcategory || 'General'}</p>
+                                <div class="flex gap-4 mt-2 text-xs text-slate-400 dark:text-slate-500">
+                                    ${asset.monthlyPayment > 0 ? `<span>Cuota: ${formatCurrency(asset.monthlyPayment)}</span>` : ''}
+                                    ${asset.monthsRemaining > 0 ? `<span>Faltan: ${asset.monthsRemaining} meses</span>` : ''}
+                                    ${asset.interestRate ? `<span>Tasa: ${asset.interestRate}%</span>` : ''}
+                                </div>
                                 <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">${asset.description || 'Sin descripción'}</p>
                             </div>
                             <div class="text-right">
@@ -2800,10 +2804,6 @@
 
             if (liabilities.length === 0) {
                 liabilitiesList.innerHTML = `
-                    <div class="text-center py-8 text-slate-500 dark:text-slate-400">
-                        <i data-lucide="credit-card" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
-                        <p>No tienes pasivos registrados todavía.</p>
-                        <p class="text-sm">Agrega tus deudas y obligaciones para tener un control completo de tu patrimonio.</p>
                     </div>
                 `;
                 return;
@@ -3133,8 +3133,7 @@ Instrucciones:
         const showMemoryStats = () => {
             if (!aiMemorySystem) return;
 
-            const stats = aiMemorySystem.getMemoryStats();
-            const statsMessage = `
+            const stats = aiMemorySystem.getMemoryStat            const statsMessage = `
 ## 🧠 Estadísticas de Memoria IA
 
 **Conversaciones recordadas:** ${stats.conversationsCount}
