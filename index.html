@@ -279,11 +279,12 @@
         
         <section class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold">Historial de Transacciones</h2>
-            <div class="flex gap-2">
+            <div class="flex gap-2 flex-wrap">
                 <button id="tips-btn" class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg shadow-md hover:bg-teal-700 transition-colors"><i data-lucide="lightbulb" class="w-4 h-4"></i> Tips IA</button>
                 <button id="ai-assistant-btn" class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg shadow-md hover:bg-purple-700 transition-colors"><i data-lucide="brain-circuit" class="w-4 h-4"></i> FinGenius 🧠</button>
                 <button id="proactive-insights-btn" class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg shadow-md hover:from-purple-700 hover:to-pink-700 transition-colors relative"><i data-lucide="zap" class="w-4 h-4"></i> Insights <span id="insights-badge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span></button>
                 <button id="predictive-dashboard-btn" class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg shadow-md hover:from-blue-700 hover:to-indigo-700 transition-colors"><i data-lucide="trending-up" class="w-4 h-4"></i> Dashboard Predictivo</button>
+                <button id="backup-management-btn" class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg shadow-md hover:from-green-700 hover:to-emerald-700 transition-colors"><i data-lucide="shield-check" class="w-4 h-4"></i> Backups</button>
             </div>
         </section>
         <div id="transaction-list" class="space-y-3"><p class="text-center text-slate-500 dark:text-slate-400 py-4">No hay transacciones todavía.</p></div>
@@ -319,6 +320,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="predictive-analytics-engine.js"></script>
     <script src="predictive-dashboard.js"></script>
+
+    <!-- 💾 Sistema de Backups Automáticos -->
+    <script src="automatic-backup-system.js"></script>
+    <script src="multi-export-system.js"></script>
+    <script src="backup-management-ui.js"></script>
 
     <!-- 📊 Dashboard Predictivo - Desafío 2 -->
     <script src="predictive-analytics.js"></script>
@@ -494,6 +500,12 @@
         // 📊 Dashboard Predictivo - Desafío 2
         let predictiveAnalyticsEngine = null;
         let predictiveDashboard = null;
+
+        // 💾 Sistema de Backups Automáticos
+        let automaticBackupSystem = null;
+        let multiExportSystem = null;
+        let backupRestoreSystem = null;
+        let backupManagementUI = null;
 
         // Sistema de categorías con subcategorías de dos niveles
         const categoryStructure = {
@@ -747,6 +759,7 @@
         const proactiveInsightsBtn = document.getElementById('proactive-insights-btn');
         const insightsBadge = document.getElementById('insights-badge');
         const predictiveDashboardBtn = document.getElementById('predictive-dashboard-btn');
+        const backupManagementBtn = document.getElementById('backup-management-btn');
         const forgotPasswordBtn = document.getElementById('forgot-password-btn');
         const manageCategoriesBtn = document.getElementById('manage-categories-btn');
         const categoriesModalEl = document.getElementById('categories-modal');
@@ -932,7 +945,22 @@
                     console.log('📊 Dashboard predictivo integrado con', dashboardInsights.length, 'insights adicionales');
                 }
 
+                // 💾 Inicializar Sistema de Backups Automáticos
+                automaticBackupSystem = new AutomaticBackupSystem();
+                await automaticBackupSystem.initialize();
+
+                multiExportSystem = new MultiExportSystem();
+                backupRestoreSystem = new BackupRestoreSystem();
+                backupManagementUI = new BackupManagementUI();
+
+                await backupManagementUI.initialize(
+                    automaticBackupSystem,
+                    multiExportSystem,
+                    backupRestoreSystem
+                );
+
                 console.log('✅ Sistema de IA Avanzado inicializado correctamente');
+                console.log('💾 Sistema de Backups Automáticos inicializado correctamente');
                 console.log(`📊 Estadísticas de memoria:`, aiMemorySystem.getMemoryStats());
 
                 // Mostrar insights proactivos si los hay
@@ -3151,6 +3179,44 @@ ${aiMemorySystem.userProfile.behaviorInsights.slice(0, 3).map(insight => `- ${in
             }
         };
 
+        // 💾 Abrir Gestión de Backups
+        const openBackupManagement = async () => {
+            try {
+                // Inicializar sistemas de backup si no existen
+                if (!automaticBackupSystem) {
+                    automaticBackupSystem = new AutomaticBackupSystem();
+                    await automaticBackupSystem.initialize();
+                }
+
+                if (!multiExportSystem) {
+                    multiExportSystem = new MultiExportSystem();
+                }
+
+                if (!backupRestoreSystem) {
+                    backupRestoreSystem = new BackupRestoreSystem();
+                }
+
+                if (!backupManagementUI) {
+                    backupManagementUI = new BackupManagementUI();
+                    await backupManagementUI.initialize(
+                        automaticBackupSystem,
+                        multiExportSystem,
+                        backupRestoreSystem
+                    );
+                }
+
+                // Mostrar panel de gestión
+                await backupManagementUI.showBackupPanel();
+
+                console.log('💾 Panel de gestión de backups abierto');
+
+            } catch (error) {
+                console.error('❌ Error abriendo gestión de backups:', error);
+                addAiMessage("❌ **Error**\n\nHubo un problema al abrir la gestión de backups. Por favor, inténtalo de nuevo.\n\n**Error**: " + error.message);
+                openAiChatModal();
+            }
+        };
+
         const openTipsModal = async () => {
             tipsModalEl.innerHTML = `<div class="bg-white dark:bg-gray-800 w-full max-w-2xl m-4 p-6 rounded-2xl shadow-xl"><div class="text-center py-8"><i data-lucide="loader-2" class="w-12 h-12 mx-auto animate-spin text-teal-500"></i><p class="mt-4">Buscando consejos personalizados...</p></div></div>`;
             openModal(tipsModalEl);
@@ -3313,6 +3379,7 @@ ${transactionData}`;
             tipsBtn.addEventListener('click', openTipsModal);
             proactiveInsightsBtn.addEventListener('click', openProactiveInsightsModal);
             predictiveDashboardBtn.addEventListener('click', openPredictiveDashboard);
+            backupManagementBtn.addEventListener('click', openBackupManagement);
             manageCategoriesBtn.addEventListener('click', openCategoriesModal);
             manageAssetsBtn.addEventListener('click', openAssetsModal);
             manageLiabilitiesBtn.addEventListener('click', openLiabilitiesModal);
