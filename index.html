@@ -281,6 +281,82 @@
             return diagnostico;
         };
 
+        window.probarBotonTesting = function() {
+            console.log('🧪 Probando botón Testing manualmente...');
+
+            const boton = document.getElementById('testing-panel-btn');
+            if (!boton) {
+                console.error('❌ Botón testing-panel-btn no encontrado');
+                return false;
+            }
+
+            console.log('✅ Botón encontrado:', boton);
+            console.log('✅ Botón visible:', boton.offsetParent !== null);
+            console.log('✅ Botón habilitado:', !boton.disabled);
+
+            // Simular click
+            try {
+                console.log('🖱️ Simulando click en el botón...');
+                boton.click();
+                return true;
+            } catch (error) {
+                console.error('❌ Error al hacer click:', error);
+                return false;
+            }
+        };
+
+        window.forzarInicializacionTesting = function() {
+            console.log('🔧 Forzando inicialización del sistema de testing...');
+
+            try {
+                // Verificar que las clases estén disponibles
+                if (typeof TestingFramework === 'undefined') {
+                    console.error('❌ TestingFramework no disponible');
+                    return false;
+                }
+
+                if (typeof TestRunner === 'undefined') {
+                    console.error('❌ TestRunner no disponible');
+                    return false;
+                }
+
+                if (typeof TestingUI === 'undefined') {
+                    console.error('❌ TestingUI no disponible');
+                    return false;
+                }
+
+                // Forzar inicialización
+                testingFramework = window.appTests;
+
+                if (testingFramework) {
+                    testRunner = new TestRunner();
+                    testRunner.initialize(testingFramework);
+
+                    testingUI = new TestingUI();
+                    testingUI.initialize(testRunner);
+
+                    // Configurar event listener del botón
+                    const testingPanelBtn = document.getElementById('testing-panel-btn');
+                    if (testingPanelBtn) {
+                        // Remover event listeners existentes
+                        testingPanelBtn.removeEventListener('click', openTestingPanel);
+                        // Agregar nuevo event listener
+                        testingPanelBtn.addEventListener('click', openTestingPanel);
+                        console.log('✅ Event listener reconfigurado');
+                    }
+
+                    console.log('✅ Sistema de testing forzado exitosamente');
+                    return true;
+                } else {
+                    console.error('❌ window.appTests no disponible');
+                    return false;
+                }
+            } catch (error) {
+                console.error('❌ Error forzando inicialización:', error);
+                return false;
+            }
+        };
+
 
 
 
@@ -3559,11 +3635,20 @@ ${aiMemorySystem.userProfile.behaviorInsights.slice(0, 3).map(insight => `- ${in
         // 🧪 Abrir Panel de Testing
         const openTestingPanel = async () => {
             console.log('🧪 Abriendo Panel de Testing...');
+            console.log('🔍 Estado actual del sistema:');
+            console.log('  - testingFramework:', !!testingFramework);
+            console.log('  - testRunner:', !!testRunner);
+            console.log('  - testingUI:', !!testingUI);
+            console.log('  - window.appTests:', !!window.appTests);
+
             try {
                 // Verificar que el sistema de testing esté inicializado
                 if (!testingUI) {
+                    console.error('❌ testingUI no está inicializado');
                     throw new Error('Sistema de testing no inicializado. Recarga la página e inténtalo de nuevo.');
                 }
+
+                console.log('✅ testingUI disponible, llamando showTestingPanel()...');
 
                 // Mostrar panel de testing
                 testingUI.showTestingPanel();
@@ -3572,18 +3657,25 @@ ${aiMemorySystem.userProfile.behaviorInsights.slice(0, 3).map(insight => `- ${in
 
             } catch (error) {
                 console.error('❌ Error abriendo panel de testing:', error);
+                console.error('❌ Stack trace:', error.stack);
 
                 let errorMessage = "❌ **Error del Sistema de Testing**\n\n";
                 errorMessage += "Hubo un problema al abrir el panel de testing.\n\n";
                 errorMessage += "**Detalles del error**: " + error.message + "\n\n";
+                errorMessage += "**Estado del sistema**:\n";
+                errorMessage += `• testingFramework: ${!!testingFramework}\n`;
+                errorMessage += `• testRunner: ${!!testRunner}\n`;
+                errorMessage += `• testingUI: ${!!testingUI}\n`;
+                errorMessage += `• window.appTests: ${!!window.appTests}\n\n`;
                 errorMessage += "**Posibles soluciones**:\n";
                 errorMessage += "• Recarga la página e inténtalo de nuevo\n";
                 errorMessage += "• Verifica tu conexión a internet\n";
-                errorMessage += "• Asegúrate de que todos los scripts se hayan cargado\n\n";
+                errorMessage += "• Asegúrate de que todos los scripts se hayan cargado\n";
+                errorMessage += "• Ejecuta `diagnosticarTesting()` en la consola para más detalles\n\n";
                 errorMessage += "Si el problema persiste, contacta al soporte técnico.";
 
-                addAiMessage(errorMessage);
-                openAiChatModal();
+                // Mostrar error en consola también
+                alert('Error del Sistema de Testing: ' + error.message + '\n\nRevisa la consola para más detalles.');
             }
         };
 
@@ -3778,12 +3870,7 @@ ${transactionData}`;
                 console.error('❌ backupManagementBtn no encontrado');
             }
 
-            if (testingPanelBtn) {
-                testingPanelBtn.addEventListener('click', openTestingPanel);
-                console.log('✅ Event listener agregado para Panel de Testing');
-            } else {
-                console.error('❌ testingPanelBtn no encontrado');
-            }
+            // Event listener para Testing se configura en la inicialización del sistema de testing
 
             manageCategoriesBtn.addEventListener('click', openCategoriesModal);
             manageAssetsBtn.addEventListener('click', openAssetsModal);
@@ -3832,6 +3919,15 @@ ${transactionData}`;
 
                         testingUI = new TestingUI();
                         testingUI.initialize(testRunner);
+
+                        // Configurar event listener del botón Testing
+                        const testingPanelBtn = document.getElementById('testing-panel-btn');
+                        if (testingPanelBtn) {
+                            testingPanelBtn.addEventListener('click', openTestingPanel);
+                            console.log('✅ Event listener agregado para Panel de Testing');
+                        } else {
+                            console.error('❌ testingPanelBtn no encontrado');
+                        }
 
                         console.log('✅ Sistema de testing inicializado correctamente');
                     } else {
