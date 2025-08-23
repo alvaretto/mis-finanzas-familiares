@@ -283,6 +283,7 @@
                 <button id="tips-btn" class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg shadow-md hover:bg-teal-700 transition-colors"><i data-lucide="lightbulb" class="w-4 h-4"></i> Tips IA</button>
                 <button id="ai-assistant-btn" class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg shadow-md hover:bg-purple-700 transition-colors"><i data-lucide="brain-circuit" class="w-4 h-4"></i> FinGenius 🧠</button>
                 <button id="proactive-insights-btn" class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg shadow-md hover:from-purple-700 hover:to-pink-700 transition-colors relative"><i data-lucide="zap" class="w-4 h-4"></i> Insights <span id="insights-badge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span></button>
+                <button id="predictive-dashboard-btn" class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg shadow-md hover:from-blue-700 hover:to-indigo-700 transition-colors"><i data-lucide="trending-up" class="w-4 h-4"></i> Dashboard Predictivo</button>
             </div>
         </section>
         <div id="transaction-list" class="space-y-3"><p class="text-center text-slate-500 dark:text-slate-400 py-4">No hay transacciones todavía.</p></div>
@@ -313,6 +314,11 @@
     <!-- 🧠 Sistema de IA Avanzado - Desafío 1 -->
     <script src="ai-memory-system.js"></script>
     <script src="ai-learning-engine.js"></script>
+
+    <!-- 📊 Dashboard Predictivo - Desafío 2 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="predictive-analytics-engine.js"></script>
+    <script src="predictive-dashboard.js"></script>
 
     <!-- 📊 Dashboard Predictivo - Desafío 2 -->
     <script src="predictive-analytics.js"></script>
@@ -484,6 +490,10 @@
         let aiMemorySystem = null;
         let aiLearningEngine = null;
         let proactiveInsights = [];
+
+        // 📊 Dashboard Predictivo - Desafío 2
+        let predictiveAnalyticsEngine = null;
+        let predictiveDashboard = null;
 
         // Sistema de categorías con subcategorías de dos niveles
         const categoryStructure = {
@@ -736,9 +746,9 @@
         const tipsBtn = document.getElementById('tips-btn');
         const proactiveInsightsBtn = document.getElementById('proactive-insights-btn');
         const insightsBadge = document.getElementById('insights-badge');
+        const predictiveDashboardBtn = document.getElementById('predictive-dashboard-btn');
         const forgotPasswordBtn = document.getElementById('forgot-password-btn');
         const manageCategoriesBtn = document.getElementById('manage-categories-btn');
-        const predictiveDashboardBtn = document.getElementById('predictive-dashboard-btn');
         const categoriesModalEl = document.getElementById('categories-modal');
         const manageAssetsBtn = document.getElementById('manage-assets-btn');
         const manageLiabilitiesBtn = document.getElementById('manage-liabilities-btn');
@@ -907,6 +917,19 @@
                 // Generar nuevos insights si es necesario
                 if (proactiveInsights.length === 0) {
                     proactiveInsights = await aiLearningEngine.generateProactiveAdvice();
+                }
+
+                // 📊 Inicializar Dashboard Predictivo
+                predictiveAnalyticsEngine = new PredictiveAnalyticsEngine();
+                predictiveDashboard = new PredictiveDashboard();
+
+                // Integrar insights del dashboard predictivo
+                const transactions = getTransactions();
+                if (transactions.length > 0) {
+                    await predictiveAnalyticsEngine.initialize(transactions);
+                    const dashboardInsights = predictiveAnalyticsEngine.generateInsightsForDashboard();
+                    proactiveInsights.push(...dashboardInsights);
+                    console.log('📊 Dashboard predictivo integrado con', dashboardInsights.length, 'insights adicionales');
                 }
 
                 console.log('✅ Sistema de IA Avanzado inicializado correctamente');
@@ -2647,10 +2670,70 @@
                     await transactionsCollection.add({ ...formData, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
                     showSuccessMessage('Transacción agregada exitosamente');
                 }
+
+                // 🧠 Análisis inteligente después de agregar/actualizar transacción
+                setTimeout(async () => {
+                    await generateInsightsAfterTransaction(formData);
+                }, 1000);
+
                 closeModal(transactionModalEl);
             } catch (error) {
                 console.error("Error saving transaction:", error);
                 showErrorMessage('Error al guardar la transacción');
+            }
+        };
+
+        // 🧠 Generar insights inteligentes después de transacción
+        const generateInsightsAfterTransaction = async (transaction) => {
+            try {
+                console.log('🧠 Analizando transacción para generar insights...');
+
+                // Analizar con IA Learning Engine si está disponible
+                if (aiLearningEngine) {
+                    const aiInsights = await aiLearningEngine.analyzeTransaction(transaction);
+                    if (aiInsights.length > 0) {
+                        proactiveInsights.push(...aiInsights);
+                        console.log('🧠 Agregados', aiInsights.length, 'insights de IA');
+                    }
+                }
+
+                // 📊 Actualizar análisis predictivo
+                if (predictiveAnalyticsEngine) {
+                    const allTransactions = getTransactions();
+                    if (allTransactions.length > 0) {
+                        await predictiveAnalyticsEngine.initialize(allTransactions);
+
+                        // Generar insights del dashboard predictivo
+                        const dashboardInsights = predictiveAnalyticsEngine.generateInsightsForDashboard();
+
+                        // Filtrar insights duplicados
+                        const newInsights = dashboardInsights.filter(di =>
+                            !proactiveInsights.some(pi => pi.message === di.message)
+                        );
+
+                        if (newInsights.length > 0) {
+                            proactiveInsights.push(...newInsights);
+                            console.log('📊 Agregados', newInsights.length, 'insights predictivos');
+                        }
+                    }
+                }
+
+                // Actualizar badge y mostrar notificaciones si hay insights importantes
+                if (proactiveInsights.length > 0) {
+                    updateInsightsBadge(proactiveInsights.length);
+
+                    // Mostrar insights de alta prioridad inmediatamente
+                    const highPriorityInsights = proactiveInsights.filter(i => i.priority === 'high');
+                    if (highPriorityInsights.length > 0) {
+                        setTimeout(() => {
+                            showProactiveInsights();
+                        }, 2000);
+                    }
+                }
+
+                console.log('✅ Análisis de transacción completado');
+            } catch (error) {
+                console.error('❌ Error generando insights después de transacción:', error);
             }
         };
 
@@ -3031,6 +3114,43 @@ ${aiMemorySystem.userProfile.behaviorInsights.slice(0, 3).map(insight => `- ${in
             }
         };
 
+        // 📊 Abrir Dashboard Predictivo
+        const openPredictiveDashboard = async () => {
+            try {
+                // Inicializar motor de análisis si no existe
+                if (!predictiveAnalyticsEngine) {
+                    predictiveAnalyticsEngine = new PredictiveAnalyticsEngine();
+                }
+
+                // Inicializar dashboard si no existe
+                if (!predictiveDashboard) {
+                    predictiveDashboard = new PredictiveDashboard();
+                }
+
+                // Obtener transacciones actuales
+                const transactions = getTransactions();
+
+                if (transactions.length === 0) {
+                    addAiMessage("📊 **Dashboard Predictivo**\n\nPara generar predicciones precisas, necesitas tener al menos algunas transacciones registradas.\n\n💡 **Sugerencia**: Agrega algunas transacciones de ejemplo y luego vuelve a abrir el dashboard.");
+                    openAiChatModal();
+                    return;
+                }
+
+                // Inicializar sistemas
+                await predictiveDashboard.initialize(predictiveAnalyticsEngine, transactions);
+
+                // Mostrar dashboard
+                await predictiveDashboard.showDashboard();
+
+                console.log('📊 Dashboard Predictivo abierto con', transactions.length, 'transacciones');
+
+            } catch (error) {
+                console.error('❌ Error abriendo Dashboard Predictivo:', error);
+                addAiMessage("❌ **Error**\n\nHubo un problema al abrir el Dashboard Predictivo. Por favor, inténtalo de nuevo.");
+                openAiChatModal();
+            }
+        };
+
         const openTipsModal = async () => {
             tipsModalEl.innerHTML = `<div class="bg-white dark:bg-gray-800 w-full max-w-2xl m-4 p-6 rounded-2xl shadow-xl"><div class="text-center py-8"><i data-lucide="loader-2" class="w-12 h-12 mx-auto animate-spin text-teal-500"></i><p class="mt-4">Buscando consejos personalizados...</p></div></div>`;
             openModal(tipsModalEl);
@@ -3192,6 +3312,7 @@ ${transactionData}`;
             aiAssistantBtn.addEventListener('click', openAiChatModal);
             tipsBtn.addEventListener('click', openTipsModal);
             proactiveInsightsBtn.addEventListener('click', openProactiveInsightsModal);
+            predictiveDashboardBtn.addEventListener('click', openPredictiveDashboard);
             manageCategoriesBtn.addEventListener('click', openCategoriesModal);
             manageAssetsBtn.addEventListener('click', openAssetsModal);
             manageLiabilitiesBtn.addEventListener('click', openLiabilitiesModal);
