@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Finanzas Familiares</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- 🔐 Sistema de Configuración Simplificado -->
     <script>
@@ -369,10 +368,6 @@
     <script src="automatic-backup-system.js"></script>
     <script src="multi-export-system.js"></script>
     <script src="backup-management-ui.js"></script>
-
-    <!-- 📊 Dashboard Predictivo - Desafío 2 -->
-    <script src="predictive-analytics.js"></script>
-    <script src="dashboard-predictivo.js"></script>
 
     <script>
         // 🚀 MEGA RADICAL: Usar Firebase v9 compat para máxima compatibilidad
@@ -928,11 +923,6 @@
 
             // 🧠 Inicializar Sistema de IA Avanzado
             await initializeAdvancedAI(user.uid);
-
-            // Event Listeners
-            predictiveDashboardBtn.addEventListener('click', () => {
-                PredictiveDashboard.open(transactions, monthlyBudget);
-            });
 
             lucide.createIcons();
         };
@@ -3200,9 +3190,20 @@ ${aiMemorySystem.userProfile.behaviorInsights.slice(0, 3).map(insight => `- ${in
 
         // 📊 Abrir Dashboard Predictivo
         const openPredictiveDashboard = async () => {
+            console.log('📊 Abriendo Dashboard Predictivo...');
             try {
+                // Verificar que las clases estén disponibles
+                if (typeof PredictiveAnalyticsEngine === 'undefined') {
+                    throw new Error('PredictiveAnalyticsEngine no está disponible');
+                }
+
+                if (typeof PredictiveDashboard === 'undefined') {
+                    throw new Error('PredictiveDashboard no está disponible');
+                }
+
                 // Inicializar motor de análisis si no existe
                 if (!predictiveAnalyticsEngine) {
+                    console.log('🔧 Inicializando PredictiveAnalyticsEngine...');
                     predictiveAnalyticsEngine = new PredictiveAnalyticsEngine();
                 }
 
@@ -3237,7 +3238,21 @@ ${aiMemorySystem.userProfile.behaviorInsights.slice(0, 3).map(insight => `- ${in
 
         // 💾 Abrir Gestión de Backups
         const openBackupManagement = async () => {
+            console.log('💾 Abriendo Gestión de Backups...');
             try {
+                // Verificar que las clases estén disponibles
+                if (typeof AutomaticBackupSystem === 'undefined') {
+                    throw new Error('AutomaticBackupSystem no está disponible - verifica que automatic-backup-system.js se haya cargado');
+                }
+
+                if (typeof MultiExportSystem === 'undefined') {
+                    throw new Error('MultiExportSystem no está disponible - verifica que multi-export-system.js se haya cargado');
+                }
+
+                if (typeof BackupManagementUI === 'undefined') {
+                    throw new Error('BackupManagementUI no está disponible - verifica que backup-management-ui.js se haya cargado');
+                }
+
                 // Verificar autenticación
                 if (!firebase.auth().currentUser) {
                     addAiMessage("❌ **Error de Autenticación**\n\nDebes estar autenticado para acceder al sistema de backups.\n\nPor favor, inicia sesión primero.");
@@ -3459,17 +3474,40 @@ ${transactionData}`;
         };
 
         const initAppEventListeners = () => {
+            console.log('🔧 Inicializando event listeners...');
+
+            // Verificar que los elementos existan
+            console.log('🔍 Verificando elementos del DOM:');
+            console.log('predictiveDashboardBtn:', predictiveDashboardBtn);
+            console.log('backupManagementBtn:', backupManagementBtn);
+
             addTransactionBtn.addEventListener('click', () => openTransactionModal());
             transactionListEl.addEventListener('click', handleTransactionListClick);
             editBudgetBtn.addEventListener('click', openBudgetModal);
             aiAssistantBtn.addEventListener('click', openAiChatModal);
             tipsBtn.addEventListener('click', openTipsModal);
             proactiveInsightsBtn.addEventListener('click', openProactiveInsightsModal);
-            predictiveDashboardBtn.addEventListener('click', openPredictiveDashboard);
-            backupManagementBtn.addEventListener('click', openBackupManagement);
+
+            // Event listeners con verificación
+            if (predictiveDashboardBtn) {
+                predictiveDashboardBtn.addEventListener('click', openPredictiveDashboard);
+                console.log('✅ Event listener agregado para Dashboard Predictivo');
+            } else {
+                console.error('❌ predictiveDashboardBtn no encontrado');
+            }
+
+            if (backupManagementBtn) {
+                backupManagementBtn.addEventListener('click', openBackupManagement);
+                console.log('✅ Event listener agregado para Gestión de Backups');
+            } else {
+                console.error('❌ backupManagementBtn no encontrado');
+            }
+
             manageCategoriesBtn.addEventListener('click', openCategoriesModal);
             manageAssetsBtn.addEventListener('click', openAssetsModal);
             manageLiabilitiesBtn.addEventListener('click', openLiabilitiesModal);
+
+            console.log('✅ Event listeners inicializados');
         };
 
         const initAuth = () => {
