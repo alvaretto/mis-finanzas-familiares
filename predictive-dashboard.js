@@ -14,19 +14,32 @@ class PredictiveDashboard {
     // 🚀 Inicializar dashboard con motor de análisis
     async initialize(analyticsEngine, transactions = []) {
         try {
+            console.log('🔧 Inicializando Dashboard Predictivo...');
+            console.log('📊 Motor de análisis recibido:', !!analyticsEngine);
+            console.log('📋 Transacciones recibidas:', transactions.length);
+
+            if (!analyticsEngine) {
+                throw new Error('Motor de análisis no proporcionado');
+            }
+
             this.analyticsEngine = analyticsEngine;
             this.currentData = transactions;
-            
+
             // Asegurar que el motor esté inicializado
+            console.log('🔧 Verificando inicialización del motor...');
             if (!analyticsEngine.initialized) {
+                console.log('🔧 Inicializando motor de análisis...');
                 await analyticsEngine.initialize(transactions);
+                console.log('✅ Motor de análisis inicializado');
+            } else {
+                console.log('✅ Motor de análisis ya estaba inicializado');
             }
-            
+
             console.log('✅ Dashboard Predictivo listo con', transactions.length, 'transacciones');
             return true;
         } catch (error) {
             console.error('❌ Error inicializando dashboard:', error);
-            return false;
+            throw error;
         }
     }
 
@@ -171,28 +184,46 @@ class PredictiveDashboard {
 
     // 📊 Mostrar dashboard
     async showDashboard() {
-        if (!this.analyticsEngine || !this.analyticsEngine.initialized) {
-            console.error('❌ Motor de análisis no inicializado');
-            return;
+        try {
+            console.log('📊 Verificando motor de análisis...');
+            if (!this.analyticsEngine || !this.analyticsEngine.initialized) {
+                console.error('❌ Motor de análisis no inicializado');
+                throw new Error('Motor de análisis no inicializado');
+            }
+
+            // Verificar que Chart.js esté disponible
+            if (typeof Chart === 'undefined') {
+                console.error('❌ Chart.js no está disponible');
+                throw new Error('Chart.js no está disponible - verifica que se haya cargado correctamente');
+            }
+
+            console.log('📊 Creando modal del dashboard...');
+            // Crear y mostrar modal
+            const modal = this.createDashboardModal();
+            document.body.appendChild(modal);
+
+            console.log('📊 Inicializando iconos...');
+            // Inicializar iconos
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+
+            console.log('📊 Configurando event listeners...');
+            // Configurar event listeners
+            this.setupEventListeners(modal);
+
+            console.log('📊 Cargando datos del dashboard...');
+            // Cargar datos y crear gráficos
+            await this.loadDashboardData();
+
+            console.log('📊 Creando gráficos...');
+            await this.createCharts();
+
+            console.log('✅ Dashboard mostrado correctamente');
+        } catch (error) {
+            console.error('❌ Error mostrando dashboard:', error);
+            throw error;
         }
-
-        // Crear y mostrar modal
-        const modal = this.createDashboardModal();
-        document.body.appendChild(modal);
-        
-        // Inicializar iconos
-        if (typeof lucide !== 'undefined') {
-            lucide.createIcons();
-        }
-
-        // Configurar event listeners
-        this.setupEventListeners(modal);
-
-        // Cargar datos y crear gráficos
-        await this.loadDashboardData();
-        await this.createCharts();
-        
-        console.log('📊 Dashboard mostrado correctamente');
     }
 
     // 🎯 Configurar event listeners

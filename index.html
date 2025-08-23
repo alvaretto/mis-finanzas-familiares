@@ -108,6 +108,68 @@
             }
         };
 
+        // 📊 Función de diagnóstico para Dashboard Predictivo
+        window.diagnosticarDashboard = async function() {
+            console.log('📊 Ejecutando diagnóstico del Dashboard Predictivo...');
+
+            const diagnostics = {
+                timestamp: new Date().toISOString(),
+                system: {
+                    chartJsAvailable: typeof Chart !== 'undefined',
+                    predictiveAnalyticsEngineAvailable: typeof PredictiveAnalyticsEngine !== 'undefined',
+                    predictiveDashboardAvailable: typeof PredictiveDashboard !== 'undefined',
+                    userAuthenticated: firebase.auth()?.currentUser ? true : false,
+                    transactionsCount: getTransactions ? getTransactions().length : 0
+                },
+                instances: {
+                    predictiveAnalyticsEngine: !!predictiveAnalyticsEngine,
+                    predictiveDashboard: !!predictiveDashboard,
+                    engineInitialized: predictiveAnalyticsEngine?.initialized || false
+                }
+            };
+
+            console.log('📊 Diagnóstico del Dashboard Predictivo:', diagnostics);
+            return diagnostics;
+        };
+
+        // 🧪 Función de prueba para Dashboard Predictivo
+        window.probarDashboard = async function() {
+            console.log('🧪 Ejecutando prueba del Dashboard Predictivo...');
+
+            try {
+                const diagnostics = await diagnosticarDashboard();
+
+                if (!diagnostics.system.chartJsAvailable) {
+                    console.error('❌ Chart.js no disponible');
+                    return false;
+                }
+
+                if (!diagnostics.system.predictiveAnalyticsEngineAvailable) {
+                    console.error('❌ PredictiveAnalyticsEngine no disponible');
+                    return false;
+                }
+
+                if (!diagnostics.system.predictiveDashboardAvailable) {
+                    console.error('❌ PredictiveDashboard no disponible');
+                    return false;
+                }
+
+                if (diagnostics.system.transactionsCount === 0) {
+                    console.warn('⚠️ No hay transacciones para analizar');
+                    return false;
+                }
+
+                // Intentar abrir el dashboard
+                await openPredictiveDashboard();
+                console.log('✅ Dashboard Predictivo funcionando correctamente');
+                return true;
+
+            } catch (error) {
+                console.error('❌ Error en prueba del dashboard:', error);
+                return false;
+            }
+        };
+
 
 
 
@@ -3199,11 +3261,24 @@ ${aiMemorySystem.userProfile.behaviorInsights.slice(0, 3).map(insight => `- ${in
             try {
                 // Verificar que las clases estén disponibles
                 if (typeof PredictiveAnalyticsEngine === 'undefined') {
-                    throw new Error('PredictiveAnalyticsEngine no está disponible');
+                    console.error('❌ PredictiveAnalyticsEngine no está disponible');
+                    addAiMessage("❌ **Error de Sistema**\n\nEl motor de análisis predictivo no se ha cargado correctamente.\n\n**Solución**: Recarga la página e inténtalo de nuevo.");
+                    openAiChatModal();
+                    return;
                 }
 
                 if (typeof PredictiveDashboard === 'undefined') {
-                    throw new Error('PredictiveDashboard no está disponible');
+                    console.error('❌ PredictiveDashboard no está disponible');
+                    addAiMessage("❌ **Error de Sistema**\n\nEl dashboard predictivo no se ha cargado correctamente.\n\n**Solución**: Recarga la página e inténtalo de nuevo.");
+                    openAiChatModal();
+                    return;
+                }
+
+                // Verificar autenticación
+                if (!firebase.auth().currentUser) {
+                    addAiMessage("❌ **Error de Autenticación**\n\nDebes estar autenticado para acceder al Dashboard Predictivo.\n\nPor favor, inicia sesión primero.");
+                    openAiChatModal();
+                    return;
                 }
 
                 // Inicializar motor de análisis si no existe
@@ -3214,29 +3289,49 @@ ${aiMemorySystem.userProfile.behaviorInsights.slice(0, 3).map(insight => `- ${in
 
                 // Inicializar dashboard si no existe
                 if (!predictiveDashboard) {
+                    console.log('🔧 Inicializando PredictiveDashboard...');
                     predictiveDashboard = new PredictiveDashboard();
                 }
 
                 // Obtener transacciones actuales
+                console.log('📋 Obteniendo transacciones...');
                 const transactions = getTransactions();
+                console.log('📋 Transacciones obtenidas:', transactions.length);
 
                 if (transactions.length === 0) {
+                    console.log('⚠️ No hay transacciones disponibles');
                     addAiMessage("📊 **Dashboard Predictivo**\n\nPara generar predicciones precisas, necesitas tener al menos algunas transacciones registradas.\n\n💡 **Sugerencia**: Agrega algunas transacciones de ejemplo y luego vuelve a abrir el dashboard.");
                     openAiChatModal();
                     return;
                 }
 
-                // Inicializar sistemas
+                // Inicializar motor de análisis con transacciones
+                console.log('🔧 Inicializando motor de análisis...');
+                await predictiveAnalyticsEngine.initialize(transactions);
+
+                // Inicializar dashboard
+                console.log('🔧 Inicializando dashboard...');
                 await predictiveDashboard.initialize(predictiveAnalyticsEngine, transactions);
 
                 // Mostrar dashboard
+                console.log('📊 Mostrando dashboard...');
                 await predictiveDashboard.showDashboard();
 
-                console.log('📊 Dashboard Predictivo abierto con', transactions.length, 'transacciones');
+                console.log('✅ Dashboard Predictivo abierto exitosamente con', transactions.length, 'transacciones');
 
             } catch (error) {
                 console.error('❌ Error abriendo Dashboard Predictivo:', error);
-                addAiMessage("❌ **Error**\n\nHubo un problema al abrir el Dashboard Predictivo. Por favor, inténtalo de nuevo.");
+
+                let errorMessage = "❌ **Error del Dashboard Predictivo**\n\n";
+                errorMessage += "Hubo un problema al abrir el dashboard.\n\n";
+                errorMessage += "**Detalles del error**: " + error.message + "\n\n";
+                errorMessage += "**Posibles soluciones**:\n";
+                errorMessage += "• Recarga la página e inténtalo de nuevo\n";
+                errorMessage += "• Verifica que tengas transacciones registradas\n";
+                errorMessage += "• Asegúrate de estar autenticado correctamente\n\n";
+                errorMessage += "Si el problema persiste, contacta al soporte técnico.";
+
+                addAiMessage(errorMessage);
                 openAiChatModal();
             }
         };

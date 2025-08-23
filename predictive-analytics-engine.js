@@ -16,17 +16,30 @@ class PredictiveAnalyticsEngine {
     // 🚀 Inicializar con datos históricos
     async initialize(transactions = []) {
         try {
+            console.log('🔮 Inicializando motor predictivo...');
+            console.log('📊 Transacciones recibidas:', transactions.length);
+
+            if (!Array.isArray(transactions)) {
+                throw new Error('Las transacciones deben ser un array');
+            }
+
             this.historicalData = transactions;
+
+            console.log('📈 Analizando patrones históricos...');
             await this.analyzeHistoricalPatterns();
+
+            console.log('📅 Calculando factores estacionales...');
             await this.calculateSeasonalFactors();
+
+            console.log('🔮 Generando predicciones...');
             await this.generatePredictions();
-            
+
             this.initialized = true;
-            console.log('✅ Motor predictivo inicializado con', transactions.length, 'transacciones');
+            console.log('✅ Motor predictivo inicializado exitosamente con', transactions.length, 'transacciones');
             return true;
         } catch (error) {
             console.error('❌ Error inicializando motor predictivo:', error);
-            return false;
+            throw error;
         }
     }
 
