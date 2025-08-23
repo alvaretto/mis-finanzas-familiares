@@ -211,16 +211,74 @@
             console.log('🧪 Estado del sistema de testing:');
 
             const estado = {
-                testingFramework: !!testingFramework,
-                testRunner: !!testRunner,
-                testingUI: !!testingUI,
-                suitesDisponibles: testingFramework ? Array.from(testingFramework.suites.keys()) : [],
-                totalTests: testingFramework ? testingFramework.results.total : 0,
-                ultimosResultados: testingFramework ? testingFramework.results : null
+                clases: {
+                    TestingFramework: typeof TestingFramework !== 'undefined',
+                    TestRunner: typeof TestRunner !== 'undefined',
+                    TestingUI: typeof TestingUI !== 'undefined',
+                    expect: typeof expect !== 'undefined'
+                },
+                instancias: {
+                    testingFramework: !!testingFramework,
+                    testRunner: !!testRunner,
+                    testingUI: !!testingUI,
+                    windowAppTests: !!window.appTests
+                },
+                datos: {
+                    suitesDisponibles: testingFramework ? Array.from(testingFramework.suites.keys()) : [],
+                    totalTests: testingFramework ? testingFramework.results.total : 0,
+                    ultimosResultados: testingFramework ? testingFramework.results : null
+                }
             };
 
             console.log(estado);
             return estado;
+        };
+
+        window.diagnosticarTesting = function() {
+            console.log('🔍 Diagnóstico completo del sistema de testing:');
+
+            const diagnostico = {
+                timestamp: new Date().toISOString(),
+                scripts: {
+                    'testing-framework.js': typeof TestingFramework !== 'undefined',
+                    'assertions.js': typeof expect !== 'undefined',
+                    'test-runner.js': typeof TestRunner !== 'undefined',
+                    'test-ui.js': typeof TestingUI !== 'undefined',
+                    'app-tests.js': !!window.appTests
+                },
+                variables: {
+                    testingFramework: !!testingFramework,
+                    testRunner: !!testRunner,
+                    testingUI: !!testingUI
+                },
+                boton: {
+                    existe: !!document.getElementById('testing-panel-btn'),
+                    visible: document.getElementById('testing-panel-btn')?.offsetParent !== null,
+                    eventListener: 'No se puede verificar directamente'
+                }
+            };
+
+            console.log(diagnostico);
+
+            // Verificar si hay errores
+            const errores = [];
+            if (!diagnostico.scripts['testing-framework.js']) errores.push('testing-framework.js no cargado');
+            if (!diagnostico.scripts['assertions.js']) errores.push('assertions.js no cargado');
+            if (!diagnostico.scripts['test-runner.js']) errores.push('test-runner.js no cargado');
+            if (!diagnostico.scripts['test-ui.js']) errores.push('test-ui.js no cargado');
+            if (!diagnostico.scripts['app-tests.js']) errores.push('app-tests.js no cargado');
+            if (!diagnostico.variables.testingFramework) errores.push('testingFramework no inicializado');
+            if (!diagnostico.variables.testRunner) errores.push('testRunner no inicializado');
+            if (!diagnostico.variables.testingUI) errores.push('testingUI no inicializado');
+            if (!diagnostico.boton.existe) errores.push('Botón testing-panel-btn no existe');
+
+            if (errores.length > 0) {
+                console.error('❌ Errores encontrados:', errores);
+            } else {
+                console.log('✅ Sistema de testing parece estar correcto');
+            }
+
+            return diagnostico;
         };
 
 
@@ -1149,28 +1207,7 @@
                     // No lanzar error para no interrumpir la inicialización de otros sistemas
                 }
 
-                // 🧪 Inicializar Sistema de Testing Avanzado
-                try {
-                    console.log('🧪 Inicializando sistema de testing avanzado...');
-
-                    // El framework ya está inicializado en app-tests.js
-                    testingFramework = window.appTests;
-
-                    if (testingFramework) {
-                        testRunner = new TestRunner();
-                        testRunner.initialize(testingFramework);
-
-                        testingUI = new TestingUI();
-                        testingUI.initialize(testRunner);
-
-                        console.log('✅ Sistema de testing inicializado correctamente');
-                    } else {
-                        console.warn('⚠️ Testing framework no disponible');
-                    }
-                } catch (testingError) {
-                    console.error('❌ Error inicializando sistema de testing:', testingError);
-                    // No lanzar error para no interrumpir la inicialización de otros sistemas
-                }
+                // Nota: Sistema de testing se inicializa independientemente más abajo
 
                 console.log('✅ Sistema de IA Avanzado inicializado correctamente');
                 console.log('💾 Sistema de Backups Automáticos inicializado correctamente');
@@ -3523,38 +3560,9 @@ ${aiMemorySystem.userProfile.behaviorInsights.slice(0, 3).map(insight => `- ${in
         const openTestingPanel = async () => {
             console.log('🧪 Abriendo Panel de Testing...');
             try {
-                // Verificar que las clases estén disponibles
-                if (typeof TestingFramework === 'undefined') {
-                    throw new Error('TestingFramework no está disponible - verifica que testing-framework.js se haya cargado');
-                }
-
-                if (typeof TestRunner === 'undefined') {
-                    throw new Error('TestRunner no está disponible - verifica que test-runner.js se haya cargado');
-                }
-
-                if (typeof TestingUI === 'undefined') {
-                    throw new Error('TestingUI no está disponible - verifica que test-ui.js se haya cargado');
-                }
-
-                // Inicializar sistemas de testing si no existen
-                if (!testingFramework) {
-                    console.log('🧪 Inicializando Testing Framework...');
-                    testingFramework = window.appTests; // Usar la instancia creada en app-tests.js
-                    if (!testingFramework) {
-                        throw new Error('No se pudo obtener la instancia del Testing Framework');
-                    }
-                }
-
-                if (!testRunner) {
-                    console.log('🏃‍♂️ Inicializando Test Runner...');
-                    testRunner = new TestRunner();
-                    testRunner.initialize(testingFramework);
-                }
-
+                // Verificar que el sistema de testing esté inicializado
                 if (!testingUI) {
-                    console.log('🎨 Inicializando Testing UI...');
-                    testingUI = new TestingUI();
-                    testingUI.initialize(testRunner);
+                    throw new Error('Sistema de testing no inicializado. Recarga la página e inténtalo de nuevo.');
                 }
 
                 // Mostrar panel de testing
@@ -3793,6 +3801,49 @@ ${transactionData}`;
             db = firebase.firestore();
 
             console.log('✅ Firebase inicializado correctamente');
+
+            // 🧪 Inicializar Sistema de Testing Avanzado (independiente de autenticación)
+            const initializeTestingSystem = () => {
+                try {
+                    console.log('🧪 Inicializando sistema de testing avanzado...');
+
+                    // Verificar que las clases estén disponibles
+                    if (typeof TestingFramework === 'undefined') {
+                        console.warn('⚠️ TestingFramework no disponible');
+                        return;
+                    }
+
+                    if (typeof TestRunner === 'undefined') {
+                        console.warn('⚠️ TestRunner no disponible');
+                        return;
+                    }
+
+                    if (typeof TestingUI === 'undefined') {
+                        console.warn('⚠️ TestingUI no disponible');
+                        return;
+                    }
+
+                    // El framework ya está inicializado en app-tests.js
+                    testingFramework = window.appTests;
+
+                    if (testingFramework) {
+                        testRunner = new TestRunner();
+                        testRunner.initialize(testingFramework);
+
+                        testingUI = new TestingUI();
+                        testingUI.initialize(testRunner);
+
+                        console.log('✅ Sistema de testing inicializado correctamente');
+                    } else {
+                        console.warn('⚠️ Testing framework no disponible en window.appTests');
+                    }
+                } catch (testingError) {
+                    console.error('❌ Error inicializando sistema de testing:', testingError);
+                }
+            };
+
+            // Inicializar sistema de testing después de un pequeño delay para asegurar que todos los scripts se hayan cargado
+            setTimeout(initializeTestingSystem, 1000);
 
             // Configurar listener de autenticación
             auth.onAuthStateChanged(user => user ? showApp(user) : showAuth());
