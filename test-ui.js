@@ -56,7 +56,7 @@ class TestingUI {
                 <!-- Header -->
                 <div class="flex justify-between items-center p-6 border-b dark:border-gray-700">
                     <div class="flex items-center gap-3">
-                        <i data-lucide="flask" class="text-blue-500 w-6 h-6"></i>
+                        <i data-lucide="test-tube" class="text-blue-500 w-6 h-6"></i>
                         <div>
                             <h3 class="text-2xl font-bold">Sistema de Testing Avanzado</h3>
                             <p class="text-sm text-gray-500 dark:text-gray-400">Pruebas unitarias, integración y E2E</p>

@@ -331,8 +331,6 @@ testFramework.describe('Rendimiento', () => {
     });
 });
 
-});
-
 // 🎭 SUITE: Tests End-to-End (E2E)
 testFramework.describe('Tests End-to-End (E2E)', () => {
 
