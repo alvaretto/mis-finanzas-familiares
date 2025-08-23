@@ -49,10 +49,11 @@ class AutomaticBackupSystem {
     // ⚙️ Cargar configuración de backups
     async loadSettings() {
         try {
+            // Usar ruta con permisos existentes
             const settingsDoc = await firebase.firestore()
-                .doc(`artifacts/${window.appId}/backup_settings/config`)
+                .doc(`artifacts/${window.appId}/shared_transactions/family_data/backup_settings`)
                 .get();
-            
+
             if (settingsDoc.exists) {
                 this.settings = { ...this.settings, ...settingsDoc.data() };
                 console.log('⚙️ Configuración de backups cargada');
@@ -65,10 +66,11 @@ class AutomaticBackupSystem {
     // 📚 Cargar historial de backups
     async loadBackupHistory() {
         try {
+            // Usar ruta con permisos existentes
             const historyDoc = await firebase.firestore()
-                .doc(`artifacts/${window.appId}/backup_history/log`)
+                .doc(`artifacts/${window.appId}/shared_transactions/family_data/backup_history`)
                 .get();
-            
+
             if (historyDoc.exists) {
                 this.backupHistory = historyDoc.data().history || [];
                 this.lastBackupTime = historyDoc.data().lastBackupTime;
@@ -492,18 +494,19 @@ class AutomaticBackupSystem {
     // 💾 Guardar backup
     async saveBackup(backup) {
         try {
-            // Guardar en Firebase
+            // Guardar en Firebase usando ruta con permisos existentes
             await firebase.firestore()
-                .doc(`artifacts/${window.appId}/backups/${backup.id}`)
+                .collection(`artifacts/${window.appId}/shared_transactions/family_data/backups`)
+                .doc(backup.id)
                 .set(backup);
-            
+
             console.log('💾 Backup guardado en Firebase:', backup.id);
-            
+
             // Si está habilitado, también guardar en Firebase Storage
             if (this.settings.cloudBackupEnabled) {
                 await this.saveToCloudStorage(backup);
             }
-            
+
         } catch (error) {
             console.error('❌ Error guardando backup:', error);
             throw error;
@@ -536,18 +539,19 @@ class AutomaticBackupSystem {
     async cleanupOldBackups(oldBackups) {
         for (const backup of oldBackups) {
             try {
-                // Eliminar de Firestore
+                // Eliminar de Firestore usando ruta con permisos
                 await firebase.firestore()
-                    .doc(`artifacts/${window.appId}/backups/${backup.id}`)
+                    .collection(`artifacts/${window.appId}/shared_transactions/family_data/backups`)
+                    .doc(backup.id)
                     .delete();
-                
+
                 // Eliminar de Storage si existe
                 if (this.settings.cloudBackupEnabled) {
                     const storageRef = firebase.storage().ref();
                     const backupRef = storageRef.child(`backups/${window.appId}/${backup.id}.json`);
                     await backupRef.delete().catch(() => {}); // Ignorar errores
                 }
-                
+
                 console.log('🧹 Backup antiguo eliminado:', backup.id);
             } catch (error) {
                 console.warn('⚠️ Error eliminando backup antiguo:', backup.id, error);
@@ -558,8 +562,9 @@ class AutomaticBackupSystem {
     // 📚 Guardar historial de backups
     async saveBackupHistory() {
         try {
+            // Usar ruta con permisos existentes
             await firebase.firestore()
-                .doc(`artifacts/${window.appId}/backup_history/log`)
+                .doc(`artifacts/${window.appId}/shared_transactions/family_data/backup_history`)
                 .set({
                     history: this.backupHistory.slice(0, 100), // Mantener últimos 100
                     lastBackupTime: this.lastBackupTime,
@@ -630,17 +635,18 @@ class AutomaticBackupSystem {
     // ⚙️ Actualizar configuración
     async updateSettings(newSettings) {
         this.settings = { ...this.settings, ...newSettings };
-        
+
         try {
+            // Usar ruta con permisos existentes
             await firebase.firestore()
-                .doc(`artifacts/${window.appId}/backup_settings/config`)
+                .doc(`artifacts/${window.appId}/shared_transactions/family_data/backup_settings`)
                 .set(this.settings);
-            
+
             // Reconfigurar backups automáticos si cambió la frecuencia
             if (newSettings.backupFrequency || newSettings.autoBackupEnabled !== undefined) {
                 this.setupAutomaticBackups();
             }
-            
+
             console.log('⚙️ Configuración de backups actualizada');
             return true;
         } catch (error) {
@@ -705,7 +711,7 @@ class AutomaticBackupSystem {
 
         // Test de permisos de escritura
         try {
-            const testDoc = firebase.firestore().doc(`artifacts/${window.appId}/backup_test/diagnostic`);
+            const testDoc = firebase.firestore().doc(`artifacts/${window.appId}/shared_transactions/family_data/backup_test`);
             await testDoc.set({ test: true, timestamp: new Date().toISOString() });
             await testDoc.delete();
             diagnostics.tests.writePermissions = 'OK';
@@ -745,9 +751,10 @@ class AutomaticBackupSystem {
                 }
             };
 
-            // Guardar backup de prueba
+            // Guardar backup de prueba usando ruta con permisos
             await firebase.firestore()
-                .doc(`artifacts/${window.appId}/backups/${backupId}`)
+                .collection(`artifacts/${window.appId}/shared_transactions/family_data/backups`)
+                .doc(backupId)
                 .set(backup);
 
             console.log('✅ Backup de prueba completado:', backupId);
@@ -756,7 +763,8 @@ class AutomaticBackupSystem {
             setTimeout(async () => {
                 try {
                     await firebase.firestore()
-                        .doc(`artifacts/${window.appId}/backups/${backupId}`)
+                        .collection(`artifacts/${window.appId}/shared_transactions/family_data/backups`)
+                        .doc(backupId)
                         .delete();
                     console.log('🧹 Backup de prueba limpiado:', backupId);
                 } catch (error) {

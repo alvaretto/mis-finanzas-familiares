@@ -602,8 +602,9 @@ class BackupRestoreSystem {
     // 📂 Listar backups disponibles
     async listAvailableBackups() {
         try {
+            // Usar ruta con permisos existentes
             const snapshot = await firebase.firestore()
-                .collection(`artifacts/${window.appId}/backups`)
+                .collection(`artifacts/${window.appId}/shared_transactions/family_data/backups`)
                 .orderBy('timestamp', 'desc')
                 .limit(50)
                 .get();
@@ -690,9 +691,10 @@ class BackupRestoreSystem {
         try {
             console.log('🔄 Iniciando restauración desde backup:', backupId);
 
-            // Obtener backup
+            // Obtener backup usando ruta con permisos
             const backupDoc = await firebase.firestore()
-                .doc(`artifacts/${window.appId}/backups/${backupId}`)
+                .collection(`artifacts/${window.appId}/shared_transactions/family_data/backups`)
+                .doc(backupId)
                 .get();
 
             if (!backupDoc.exists) {
