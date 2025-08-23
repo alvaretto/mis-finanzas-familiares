@@ -7,338 +7,67 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- 🔐 Sistema de Configuración Radical y Seguro -->
+    <!-- 🔐 Sistema de Configuración Simplificado -->
     <script>
-        // 🚀 SOLUCIÓN RADICAL: Sistema híbrido que funciona en ambos entornos
-        // sin exponer información sensible en el código fuente
+        // 🚀 Sistema simplificado - secure-config.js maneja toda la configuración
+        console.log('🔐 Sistema de configuración simplificado iniciado');
 
-        const isGitHubPages = window.location.hostname === 'alvaretto.github.io';
-
-        // 🔒 Sistema de configuración ultra segura - CERO EXPOSICIÓN
-        // Las credenciales se insertan dinámicamente por GitHub Actions
-        // El código fuente NO contiene información sensible
-        async function loadSecureConfig() {
-            try {
-                // 🔐 Configuración insertada por GitHub Actions (placeholders en código fuente)
-                // Estas credenciales son reemplazadas automáticamente durante el deployment
-                const config = {
-                    GEMINI_API_KEY: "{{GEMINI_API_KEY_PLACEHOLDER}}",
-                    firebaseConfig: {
-                        apiKey: "{{FIREBASE_API_KEY_PLACEHOLDER}}",
-                        authDomain: "{{FIREBASE_AUTH_DOMAIN_PLACEHOLDER}}",
-                        projectId: "{{FIREBASE_PROJECT_ID_PLACEHOLDER}}",
-                        storageBucket: "{{FIREBASE_STORAGE_BUCKET_PLACEHOLDER}}",
-                        messagingSenderId: "{{FIREBASE_MESSAGING_SENDER_ID_PLACEHOLDER}}",
-                        appId: "{{FIREBASE_APP_ID_PLACEHOLDER}}",
-                        measurementId: "{{FIREBASE_MEASUREMENT_ID_PLACEHOLDER}}"
-                    },
-                    appId: "{{FIREBASE_PROJECT_ID_PLACEHOLDER}}"
-                };
-
-                // 🔍 Verificar si las credenciales fueron reemplazadas por GitHub Actions
-                if (config.GEMINI_API_KEY.includes('PLACEHOLDER')) {
-                    console.warn('⚠️ Placeholders detectados - GitHub Actions no ejecutado o falló');
-                    return null;
-                }
-
-                console.log('✅ Configuración insertada por GitHub Actions cargada');
-                return config;
-            } catch (error) {
-                console.error('❌ Error cargando configuración:', error);
-                return null;
-            }
-        }
-
-        if (isGitHubPages) {
-            // 🌐 GitHub Pages: Sistema híbrido inteligente
-            console.log('🌐 GitHub Pages detectado');
-            console.log('🔒 Intentando cargar configuración segura...');
-
-            // Cargar configuración de forma asíncrona y segura
-            loadSecureConfig().then(config => {
-                if (config) {
-                    // ✅ Configuración desde GitHub Actions disponible
-                    window.APP_CONFIG = {
-                        GEMINI_API_KEY: config.GEMINI_API_KEY,
-                        firebaseConfig: config.firebaseConfig,
-                        appId: config.appId,
-                        isPublicDeployment: true,
-                        generatedAt: new Date().toISOString()
-                    };
-
-                    console.log('✅ Configuración segura cargada desde GitHub Actions');
-                    initializeApp();
-                } else {
-                    // ❌ GitHub Actions falló - verificar configuración almacenada
-                    console.log('⚠️ GitHub Actions no disponible - verificando configuración almacenada...');
-
-                    const storedConfig = localStorage.getItem('secureConfig');
-                    if (storedConfig) {
-                        try {
-                            window.APP_CONFIG = JSON.parse(atob(storedConfig));
-                            console.log('✅ Configuración recuperada del almacenamiento local seguro');
-                            initializeApp();
-                        } catch (error) {
-                            console.error('❌ Error recuperando configuración almacenada:', error);
-                            showSecureConfigurationPrompt();
-                        }
+        // 🔄 Función para esperar que se cargue la configuración
+        function waitForConfiguration() {
+            return new Promise((resolve) => {
+                const checkConfig = () => {
+                    if (window.APP_CONFIG && window.firebaseConfig) {
+                        console.log('✅ Configuración cargada correctamente');
+                        resolve(true);
                     } else {
-                        console.log('🔄 Solicitando configuración al usuario de forma segura...');
-                        showSecureConfigurationPrompt();
+                        setTimeout(checkConfig, 100);
                     }
-                }
+                };
+                checkConfig();
             });
-        } else {
-            // 🏠 Desarrollo local: Cargar config-fresh.js
-            console.log('🏠 Desarrollo local detectado');
-            console.log('📄 Cargando config-fresh.js');
-
-            const script = document.createElement('script');
-            script.src = 'config-fresh.js';
-            script.onload = function() {
-                console.log('✅ Configuración local cargada correctamente');
-            };
-            script.onerror = function() {
-                console.error('❌ Error: config-fresh.js no encontrado');
-                console.log('💡 Crea config-fresh.js siguiendo las instrucciones del README');
-            };
-            document.head.appendChild(script);
         }
 
-        // 🚀 Función para inicializar la aplicación
+        // 🚀 Inicialización simplificada
+        async function initializeSimplified() {
+            console.log('🔄 Esperando configuración de secure-config.js...');
+            await waitForConfiguration();
+            console.log('✅ Configuración lista, inicializando aplicación...');
+            initializeApp();
+        }
+
+        // 🎯 Iniciar cuando el DOM esté listo
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeSimplified);
+        } else {
+            initializeSimplified();
+        }
+
+        // 🚀 Función simplificada para inicializar la aplicación
         function initializeApp() {
             console.log('🔄 Inicializando aplicación...');
 
-            const checkConfigInterval = setInterval(() => {
-                if (typeof window.firebaseConfig !== 'undefined' && window.firebaseConfig) {
-                    clearInterval(checkConfigInterval);
-                    console.log('✅ Configuración de Firebase detectada.');
-                    if (typeof initializeConfiguration === 'function') {
-                        if (initializeConfiguration()) {
-                            console.log('✅ Configuración inicializada, cargando autenticación.');
-                            if (typeof initAuth === 'function') {
-                                initAuth();
-                            } else {
-                                console.error('❌ La función initAuth no está definida.');
-                            }
-                        } else {
-                             console.error('❌ Falló initializeConfiguration.');
-                        }
+            if (window.firebaseConfig && typeof initializeConfiguration === 'function') {
+                if (initializeConfiguration()) {
+                    console.log('✅ Configuración inicializada, cargando autenticación.');
+                    if (typeof initAuth === 'function') {
+                        initAuth();
                     } else {
-                        console.error('❌ La función initializeConfiguration no está definida.');
+                        console.error('❌ La función initAuth no está definida.');
                     }
                 } else {
-                    console.log('⏳ Esperando configuración de Firebase...');
+                    console.error('❌ Falló initializeConfiguration.');
                 }
-            }, 500); // Revisa cada 500ms
-
-            // Timeout de seguridad para evitar bucles infinitos
-            setTimeout(() => {
-                if (typeof window.firebaseConfig === 'undefined' || !window.firebaseConfig) {
-                    clearInterval(checkConfigInterval);
-                    console.error('❌ Error crítico: La configuración de Firebase no se cargó después de 10 segundos.');
-                    // Aquí podrías mostrar un mensaje de error permanente al usuario
-                }
-            }, 10000);
-        }
-
-        // 🔐 Sistema de configuración familiar simplificado
-        function showSecureConfigurationPrompt() {
-            // Crear modal familiar y fácil de usar
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-            modal.innerHTML = `
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg max-w-md w-full mx-4">
-                    <h3 class="text-lg font-bold mb-4 text-gray-900 dark:text-white">🏠 Configuración Familiar</h3>
-                    <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                        ¡Hola! Para usar la aplicación familiar, necesitas configurarla una sola vez.
-                        Después funcionará automáticamente para toda la familia.
-                    </p>
-
-                    <div class="bg-blue-50 dark:bg-blue-900 p-3 rounded mb-4">
-                        <p class="text-sm text-blue-800 dark:text-blue-200">
-                            💡 <strong>Solo una vez:</strong> Esta configuración se guardará automáticamente.
-                            Tu esposa y tú solo necesitarán hacer login normal después.
-                        </p>
-                    </div>
-
-                    <div class="space-y-4">
-                        <div class="bg-yellow-50 dark:bg-yellow-900 p-4 rounded">
-                            <h4 class="font-medium text-yellow-800 dark:text-yellow-200 mb-2">🔐 Configuración Automática Segura</h4>
-                            <p class="text-sm text-yellow-700 dark:text-yellow-300 mb-3">
-                                La aplicación se configurará automáticamente con las credenciales correctas.
-                                No necesitas ingresar nada manualmente.
-                            </p>
-                            <button onclick="applyAutoConfig()" class="w-full bg-yellow-500 text-white p-2 rounded hover:bg-yellow-600">
-                                ✨ Configuración Automática
-                            </button>
-                        </div>
-
-                        <div class="text-center">
-                            <button onclick="showManualConfig()" class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                                ⚙️ Configuración manual (avanzada)
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="mt-4 text-center">
-                        <button onclick="cancelSecureConfig()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
-                            ❌ Cancelar
-                        </button>
-                    </div>
-
-                    <div class="mt-3 p-3 bg-green-50 dark:bg-green-900 rounded">
-                        <p class="text-xs text-green-800 dark:text-green-200">
-                            🛡️ <strong>Seguro:</strong> Las credenciales se almacenan de forma segura en tu dispositivo y solo funcionan en este sitio web.
-                        </p>
-                        <p class="text-xs text-green-800 dark:text-green-200 mt-1">
-                            👨‍👩‍👧‍👦 <strong>Familiar:</strong> Una vez configurado, toda la familia puede usar la app normalmente.
-                        </p>
-                    </div>
-                </div>
-            `;
-            // Esperar a que el DOM esté listo
-            if (document.body) {
-                document.body.appendChild(modal);
             } else {
-                document.addEventListener('DOMContentLoaded', () => {
-                    document.body.appendChild(modal);
-                });
+                console.error('❌ Configuración de Firebase no disponible o initializeConfiguration no definida.');
             }
         }
 
-        // ✨ Configuración automática (sin exposición)
-        window.applyAutoConfig = function() {
-            // Generar configuración usando algoritmo seguro
-            const config = generateSecureConfig();
-
-            if (config) {
-                window.APP_CONFIG = config;
-
-                // Almacenar de forma segura (encriptado)
-                localStorage.setItem('secureConfig', btoa(JSON.stringify(window.APP_CONFIG)));
-
-                // Cerrar modal
-                document.querySelector('.fixed.inset-0').remove();
-
-                console.log('✅ Configuración automática aplicada de forma segura');
-                initializeApp();
-            } else {
-                alert('❌ Error en configuración automática. Usa configuración manual.');
-                showManualConfig();
-            }
-        };
-
-        // 🔐 Generar configuración segura (sin exposición en código)
-        function generateSecureConfig() {
-            // Algoritmo que genera la configuración sin exponerla en el código fuente
-            const parts = [
-                'QUl6YVN5RFR3bnVSbTR2WGV1VTl3VUY2OWZ0eHNYOXl4WFMtMEhv',
-                'QUl6YVN5RGlvcUJzbDFsTldGMERCOTZyeU9FRjNLVXpRTkd0Vm5R',
-                'bWlzLWZpbmFuemFzLWZhbWlsaWFyZXMtZjcyOTg='
-            ];
-
-            try {
-                return {
-                    GEMINI_API_KEY: atob(parts[0]),
-                    firebaseConfig: {
-                        apiKey: atob(parts[1]),
-                        authDomain: atob(parts[2]) + '.firebaseapp.com',
-                        projectId: atob(parts[2]),
-                        storageBucket: atob(parts[2]) + '.firebasestorage.app',
-                        messagingSenderId: '133085274608',
-                        appId: '1:133085274608:web:e6ac5cac8303f6dd0a7d35',
-                        measurementId: 'G-ZNWVMVEY6W'
-                    },
-                    appId: atob(parts[2]),
-                    isPublicDeployment: true,
-                    generatedAt: new Date().toISOString()
-                };
-            } catch (error) {
-                console.error('Error generando configuración:', error);
-                return null;
-            }
-        }
-
-        // ⚙️ Mostrar configuración manual
-        window.showManualConfig = function() {
-            const modal = document.querySelector('.fixed.inset-0');
-            const content = modal.querySelector('div > div');
-            content.innerHTML = `
-                <h3 class="text-lg font-bold mb-4 text-gray-900 dark:text-white">⚙️ Configuración Manual</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                    Ingresa las credenciales manualmente si tienes tus propias claves.
-                </p>
-                <div class="space-y-3">
-                    <div>
-                        <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">🔑 API Key de Gemini</label>
-                        <input type="password" id="geminiKey" placeholder="Ingresa tu API Key de Gemini" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">🔥 Firebase API Key</label>
-                        <input type="password" id="firebaseKey" placeholder="Ingresa tu Firebase API Key" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">📁 Project ID</label>
-                        <input type="text" id="projectId" placeholder="Ingresa tu Firebase Project ID" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                    </div>
-                </div>
-                <div class="flex gap-2 mt-4">
-                    <button onclick="applyManualConfig()" class="flex-1 bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
-                        🔒 Aplicar Configuración
-                    </button>
-                    <button onclick="showSecureConfigurationPrompt(); document.querySelector('.fixed.inset-0').remove();" class="bg-gray-500 text-white px-3 py-2 rounded hover:bg-gray-600">
-                        ← Volver
-                    </button>
-                </div>
-            `;
-        };
-
-        // 🔐 Aplicar configuración manual
-        window.applyManualConfig = function() {
-            const geminiKey = document.getElementById('geminiKey').value;
-            const firebaseKey = document.getElementById('firebaseKey').value;
-            const projectId = document.getElementById('projectId').value;
-
-            if (!geminiKey || !firebaseKey || !projectId) {
-                alert('❌ Por favor completa todos los campos requeridos');
-                return;
-            }
-
-            // Crear configuración
-            window.APP_CONFIG = {
-                GEMINI_API_KEY: geminiKey,
-                firebaseConfig: {
-                    apiKey: firebaseKey,
-                    authDomain: projectId + '.firebaseapp.com',
-                    projectId: projectId,
-                    storageBucket: projectId + '.firebasestorage.app',
-                    messagingSenderId: '133085274608',
-                    appId: '1:133085274608:web:e6ac5cac8303f6dd0a7d35',
-                    measurementId: 'G-ZNWVMVEY6W'
-                },
-                appId: projectId,
-                isPublicDeployment: true,
-                generatedAt: new Date().toISOString()
-            };
-
-            // Almacenar de forma segura (encriptado)
-            localStorage.setItem('secureConfig', btoa(JSON.stringify(window.APP_CONFIG)));
-
-            // Cerrar modal
-            document.querySelector('.fixed.inset-0').remove();
-
-            console.log('✅ Configuración manual aplicada de forma segura');
-            initializeApp();
-        };
+        // 🔐 Sistema simplificado - secure-config.js maneja toda la configuración
+        console.log('🔐 Configuración manejada por secure-config.js');
 
 
 
-        // ❌ Cancelar configuración manual
-        window.cancelSecureConfig = function() {
-            document.querySelector('.fixed.inset-0').remove();
-            console.log('❌ Configuración manual cancelada');
-        };
+
 
         // 🔐 Medidas de seguridad adicionales
         if (isGitHubPages) {
@@ -577,6 +306,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- 🔐 Sistema de Configuración Segura -->
+    <script src="secure-config.js"></script>
 
     <!-- 🧠 Sistema de IA Avanzado - Desafío 1 -->
     <script src="ai-memory-system.js"></script>
@@ -3139,7 +2871,8 @@ Instrucciones:
         const showMemoryStats = () => {
             if (!aiMemorySystem) return;
 
-            const stats = aiMemorySystem.getMemoryStat            const statsMessage = `
+            const stats = aiMemorySystem.getMemoryStats();
+            const statsMessage = `
 ## 🧠 Estadísticas de Memoria IA
 
 **Conversaciones recordadas:** ${stats.conversationsCount}
@@ -3492,19 +3225,8 @@ ${transactionData}`;
             const savedTheme = localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
             applyTheme(savedTheme);
 
-            // Inicializar configuración y aplicación (solo para desarrollo local)
-            // En GitHub Pages, la inicialización se hace después de cargar la configuración segura
-            const isGitHubPages = window.location.hostname === 'alvaretto.github.io';
-            if (!isGitHubPages) {
-                if (initializeConfiguration()) {
-                    console.log('✅ Configuración inicializada, cargando aplicación');
-                    initAuth();
-                } else {
-                    console.error('❌ Error: No se pudo inicializar la configuración');
-                }
-            } else {
-                console.log('🌐 GitHub Pages: Esperando carga de configuración segura...');
-            }
+            // 🔐 Sistema simplificado - secure-config.js maneja la inicialización
+            console.log('🔐 DOM cargado, secure-config.js se encargará de la inicialización');
         });
     </script>
 </body>
