@@ -40,7 +40,7 @@ class AIMemorySystem {
     async loadUserProfile() {
         try {
             const profileDoc = await firebase.firestore()
-                .doc(`artifacts/${window.appId}/ai_memory/${this.userId}/profile`)
+                .doc(`artifacts/${window.appId}/ai_memory_data/${this.userId}`)
                 .get();
             
             if (profileDoc.exists) {
@@ -140,12 +140,12 @@ class AIMemorySystem {
     async loadConversationHistory() {
         try {
             const historyDoc = await firebase.firestore()
-                .doc(`artifacts/${window.appId}/ai_memory/${this.userId}/conversations`)
+                .doc(`artifacts/${window.appId}/ai_memory_data/${this.userId}`)
                 .get();
             
             if (historyDoc.exists) {
                 const data = historyDoc.data();
-                this.conversationHistory = data.history || [];
+                this.conversationHistory = data.conversations?.history || [];
                 this.contextMemory = new Map(data.contextMemory || []);
                 console.log('💬 Historial de conversaciones cargado');
             }
@@ -158,16 +158,17 @@ class AIMemorySystem {
     async loadLearningData() {
         try {
             const learningDoc = await firebase.firestore()
-                .doc(`artifacts/${window.appId}/ai_memory/${this.userId}/learning`)
+                .doc(`artifacts/${window.appId}/ai_memory_data/${this.userId}`)
                 .get();
             
             if (learningDoc.exists) {
                 const data = learningDoc.data();
+                const learningData = data.learning || {};
                 this.learningData = {
-                    frequentQuestions: new Map(data.frequentQuestions || []),
-                    userPreferences: new Map(data.userPreferences || []),
-                    successfulAdvice: data.successfulAdvice || [],
-                    feedbackHistory: data.feedbackHistory || []
+                    frequentQuestions: new Map(learningData.frequentQuestions || []),
+                    userPreferences: new Map(learningData.userPreferences || []),
+                    successfulAdvice: learningData.successfulAdvice || [],
+                    feedbackHistory: learningData.feedbackHistory || []
                 };
                 console.log('🎓 Datos de aprendizaje cargados');
             }
@@ -180,8 +181,8 @@ class AIMemorySystem {
     async saveUserProfile() {
         try {
             await firebase.firestore()
-                .doc(`artifacts/${window.appId}/ai_memory/${this.userId}/profile`)
-                .set(this.userProfile);
+                .doc(`artifacts/${window.appId}/ai_memory_data/${this.userId}`)
+                .set({ profile: this.userProfile }, { merge: true });
         } catch (error) {
             console.error('❌ Error guardando perfil:', error);
         }
@@ -191,12 +192,14 @@ class AIMemorySystem {
     async saveConversationHistory() {
         try {
             await firebase.firestore()
-                .doc(`artifacts/${window.appId}/ai_memory/${this.userId}/conversations`)
+                .doc(`artifacts/${window.appId}/ai_memory_data/${this.userId}`)
                 .set({
-                    history: this.conversationHistory.slice(-50), // Mantener últimas 50 conversaciones
-                    contextMemory: Array.from(this.contextMemory.entries()),
-                    lastUpdated: new Date().toISOString()
-                });
+                    conversations: {
+                        history: this.conversationHistory.slice(-50), // Mantener últimas 50 conversaciones
+                        contextMemory: Array.from(this.contextMemory.entries()),
+                        lastUpdated: new Date().toISOString()
+                    }
+                }, { merge: true });
         } catch (error) {
             console.error('❌ Error guardando historial:', error);
         }
@@ -206,14 +209,16 @@ class AIMemorySystem {
     async saveLearningData() {
         try {
             await firebase.firestore()
-                .doc(`artifacts/${window.appId}/ai_memory/${this.userId}/learning`)
+                .doc(`artifacts/${window.appId}/ai_memory_data/${this.userId}`)
                 .set({
-                    frequentQuestions: Array.from(this.learningData.frequentQuestions.entries()),
-                    userPreferences: Array.from(this.learningData.userPreferences.entries()),
-                    successfulAdvice: this.learningData.successfulAdvice,
-                    feedbackHistory: this.learningData.feedbackHistory,
-                    lastUpdated: new Date().toISOString()
-                });
+                    learning: {
+                        frequentQuestions: Array.from(this.learningData.frequentQuestions.entries()),
+                        userPreferences: Array.from(this.learningData.userPreferences.entries()),
+                        successfulAdvice: this.learningData.successfulAdvice,
+                        feedbackHistory: this.learningData.feedbackHistory,
+                        lastUpdated: new Date().toISOString()
+                    }
+                }, { merge: true });
         } catch (error) {
             console.error('❌ Error guardando datos de aprendizaje:', error);
         }

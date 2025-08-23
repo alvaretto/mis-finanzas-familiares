@@ -219,11 +219,13 @@ class AILearningEngine {
     async saveProactiveInsights() {
         try {
             await firebase.firestore()
-                .doc(`artifacts/${window.appId}/ai_memory/${this.memorySystem.userId}/proactive_insights`)
+                .doc(`artifacts/${window.appId}/ai_memory_data/${this.memorySystem.userId}`)
                 .set({
-                    insights: this.proactiveInsights,
-                    lastGenerated: new Date().toISOString()
-                });
+                    proactive_insights: {
+                        insights: this.proactiveInsights,
+                        lastGenerated: new Date().toISOString()
+                    }
+                }, { merge: true });
         } catch (error) {
             console.error('❌ Error guardando insights proactivos:', error);
         }
@@ -233,11 +235,12 @@ class AILearningEngine {
     async loadProactiveInsights() {
         try {
             const doc = await firebase.firestore()
-                .doc(`artifacts/${window.appId}/ai_memory/${this.memorySystem.userId}/proactive_insights`)
+                .doc(`artifacts/${window.appId}/ai_memory_data/${this.memorySystem.userId}`)
                 .get();
-            
+
             if (doc.exists) {
-                this.proactiveInsights = doc.data().insights || [];
+                const data = doc.data();
+                this.proactiveInsights = data.proactive_insights?.insights || [];
                 return this.proactiveInsights;
             }
         } catch (error) {

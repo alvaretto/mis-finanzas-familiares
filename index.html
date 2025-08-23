@@ -113,7 +113,7 @@
 
 
         // 🔐 Medidas de seguridad adicionales
-        if (isGitHubPages) {
+        if (window.location.hostname === 'alvaretto.github.io') {
             console.log('🛡️ Medidas de seguridad activas:');
             console.log('  • API Key restringida solo para alvaretto.github.io');
             console.log('  • Firebase con reglas de autenticación estrictas');
@@ -944,6 +944,11 @@
             aiMemorySystem = null;
             aiLearningEngine = null;
             proactiveInsights = [];
+        };
+
+        // 📋 Función para obtener transacciones (necesaria para IA)
+        const getTransactions = () => {
+            return transactions || [];
         };
 
         // 🧠 Inicializar Sistema de IA Avanzado - Desafío 1
