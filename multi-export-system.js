@@ -546,9 +546,10 @@ class MultiExportSystem {
 
     // 💰 Formatear moneda
     formatCurrency(amount) {
-        return new Intl.NumberFormat('es-ES', {
+        return new Intl.NumberFormat('es-CO', {
             style: 'currency',
-            currency: 'EUR'
+            currency: 'COP',
+            minimumFractionDigits: 0
         }).format(amount || 0);
     }
 

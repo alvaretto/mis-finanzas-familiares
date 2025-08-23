@@ -162,10 +162,11 @@ const PredictiveDashboard = {
 
 // Helper para formatear moneda, si no existe globalmente
 if (typeof formatCurrency !== 'function') {
-    const formatCurrency = (value) => {
-        return new Intl.NumberFormat('es-MX', {
+    window.formatCurrency = (value) => {
+        return new Intl.NumberFormat('es-CO', {
             style: 'currency',
-            currency: 'MXN'
+            currency: 'COP',
+            minimumFractionDigits: 0
         }).format(value);
     };
 }

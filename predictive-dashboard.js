@@ -359,7 +359,11 @@ class PredictiveDashboard {
                         beginAtZero: true,
                         ticks: {
                             callback: function(value) {
-                                return '$' + value.toLocaleString();
+                                return new Intl.NumberFormat('es-CO', {
+                                    style: 'currency',
+                                    currency: 'COP',
+                                    minimumFractionDigits: 0
+                                }).format(value);
                             }
                         }
                     }
@@ -583,9 +587,10 @@ class PredictiveDashboard {
 
     // 💰 Formatear moneda
     formatCurrency(amount) {
-        return new Intl.NumberFormat('es-ES', {
+        return new Intl.NumberFormat('es-CO', {
             style: 'currency',
-            currency: 'EUR'
+            currency: 'COP',
+            minimumFractionDigits: 0
         }).format(amount);
     }
 }

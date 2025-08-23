@@ -729,7 +729,7 @@
             assets: {
                 "Activos Líquidos": {
                     "Efectivo": ["Dinero en casa", "Billetera/Cartera", "Cajas de ahorro"],
-                    "Cuentas Bancarias": ["Cuenta Corriente", "Cuenta de Ahorros", "Cuenta Nómina", "Cuentas en USD/EUR"],
+                    "Cuentas Bancarias": ["Cuenta Corriente", "Cuenta de Ahorros", "Cuenta Nómina", "Cuentas en USD/Moneda Extranjera"],
                     "Inversiones Líquidas": ["CDT/Certificados", "Fondos de Inversión", "Acciones", "Bonos", "Criptomonedas"]
                 },
                 "Activos Fijos": {
@@ -945,7 +945,16 @@
         const financialHealthTextEl = document.getElementById('financial-health-text');
         const financialHealthBarEl = document.getElementById('financial-health-bar');
 
-        const formatCurrency = (amount) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount);
+        // 💰 Función global de formateo de moneda - Pesos Colombianos
+        const formatCurrency = (amount) => new Intl.NumberFormat('es-CO', {
+            style: 'currency',
+            currency: 'COP',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(amount);
+
+        // Hacer disponible globalmente
+        window.formatCurrency = formatCurrency;
 
         const applyTheme = (isDark) => {
             document.documentElement.classList.toggle('dark', isDark);

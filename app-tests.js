@@ -258,6 +258,17 @@ testFramework.describe('Utilidades y Helpers', () => {
         }
     });
 
+    testFramework.it('Moneda debe ser Pesos Colombianos (COP)', () => {
+        // Verificar que la moneda oficial sea COP
+        if (typeof formatCurrency === 'function') {
+            const formatted = formatCurrency(1000);
+            expect(formatted).toContain('COP');
+            expect(formatted).not.toContain('EUR');
+            expect(formatted).not.toContain('MXN');
+            expect(formatted).not.toContain('USD');
+        }
+    });
+
     testFramework.it('Funciones de validación deben funcionar', () => {
         // Tests para funciones de validación si existen
         if (typeof validateEmail === 'function') {

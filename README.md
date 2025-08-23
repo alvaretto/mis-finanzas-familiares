@@ -196,7 +196,7 @@ cp config.example.js config-fresh.js
 1. Haz clic en el botón "+" flotante
 2. Completa los datos:
    - **Descripción**: Detalle de la transacción
-   - **Monto**: Cantidad en pesos mexicanos
+   - **Monto**: Cantidad en pesos colombianos (COP)
    - **Tipo**: Ingreso o Gasto
    - **Categoría**: Selecciona de tu lista personalizada
    - **Subcategoría** (opcional): Mayor detalle
@@ -335,6 +335,19 @@ Categoría Principal
 - **Compras**: Ropa, Tecnología, Hogar
 - **Finanzas**: Deudas, Ahorros, Otros
 - **Otros**: Mascotas, Regalos, Varios
+
+## 💰 Moneda y Formateo
+
+### Moneda Oficial: Pesos Colombianos (COP)
+- **Símbolo**: COP $
+- **Formato**: Sin decimales para mayor claridad
+- **Localización**: Español de Colombia (es-CO)
+- **Ejemplo**: COP $1.234.567
+
+### Características del Formateo
+- **Separador de miles**: Punto (.)
+- **Sin decimales**: Los centavos se omiten para simplificar
+- **Formato estándar**: Intl.NumberFormat('es-CO', { currency: 'COP' })
 
 ## 🛡️ Seguridad y Privacidad
 
@@ -519,7 +532,8 @@ Desarrollado con ❤️ por **Álvaro Ángel Molina** (@alvaretto)
 - [ ] Compartir presupuestos familiares
 - [ ] Integración con bancos (API)
 - [ ] Aplicación móvil nativa
-- [ ] Múltiples monedas
+- [x] Moneda oficial: Pesos Colombianos (COP)
+- [ ] Múltiples monedas adicionales
 - [ ] Dashboard de inversiones avanzado
 - [ ] Calculadora de préstamos integrada
 
