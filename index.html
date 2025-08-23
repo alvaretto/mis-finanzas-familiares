@@ -542,7 +542,8 @@
             <h2 class="text-xl font-semibold">Historial de Transacciones</h2>
             <div class="flex gap-2">
                 <button id="tips-btn" class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg shadow-md hover:bg-teal-700 transition-colors"><i data-lucide="lightbulb" class="w-4 h-4"></i> Tips IA</button>
-                <button id="ai-assistant-btn" class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg shadow-md hover:bg-purple-700 transition-colors"><i data-lucide="brain-circuit" class="w-4 h-4"></i> Asistente IA</button>
+                <button id="ai-assistant-btn" class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg shadow-md hover:bg-purple-700 transition-colors"><i data-lucide="brain-circuit" class="w-4 h-4"></i> FinGenius 🧠</button>
+                <button id="proactive-insights-btn" class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg shadow-md hover:from-purple-700 hover:to-pink-700 transition-colors relative"><i data-lucide="zap" class="w-4 h-4"></i> Insights <span id="insights-badge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span></button>
             </div>
         </section>
         <div id="transaction-list" class="space-y-3"><p class="text-center text-slate-500 dark:text-slate-400 py-4">No hay transacciones todavía.</p></div>
@@ -565,6 +566,10 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- 🧠 Sistema de IA Avanzado - Desafío 1 -->
+    <script src="ai-memory-system.js"></script>
+    <script src="ai-learning-engine.js"></script>
 
     <script>
         // 🚀 MEGA RADICAL: Usar Firebase v9 compat para máxima compatibilidad
@@ -727,6 +732,11 @@
         let isLoginMode = true;
         let aiChatHistory = [], financialTips = [], currentTipIndex = 0;
         let userCategoryStructure = null; // Categorías personalizadas del usuario
+
+        // 🧠 Sistema de IA Avanzado - Desafío 1
+        let aiMemorySystem = null;
+        let aiLearningEngine = null;
+        let proactiveInsights = [];
 
         // Sistema de categorías con subcategorías de dos niveles
         const categoryStructure = {
@@ -977,6 +987,8 @@
         const editBudgetBtn = document.getElementById('edit-budget-btn');
         const aiAssistantBtn = document.getElementById('ai-assistant-btn');
         const tipsBtn = document.getElementById('tips-btn');
+        const proactiveInsightsBtn = document.getElementById('proactive-insights-btn');
+        const insightsBadge = document.getElementById('insights-badge');
         const forgotPasswordBtn = document.getElementById('forgot-password-btn');
         const manageCategoriesBtn = document.getElementById('manage-categories-btn');
         const categoriesModalEl = document.getElementById('categories-modal');
@@ -1093,11 +1105,15 @@
             await auth.signOut();
         };
 
-        const showApp = (user) => {
+        const showApp = async (user) => {
             authScreen.classList.add('hidden');
             appScreen.classList.remove('hidden');
             userEmailEl.textContent = user.email;
             setupRealtimeListeners();
+
+            // 🧠 Inicializar Sistema de IA Avanzado
+            await initializeAdvancedAI(user.uid);
+
             lucide.createIcons();
         };
 
@@ -1113,6 +1129,46 @@
             userCategoryStructure = null;
             assets = [];
             liabilities = [];
+
+            // 🧠 Limpiar sistema de IA
+            aiMemorySystem = null;
+            aiLearningEngine = null;
+            proactiveInsights = [];
+        };
+
+        // 🧠 Inicializar Sistema de IA Avanzado - Desafío 1
+        const initializeAdvancedAI = async (userId) => {
+            try {
+                console.log('🧠 Inicializando Sistema de IA Avanzado...');
+
+                // Crear instancia del sistema de memoria
+                aiMemorySystem = new AIMemorySystem();
+                await aiMemorySystem.initialize(userId);
+
+                // Crear motor de aprendizaje
+                aiLearningEngine = new AILearningEngine(aiMemorySystem);
+
+                // Cargar insights proactivos
+                proactiveInsights = await aiLearningEngine.loadProactiveInsights();
+
+                // Generar nuevos insights si es necesario
+                if (proactiveInsights.length === 0) {
+                    proactiveInsights = await aiLearningEngine.generateProactiveAdvice();
+                }
+
+                console.log('✅ Sistema de IA Avanzado inicializado correctamente');
+                console.log(`📊 Estadísticas de memoria:`, aiMemorySystem.getMemoryStats());
+
+                // Mostrar insights proactivos si los hay
+                if (proactiveInsights.length > 0) {
+                    showProactiveInsights();
+                }
+
+            } catch (error) {
+                console.error('❌ Error inicializando Sistema de IA Avanzado:', error);
+                // Fallback al sistema básico
+                console.log('🔄 Usando sistema de IA básico como fallback');
+            }
         };
 
         const setupRealtimeListeners = () => {
@@ -2881,14 +2937,55 @@
             if (newAmount >= 0) { await budgetDocRef.set({ amount: newAmount }); closeModal(budgetModalEl); }
         };
 
-        const openAiChatModal = () => {
+        const openAiChatModal = async () => {
             aiChatHistory = [];
-            aiChatModalEl.innerHTML = `<div class="bg-white dark:bg-gray-800 w-full max-w-2xl m-4 rounded-2xl shadow-xl flex flex-col h-[80vh]"><div class="flex justify-between items-center p-4 border-b dark:border-gray-700"><h3 class="text-xl font-semibold flex items-center gap-2"><i data-lucide="brain-circuit" class="text-purple-500"></i>Asistente FinGenius</h3><button class="js-close-modal p-1 rounded-full"><i data-lucide="x"></i></button></div><div id="ai-chat-messages" class="flex-1 p-4 overflow-y-auto space-y-4"></div><div class="p-4 border-t dark:border-gray-700"><form id="ai-chat-form" class="flex gap-2"><input type="text" id="ai-chat-input" class="flex-1 px-3 py-2 bg-slate-50 dark:bg-gray-700 border rounded-md" placeholder="Pregúntale a FinGenius..." required><button type="submit" class="bg-purple-600 text-white p-2 rounded-md"><i data-lucide="send"></i></button></form></div></div>`;
+
+            // 🧠 Crear interfaz avanzada con memoria
+            const memoryStats = aiMemorySystem ? aiMemorySystem.getMemoryStats() : null;
+            const hasMemory = memoryStats && memoryStats.conversationsCount > 0;
+
+            aiChatModalEl.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 w-full max-w-2xl m-4 rounded-2xl shadow-xl flex flex-col h-[80vh]">
+                    <div class="flex justify-between items-center p-4 border-b dark:border-gray-700">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="brain-circuit" class="text-purple-500"></i>
+                            <div>
+                                <h3 class="text-xl font-semibold">FinGenius ${hasMemory ? '🧠' : ''}</h3>
+                                ${hasMemory ? `<p class="text-xs text-gray-500">Recuerda ${memoryStats.conversationsCount} conversaciones</p>` : ''}
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            ${hasMemory ? `<button id="memory-stats-btn" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" title="Ver estadísticas de memoria"><i data-lucide="database" class="w-4 h-4"></i></button>` : ''}
+                            <button class="js-close-modal p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"><i data-lucide="x"></i></button>
+                        </div>
+                    </div>
+                    <div id="ai-chat-messages" class="flex-1 p-4 overflow-y-auto space-y-4"></div>
+                    <div class="p-4 border-t dark:border-gray-700">
+                        <form id="ai-chat-form" class="flex gap-2">
+                            <input type="text" id="ai-chat-input" class="flex-1 px-3 py-2 bg-slate-50 dark:bg-gray-700 border rounded-md" placeholder="Pregúntale a FinGenius..." required>
+                            <button type="submit" class="bg-purple-600 text-white p-2 rounded-md hover:bg-purple-700 transition-colors">
+                                <i data-lucide="send"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>`;
+
             openModal(aiChatModalEl);
             lucide.createIcons();
+
+            // Event listeners
             aiChatModalEl.querySelector('.js-close-modal').addEventListener('click', () => closeModal(aiChatModalEl));
-            aiChatModalEl.querySelector('#ai-chat-form').addEventListener('submit', handleAiChatSubmit);
-            addAiMessage("¡Hola! Soy FinGenius. ¿En qué puedo ayudarte con tus finanzas hoy?");
+            aiChatModalEl.querySelector('#ai-chat-form').addEventListener('submit', handleAdvancedAiChatSubmit);
+
+            // Botón de estadísticas de memoria
+            const memoryStatsBtn = aiChatModalEl.querySelector('#memory-stats-btn');
+            if (memoryStatsBtn) {
+                memoryStatsBtn.addEventListener('click', showMemoryStats);
+            }
+
+            // 🧠 Mensaje de bienvenida personalizado
+            const welcomeMessage = await generateWelcomeMessage();
+            addAiMessage(welcomeMessage);
         };
 
         const addChatMessage = (message, sender) => {
@@ -2903,32 +3000,296 @@
         const addAiMessage = (text) => addChatMessage(marked.parse(text), 'ai');
         const addUserMessage = (text) => addChatMessage(text, 'user');
 
-        const handleAiChatSubmit = async (e) => {
+        // 🧠 Función avanzada de chat con memoria y aprendizaje
+        const handleAdvancedAiChatSubmit = async (e) => {
             e.preventDefault();
             const input = e.target.querySelector('#ai-chat-input');
             const userMessage = input.value.trim();
             if (!userMessage) return;
-            addUserMessage(userMessage); input.value = '';
-            addChatMessage('<div class="animate-spin"><i data-lucide="loader-2"></i></div>', 'ai');
-            const transactionData = transactions.map(t => {
-                let categoryInfo = t.category;
-                if (t.subcategory) categoryInfo += ` › ${t.subcategory}`;
-                if (t.subsubcategory) categoryInfo += ` › ${t.subsubcategory}`;
-                return `${t.type}: ${t.description} (${categoryInfo}) - ${formatCurrency(t.amount)}`;
-            }).join('\n');
-            const contextPrompt = `System: Eres un asesor financiero amigable llamado 'FinGenius'. Responde las preguntas del usuario basándote en los siguientes datos financieros. Sé conciso y útil. Datos actuales:\n${transactionData}\nPresupuesto Mensual: ${formatCurrency(monthlyBudget)}\n---`;
-            aiChatHistory.push({ role: "user", parts: [{ text: userMessage }] });
+
+            addUserMessage(userMessage);
+            input.value = '';
+            addChatMessage('<div class="flex items-center gap-2"><i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>Analizando con memoria avanzada...</div>', 'ai');
+
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: contextPrompt }] }, ...aiChatHistory] }) });
+                // 🧠 Generar contexto personalizado con memoria
+                const personalizedContext = aiMemorySystem ? aiMemorySystem.generatePersonalizedContext() : '';
+
+                // 📊 Datos financieros actuales
+                const transactionData = transactions.map(t => {
+                    let categoryInfo = t.category;
+                    if (t.subcategory) categoryInfo += ` › ${t.subcategory}`;
+                    if (t.subsubcategory) categoryInfo += ` › ${t.subsubcategory}`;
+                    return `${t.type}: ${t.description} (${categoryInfo}) - ${formatCurrency(t.amount)}`;
+                }).join('\n');
+
+                // 🎯 Prompt avanzado con contexto personalizado
+                const advancedPrompt = `System: Eres FinGenius, un asesor financiero inteligente con memoria avanzada.
+
+${personalizedContext}
+
+Datos financieros actuales:
+${transactionData}
+Presupuesto Mensual: ${formatCurrency(monthlyBudget)}
+
+Instrucciones:
+- Usa la información del perfil del usuario para personalizar tu respuesta
+- Referencia conversaciones anteriores cuando sea relevante
+- Adapta tu estilo de comunicación a las preferencias del usuario
+- Proporciona consejos específicos basados en los patrones identificados
+- Sé amigable, útil y proactivo
+
+---`;
+
+                // 🚀 Llamada a la API con contexto avanzado
+                aiChatHistory.push({ role: "user", parts: [{ text: userMessage }] });
+
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [
+                            { role: "user", parts: [{ text: advancedPrompt }] },
+                            ...aiChatHistory
+                        ]
+                    })
+                });
+
                 if (!response.ok) throw new Error('API Error');
                 const result = await response.json();
-                const aiResponse = result.candidates[0].content.parts[0].text;
+                let aiResponse = result.candidates[0].content.parts[0].text;
+
+                // 🎓 Adaptar respuesta basándose en el aprendizaje
+                if (aiLearningEngine) {
+                    aiResponse = aiLearningEngine.adaptToUserBehavior(userMessage, aiResponse);
+                }
+
                 aiChatHistory.push({ role: "model", parts: [{ text: aiResponse }] });
-                aiChatModalEl.querySelector('.animate-spin').parentElement.remove();
+
+                // 🧠 Procesar conversación para memoria y aprendizaje
+                if (aiMemorySystem) {
+                    await aiMemorySystem.processConversation(userMessage, aiResponse);
+                }
+
+                // Mostrar respuesta
+                const loadingElement = aiChatModalEl.querySelector('.animate-spin')?.parentElement || aiChatModalEl.querySelector('.animate-spin');
+                if (loadingElement) loadingElement.remove();
                 addAiMessage(aiResponse);
+
+                // 🎯 Generar insights proactivos después de la conversación
+                if (aiLearningEngine && Math.random() < 0.3) { // 30% de probabilidad
+                    setTimeout(async () => {
+                        const newInsights = await aiLearningEngine.generateProactiveAdvice();
+                        if (newInsights.length > 0) {
+                            proactiveInsights = newInsights;
+                        }
+                    }, 2000);
+                }
+
             } catch (error) {
-                aiChatModalEl.querySelector('.animate-spin').parentElement.remove();
+                console.error('❌ Error en chat avanzado:', error);
+                const loadingElement = aiChatModalEl.querySelector('.animate-spin')?.parentElement || aiChatModalEl.querySelector('.animate-spin');
+                if (loadingElement) loadingElement.remove();
                 addAiMessage("Lo siento, tuve un problema para conectarme. Intenta de nuevo.");
+            }
+        };
+
+        // 🔄 Mantener compatibilidad con sistema básico
+        const handleAiChatSubmit = handleAdvancedAiChatSubmit;
+
+        // 🧠 Generar mensaje de bienvenida personalizado
+        const generateWelcomeMessage = async () => {
+            if (!aiMemorySystem || !aiMemorySystem.initialized) {
+                return "¡Hola! Soy FinGenius. ¿En qué puedo ayudarte con tus finanzas hoy?";
+            }
+
+            const stats = aiMemorySystem.getMemoryStats();
+            const userProfile = aiMemorySystem.userProfile;
+
+            let welcomeMessage = "¡Hola de nuevo! 🧠 ";
+
+            if (stats.conversationsCount > 0) {
+                welcomeMessage += `Recuerdo nuestras ${stats.conversationsCount} conversaciones anteriores. `;
+            }
+
+            if (userProfile.behaviorInsights.length > 0) {
+                const randomInsight = userProfile.behaviorInsights[Math.floor(Math.random() * userProfile.behaviorInsights.length)];
+                welcomeMessage += `\n\n💡 **Recordatorio**: ${randomInsight}`;
+            }
+
+            // Agregar predicciones proactivas si las hay
+            if (proactiveInsights.length > 0) {
+                const highPriorityInsights = proactiveInsights.filter(insight => insight.priority === 'high');
+                if (highPriorityInsights.length > 0) {
+                    welcomeMessage += `\n\n⚠️ **Alerta importante**: ${highPriorityInsights[0].message}`;
+                }
+            }
+
+            welcomeMessage += "\n\n¿En qué puedo ayudarte hoy?";
+            return welcomeMessage;
+        };
+
+        // 📊 Mostrar estadísticas de memoria
+        const showMemoryStats = () => {
+            if (!aiMemorySystem) return;
+
+            const stats = aiMemorySystem.getMemoryStats();
+            const statsMessage = `
+## 🧠 Estadísticas de Memoria IA
+
+**Conversaciones recordadas:** ${stats.conversationsCount}
+**Contextos rastreados:** ${stats.contextsTracked}
+**Preguntas frecuentes:** ${stats.frequentQuestionsCount}
+**Preferencias aprendidas:** ${stats.userPreferencesCount}
+**Última actualización:** ${new Date(stats.profileLastUpdated).toLocaleDateString()}
+
+### 🎯 Perfil de Usuario
+- **Tamaño familiar:** ${aiMemorySystem.userProfile.familySize} personas
+- **Tolerancia al riesgo:** ${aiMemorySystem.userProfile.riskTolerance}
+- **Categorías frecuentes:** ${Array.from(aiMemorySystem.userProfile.preferredCategories.keys()).slice(0, 3).join(', ')}
+
+### 📈 Insights de Comportamiento
+${aiMemorySystem.userProfile.behaviorInsights.slice(0, 3).map(insight => `- ${insight}`).join('\n')}
+            `;
+
+            addAiMessage(statsMessage);
+        };
+
+        // 🎯 Mostrar insights proactivos
+        const showProactiveInsights = () => {
+            if (proactiveInsights.length === 0) return;
+
+            // Actualizar badge
+            updateInsightsBadge(proactiveInsights.length);
+
+            // Mostrar notificación discreta
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 bg-purple-600 text-white p-3 rounded-lg shadow-lg z-50 max-w-sm cursor-pointer';
+            notification.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <i data-lucide="brain-circuit" class="w-5 h-5"></i>
+                    <div>
+                        <p class="font-semibold">FinGenius tiene insights para ti</p>
+                        <p class="text-sm opacity-90">${proactiveInsights.length} recomendación${proactiveInsights.length > 1 ? 'es' : ''} personalizada${proactiveInsights.length > 1 ? 's' : ''}</p>
+                        <p class="text-xs opacity-75 mt-1">Haz clic para ver detalles</p>
+                    </div>
+                    <button onclick="event.stopPropagation(); this.parentElement.parentElement.remove()" class="ml-2 hover:bg-purple-700 rounded p-1">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            `;
+
+            // Hacer clic en la notificación abre el modal de insights
+            notification.addEventListener('click', () => {
+                notification.remove();
+                openProactiveInsightsModal();
+            });
+
+            document.body.appendChild(notification);
+            lucide.createIcons();
+
+            // Auto-remover después de 10 segundos
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 10000);
+        };
+
+        // 🎯 Abrir modal de insights proactivos
+        const openProactiveInsightsModal = async () => {
+            if (!aiLearningEngine) {
+                addAiMessage("El sistema de insights avanzados no está disponible. Asegúrate de que el sistema de IA esté inicializado.");
+                return;
+            }
+
+            // Generar insights frescos
+            const freshInsights = await aiLearningEngine.generateProactiveAdvice();
+            if (freshInsights.length > 0) {
+                proactiveInsights = freshInsights;
+            }
+
+            if (proactiveInsights.length === 0) {
+                proactiveInsights = [{
+                    title: '🎯 Todo en orden',
+                    message: 'No hay alertas urgentes en este momento. Tu situación financiera parece estable.',
+                    priority: 'low',
+                    actions: ['Continúa monitoreando tus gastos', 'Considera establecer nuevas metas de ahorro']
+                }];
+            }
+
+            const insightsHTML = proactiveInsights.map(insight => `
+                <div class="bg-gradient-to-r ${getPriorityGradient(insight.priority)} p-4 rounded-lg mb-4 text-white">
+                    <h4 class="font-semibold text-lg mb-2">${insight.title}</h4>
+                    <p class="mb-3">${insight.message}</p>
+                    ${insight.actions && insight.actions.length > 0 ? `
+                        <div class="mt-3">
+                            <p class="font-medium mb-2">Acciones recomendadas:</p>
+                            <ul class="list-disc list-inside space-y-1 text-sm">
+                                ${insight.actions.map(action => `<li>${action}</li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+
+            aiChatModalEl.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 w-full max-w-2xl m-4 rounded-2xl shadow-xl flex flex-col max-h-[80vh]">
+                    <div class="flex justify-between items-center p-4 border-b dark:border-gray-700">
+                        <h3 class="text-xl font-semibold flex items-center gap-2">
+                            <i data-lucide="zap" class="text-purple-500"></i>
+                            Insights Proactivos
+                        </h3>
+                        <button class="js-close-modal p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <i data-lucide="x"></i>
+                        </button>
+                    </div>
+                    <div class="flex-1 p-4 overflow-y-auto">
+                        <div class="mb-4">
+                            <p class="text-gray-600 dark:text-gray-400 text-sm">
+                                🧠 Análisis basado en tu historial financiero y patrones de comportamiento
+                            </p>
+                        </div>
+                        ${insightsHTML}
+                        <div class="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <p class="text-sm text-gray-600 dark:text-gray-400">
+                                💡 <strong>Tip:</strong> Los insights se actualizan automáticamente basándose en tus nuevas transacciones y conversaciones con FinGenius.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="p-4 border-t dark:border-gray-700">
+                        <button onclick="openAiChatModal(); closeModal(aiChatModalEl);" class="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors">
+                            💬 Hablar con FinGenius sobre estos insights
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            openModal(aiChatModalEl);
+            lucide.createIcons();
+            aiChatModalEl.querySelector('.js-close-modal').addEventListener('click', () => closeModal(aiChatModalEl));
+
+            // Limpiar badge después de ver los insights
+            updateInsightsBadge(0);
+        };
+
+        // 🎨 Obtener gradiente según prioridad
+        const getPriorityGradient = (priority) => {
+            switch (priority) {
+                case 'high': return 'from-red-500 to-red-600';
+                case 'medium': return 'from-yellow-500 to-orange-500';
+                case 'low': return 'from-green-500 to-green-600';
+                default: return 'from-purple-500 to-purple-600';
+            }
+        };
+
+        // 🔢 Actualizar badge de insights
+        const updateInsightsBadge = (count) => {
+            if (count > 0) {
+                insightsBadge.textContent = count;
+                insightsBadge.classList.remove('hidden');
+            } else {
+                insightsBadge.classList.add('hidden');
             }
         };
 
@@ -3084,6 +3445,7 @@
             editBudgetBtn.addEventListener('click', openBudgetModal);
             aiAssistantBtn.addEventListener('click', openAiChatModal);
             tipsBtn.addEventListener('click', openTipsModal);
+            proactiveInsightsBtn.addEventListener('click', openProactiveInsightsModal);
             manageCategoriesBtn.addEventListener('click', openCategoriesModal);
             manageAssetsBtn.addEventListener('click', openAssetsModal);
             manageLiabilitiesBtn.addEventListener('click', openLiabilitiesModal);
