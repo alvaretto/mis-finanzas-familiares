@@ -3318,7 +3318,15 @@ ${aiMemorySystem.userProfile.behaviorInsights.slice(0, 3).map(insight => `- ${in
                 return;
             }
 
-            const prompt = `Eres un analista financiero experto. Analiza la siguiente lista de transacciones y genera una lista de 2 a 4 consejos prácticos. Tu respuesta DEBE ser un objeto JSON válido y nada más, sin markdown. El formato debe ser: {"tips": [{"title": "string", "short_description": "string", "details": "string", "actionable_advice": "string"}]}. Transacciones:\n${transactionData}`;
+                        // 🚀 PROMPT MEJORADO: Audaz, perspicaz y centrado en la familia
+            const familyContext = `El análisis es para una familia. El objetivo es mejorar su salud financiera, optimizar gastos y aumentar ahorros.`;
+            const prompt = `Eres FinGenius, un asesor financiero personal brillante, audaz y perspicaz. Tu especialidad son las finanzas familiares.
+${familyContext}
+Analiza estas transacciones y descubre patrones ocultos, correlaciones inesperadas y oportunidades de optimización significativas. No des consejos genéricos. Sé valiente en tus conclusiones y ofrece perspectivas que el usuario no haya considerado.
+Ignora por completo conceptos de finanzas corporativas (ej. inventarios, EBITDA, etc.).
+Tu respuesta DEBE ser un objeto JSON válido y nada más, sin markdown. El formato es: {"tips": [{"title": "string", "short_description": "string", "details": "string", "actionable_advice": "string"}]}.
+Transacciones:
+${transactionData}`;
 
             try {
                 console.log("Enviando solicitud a Gemini API...");

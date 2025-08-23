@@ -504,6 +504,12 @@ Desarrollado con ❤️ por **Álvaro Ángel Molina** (@alvaretto)
 - ✅ **Animaciones Suaves** - Transiciones y efectos visuales
 - ✅ **Campos Dinámicos** - Aparición inteligente según contexto
 
+### 🤖 Mejoras de Inteligencia Artificial y Análisis Predictivo
+- ✅ **Dashboard Predictivo con ML**: Implementado un modal con análisis de machine learning para pronosticar el flujo de caja futuro.
+- ✅ **Análisis de Patrones de Gasto**: El dashboard incluye análisis de volatilidad y patrones de gasto.
+- ✅ **Sugerencias de Optimización**: Ofrece sugerencias para optimizar el presupuesto.
+- ✅ **Prompt de IA Mejorado**: El motor de "Tips IA" ahora usa un prompt más audaz y específico para finanzas familiares, eliminando la jerga corporativa y buscando insights más profundos.
+
 ## 🚀 Próximas Características
 
 - [ ] Exportación de datos a Excel/PDF
@@ -546,7 +552,7 @@ const AIMemorySystem = {
 
 **Desafío específico:** Crear un asistente que recuerde conversaciones anteriores y aprenda de los patrones del usuario para dar consejos cada vez más personalizados.
 
-### 2. **📊 DASHBOARD PREDICTIVO CON ML**
+### 2. **📊 DASHBOARD PREDICTIVO CON ML (✅ Completado)**
 ```javascript
 // Sistema de predicciones financieras
 const PredictiveAnalytics = {
