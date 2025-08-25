@@ -709,7 +709,7 @@
                     <i data-lucide="trending-up" class="w-5 h-5 text-blue-500"></i>
                     Patrimonio Neto
                 </h2>
-                <div class="flex gap-2 justify-center sm:justify-end">
+                <div class="flex gap-2 justify-center sm:justify-end flex-wrap">
                     <button id="manage-assets-btn" class="flex items-center gap-1 px-3 py-2 text-sm font-medium text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-md transition-colors min-h-[44px] touch-manipulation">
                         <i data-lucide="plus-circle" class="w-4 h-4"></i>
                         <span class="hidden sm:inline">Activos</span><span class="sm:hidden">+</span>
@@ -717,6 +717,10 @@
                     <button id="manage-liabilities-btn" class="flex items-center gap-1 px-3 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors min-h-[44px] touch-manipulation">
                         <i data-lucide="minus-circle" class="w-4 h-4"></i>
                         <span class="hidden sm:inline">Pasivos</span><span class="sm:hidden">-</span>
+                    </button>
+                    <button id="manage-accounts-payable-btn" class="flex items-center gap-1 px-3 py-2 text-sm font-medium text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-md transition-colors min-h-[44px] touch-manipulation">
+                        <i data-lucide="credit-card" class="w-4 h-4"></i>
+                        <span class="hidden sm:inline">Cuentas por Pagar</span><span class="sm:hidden">💳</span>
                     </button>
                 </div>
             </div>
@@ -788,6 +792,10 @@
         <div id="asset-form-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden"></div>
         <div id="liabilities-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden"></div>
         <div id="liability-form-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden"></div>
+        <div id="accounts-payable-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden"></div>
+        <div id="account-payable-form-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden"></div>
+        <div id="payment-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden"></div>
+        <div id="accounts-payable-calendar-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden"></div>
         <div id="predictive-dashboard-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden"></div>
     </div>
 
@@ -981,9 +989,9 @@
             }, 100);
         }
 
-        let app, auth, db, transactionsCollection, budgetDocRef, categoriesDocRef, assetsCollection, liabilitiesCollection;
-        let unsubscribeListener, unsubscribeBudgetListener, unsubscribeCategoriesListener, unsubscribeAssetsListener, unsubscribeLiabilitiesListener;
-        let transactions = [], assets = [], liabilities = [], financeChart, currentEditingId = null, monthlyBudget = 0;
+        let app, auth, db, transactionsCollection, budgetDocRef, categoriesDocRef, assetsCollection, liabilitiesCollection, accountsPayableCollection, paymentHistoryCollection;
+        let unsubscribeListener, unsubscribeBudgetListener, unsubscribeCategoriesListener, unsubscribeAssetsListener, unsubscribeLiabilitiesListener, unsubscribeAccountsPayableListener, unsubscribePaymentHistoryListener;
+        let transactions = [], assets = [], liabilities = [], accountsPayable = [], paymentHistory = [], financeChart, currentEditingId = null, monthlyBudget = 0;
         let isLoginMode = true;
         let aiChatHistory = [], financialTips = [], currentTipIndex = 0;
         let userCategoryStructure = null; // Categorías personalizadas del usuario
@@ -1008,6 +1016,12 @@
         let testingFramework = null;
         let testRunner = null;
         let testingUI = null;
+
+        // 💳 Sistema de Cuentas por Pagar
+        let accountsPayableModal = null;
+        let paymentModal = null;
+        let accountsPayableCalendar = null;
+        let currentEditingAccountId = null;
 
         // Sistema de categorías con subcategorías de dos niveles
         const categoryStructure = {
@@ -1055,6 +1069,37 @@
                 "Aseo": {
                     "Casa": [],
                     "Familia": [],
+                    "Otros": []
+                },
+                "Servicios Públicos": {
+                    "Electricidad": [],
+                    "Agua": [],
+                    "Gas": [],
+                    "Internet": [],
+                    "Teléfono": [],
+                    "Televisión": [],
+                    "Recolección de Basura": [],
+                    "Otros": []
+                },
+                "Suscripciones": {
+                    "Streaming": ["Netflix", "Amazon Prime", "Disney+", "Spotify", "YouTube Premium"],
+                    "Software": ["Office 365", "Adobe", "Antivirus", "Almacenamiento en la Nube"],
+                    "Revistas y Periódicos": [],
+                    "Gimnasio": [],
+                    "Otros": []
+                },
+                "Seguros": {
+                    "Vida": [],
+                    "Salud": [],
+                    "Vehículo": [],
+                    "Hogar": [],
+                    "Otros": []
+                },
+                "Préstamos y Créditos": {
+                    "Hipoteca": [],
+                    "Vehículo": [],
+                    "Personal": [],
+                    "Tarjetas de Crédito": [],
                     "Otros": []
                 },
                 "Otros Gastos": {
@@ -1267,10 +1312,15 @@
         const categoriesModalEl = document.getElementById('categories-modal');
         const manageAssetsBtn = document.getElementById('manage-assets-btn');
         const manageLiabilitiesBtn = document.getElementById('manage-liabilities-btn');
+        const manageAccountsPayableBtn = document.getElementById('manage-accounts-payable-btn');
         const assetsModalEl = document.getElementById('assets-modal');
         const assetFormModalEl = document.getElementById('asset-form-modal');
         const liabilitiesModalEl = document.getElementById('liabilities-modal');
         const liabilityFormModalEl = document.getElementById('liability-form-modal');
+        const accountsPayableModalEl = document.getElementById('accounts-payable-modal');
+        const accountPayableFormModalEl = document.getElementById('account-payable-form-modal');
+        const paymentModalEl = document.getElementById('payment-modal');
+        const accountsPayableCalendarModalEl = document.getElementById('accounts-payable-calendar-modal');
         const totalAssetsEl = document.getElementById('total-assets');
         const totalLiabilitiesEl = document.getElementById('total-liabilities');
         const netWorthEl = document.getElementById('net-worth');
@@ -1292,6 +1342,185 @@
 
         // Hacer disponible globalmente
         window.formatCurrency = formatCurrency;
+
+        // 🔔 Funciones de notificación globales
+        const showSuccessMessage = (message) => {
+            showNotification(message, 'success');
+        };
+
+        const showErrorMessage = (message) => {
+            showNotification(message, 'error');
+        };
+
+        const showNotification = (message, type = 'info') => {
+            const notification = document.createElement('div');
+            const colors = {
+                success: 'bg-green-600',
+                error: 'bg-red-600',
+                warning: 'bg-yellow-600',
+                info: 'bg-blue-600'
+            };
+            const icons = {
+                success: 'check-circle',
+                error: 'x-circle',
+                warning: 'alert-triangle',
+                info: 'info'
+            };
+
+            notification.className = `fixed top-4 right-4 ${colors[type]} text-white p-3 rounded-lg shadow-lg z-50 max-w-sm transform transition-all duration-300 translate-x-full`;
+            notification.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <i data-lucide="${icons[type]}" class="w-4 h-4 flex-shrink-0"></i>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium">${message}</p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-2 hover:bg-black hover:bg-opacity-20 rounded p-1 flex-shrink-0">
+                        <i data-lucide="x" class="w-3 h-3"></i>
+                    </button>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Inicializar iconos
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+
+            // Animación de entrada
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+
+            // Auto-remover después de 5 segundos
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.classList.add('translate-x-full');
+                    setTimeout(() => {
+                        if (notification.parentElement) {
+                            notification.remove();
+                        }
+                    }, 300);
+                }
+            }, 5000);
+        };
+
+        // Hacer disponibles globalmente
+        window.showSuccessMessage = showSuccessMessage;
+        window.showErrorMessage = showErrorMessage;
+        window.showNotification = showNotification;
+
+        // 💳 Funciones de utilidad para Cuentas por Pagar
+        const recurrenceTypes = {
+            'once': 'Una vez',
+            'monthly': 'Mensual',
+            'bimonthly': 'Bimestral',
+            'quarterly': 'Trimestral',
+            'semiannual': 'Semestral',
+            'annual': 'Anual',
+            'custom': 'Personalizado'
+        };
+
+        const paymentStatuses = {
+            'pending': { label: 'Pendiente', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' },
+            'paid': { label: 'Pagado', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' },
+            'overdue': { label: 'Vencido', color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' },
+            'cancelled': { label: 'Cancelado', color: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300' }
+        };
+
+        // Función para calcular la próxima fecha de vencimiento
+        const calculateNextDueDate = (lastDueDate, recurrenceType, customDays = null) => {
+            if (recurrenceType === 'once') return null;
+
+            const date = new Date(lastDueDate);
+
+            switch(recurrenceType) {
+                case 'monthly':
+                    date.setMonth(date.getMonth() + 1);
+                    break;
+                case 'bimonthly':
+                    date.setMonth(date.getMonth() + 2);
+                    break;
+                case 'quarterly':
+                    date.setMonth(date.getMonth() + 3);
+                    break;
+                case 'semiannual':
+                    date.setMonth(date.getMonth() + 6);
+                    break;
+                case 'annual':
+                    date.setFullYear(date.getFullYear() + 1);
+                    break;
+                case 'custom':
+                    if (customDays) {
+                        date.setDate(date.getDate() + customDays);
+                    }
+                    break;
+            }
+
+            return date.toISOString().split('T')[0];
+        };
+
+        // Función para determinar el estado de una cuenta por pagar
+        const getAccountPayableStatus = (account) => {
+            if (!account.isActive) return 'cancelled';
+            if (account.lastPaidDate && account.lastPaidDate === account.nextDueDate) return 'paid';
+
+            const today = new Date().toISOString().split('T')[0];
+            const dueDate = account.nextDueDate;
+
+            if (dueDate < today) return 'overdue';
+            return 'pending';
+        };
+
+        // Función para obtener cuentas que requieren alerta
+        const getAccountsRequiringAlert = (accounts) => {
+            const today = new Date();
+            const alertAccounts = [];
+
+            accounts.forEach(account => {
+                if (!account.isActive) return;
+
+                const dueDate = new Date(account.nextDueDate);
+                const daysDifference = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+
+                // Alertas antes del vencimiento
+                if (daysDifference <= account.alertDaysBefore && daysDifference >= 0) {
+                    alertAccounts.push({
+                        ...account,
+                        alertType: 'upcoming',
+                        daysUntilDue: daysDifference
+                    });
+                }
+
+                // Alertas de vencimiento
+                if (daysDifference < 0) {
+                    alertAccounts.push({
+                        ...account,
+                        alertType: 'overdue',
+                        daysOverdue: Math.abs(daysDifference)
+                    });
+                }
+            });
+
+            return alertAccounts;
+        };
+
+        // Función para formatear fechas
+        const formatDate = (dateString) => {
+            if (!dateString) return 'No definida';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        };
+
+        // Hacer disponibles globalmente
+        window.calculateNextDueDate = calculateNextDueDate;
+        window.getAccountPayableStatus = getAccountPayableStatus;
+        window.getAccountsRequiringAlert = getAccountsRequiringAlert;
+        window.formatDate = formatDate;
 
         const applyTheme = (isDark) => {
             document.documentElement.classList.toggle('dark', isDark);
@@ -1411,10 +1640,14 @@
             if (unsubscribeCategoriesListener) unsubscribeCategoriesListener();
             if (unsubscribeAssetsListener) unsubscribeAssetsListener();
             if (unsubscribeLiabilitiesListener) unsubscribeLiabilitiesListener();
+            if (unsubscribeAccountsPayableListener) unsubscribeAccountsPayableListener();
+            if (unsubscribePaymentHistoryListener) unsubscribePaymentHistoryListener();
             transactionsCollection = null;
             userCategoryStructure = null;
             assets = [];
             liabilities = [];
+            accountsPayable = [];
+            paymentHistory = [];
 
             // 🧠 Limpiar sistema de IA
             aiMemorySystem = null;
@@ -1516,6 +1749,8 @@
             categoriesDocRef = firebase.firestore().doc(`${basePath}/categories/structure`);
             assetsCollection = firebase.firestore().collection(`${basePath}/assets`);
             liabilitiesCollection = firebase.firestore().collection(`${basePath}/liabilities`);
+            accountsPayableCollection = firebase.firestore().collection(`${basePath}/accounts_payable`);
+            paymentHistoryCollection = firebase.firestore().collection(`${basePath}/payment_history`);
 
             unsubscribeListener = transactionsCollection.onSnapshot((snapshot) => {
                 transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -1543,6 +1778,16 @@
                 liabilities = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 updateAllUI();
             });
+
+            unsubscribeAccountsPayableListener = accountsPayableCollection.onSnapshot((snapshot) => {
+                accountsPayable = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                updateAllUI();
+                checkAccountsPayableAlerts();
+            });
+
+            unsubscribePaymentHistoryListener = paymentHistoryCollection.onSnapshot((snapshot) => {
+                paymentHistory = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            });
         };
 
         const loadLiabilities = async () => {
@@ -1554,7 +1799,281 @@
                 console.error('Error loading liabilities:', error);
             }
         };
-        
+
+        // 💳 Funciones CRUD para Cuentas por Pagar
+        const loadAccountsPayable = async () => {
+            if (!accountsPayableCollection) return;
+            try {
+                const snapshot = await accountsPayableCollection.get();
+                accountsPayable = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                updateAccountsPayableStatuses();
+            } catch (error) {
+                console.error('Error loading accounts payable:', error);
+            }
+        };
+
+        const createAccountPayable = async (accountData) => {
+            if (!accountsPayableCollection) throw new Error('Collection not initialized');
+
+            try {
+                const currentUser = auth.currentUser;
+                if (!currentUser) throw new Error('User not authenticated');
+
+                const newAccount = {
+                    ...accountData,
+                    status: 'pending',
+                    isActive: true,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    userId: currentUser.uid
+                };
+
+                const docRef = await accountsPayableCollection.add(newAccount);
+                showSuccessMessage('Cuenta por pagar creada exitosamente');
+                return docRef.id;
+            } catch (error) {
+                console.error('Error creating account payable:', error);
+                showErrorMessage('Error al crear la cuenta por pagar');
+                throw error;
+            }
+        };
+
+        const updateAccountPayable = async (accountId, updateData) => {
+            if (!accountsPayableCollection) throw new Error('Collection not initialized');
+
+            try {
+                const updatedData = {
+                    ...updateData,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                await accountsPayableCollection.doc(accountId).update(updatedData);
+                showSuccessMessage('Cuenta por pagar actualizada exitosamente');
+            } catch (error) {
+                console.error('Error updating account payable:', error);
+                showErrorMessage('Error al actualizar la cuenta por pagar');
+                throw error;
+            }
+        };
+
+        const deleteAccountPayable = async (accountId) => {
+            if (!accountsPayableCollection) throw new Error('Collection not initialized');
+
+            try {
+                await accountsPayableCollection.doc(accountId).delete();
+                showSuccessMessage('Cuenta por pagar eliminada exitosamente');
+            } catch (error) {
+                console.error('Error deleting account payable:', error);
+                showErrorMessage('Error al eliminar la cuenta por pagar');
+                throw error;
+            }
+        };
+
+        const updateAccountsPayableStatuses = () => {
+            accountsPayable.forEach(async (account) => {
+                const currentStatus = getAccountPayableStatus(account);
+                if (currentStatus !== account.status) {
+                    try {
+                        await updateAccountPayable(account.id, { status: currentStatus });
+                    } catch (error) {
+                        console.error('Error updating account status:', error);
+                    }
+                }
+            });
+        };
+
+        const checkAccountsPayableAlerts = () => {
+            const alertAccounts = getAccountsRequiringAlert(accountsPayable);
+            if (alertAccounts.length > 0) {
+                showAccountsPayableAlerts(alertAccounts);
+            }
+        };
+
+        const showAccountsPayableAlerts = (alertAccounts) => {
+            alertAccounts.forEach(account => {
+                let message = '';
+                if (account.alertType === 'upcoming') {
+                    message = `${account.name} vence en ${account.daysUntilDue} día${account.daysUntilDue !== 1 ? 's' : ''}`;
+                } else if (account.alertType === 'overdue') {
+                    message = `${account.name} está vencida desde hace ${account.daysOverdue} día${account.daysOverdue !== 1 ? 's' : ''}`;
+                }
+
+                if (message) {
+                    showNotification(message, account.alertType === 'overdue' ? 'error' : 'warning');
+                }
+            });
+        };
+
+        // 🔄 Sistema de Recurrencia para Cuentas por Pagar
+        const processRecurringAccounts = async () => {
+            const today = new Date().toISOString().split('T')[0];
+
+            for (const account of accountsPayable) {
+                if (!account.isActive || account.recurrenceType === 'once') continue;
+
+                // Verificar si necesita generar nueva fecha de vencimiento
+                if (account.status === 'paid' && account.lastPaidDate === account.nextDueDate) {
+                    const nextDueDate = calculateNextDueDate(
+                        account.nextDueDate,
+                        account.recurrenceType,
+                        account.customRecurrenceDays
+                    );
+
+                    if (nextDueDate) {
+                        try {
+                            await updateAccountPayable(account.id, {
+                                nextDueDate: nextDueDate,
+                                status: 'pending'
+                            });
+                        } catch (error) {
+                            console.error('Error updating recurring account:', error);
+                        }
+                    }
+                }
+            }
+        };
+
+        const markAccountAsPaid = async (accountId, paymentData = {}) => {
+            try {
+                const account = accountsPayable.find(a => a.id === accountId);
+                if (!account) throw new Error('Account not found');
+
+                const currentUser = auth.currentUser;
+                if (!currentUser) throw new Error('User not authenticated');
+
+                const today = new Date().toISOString().split('T')[0];
+
+                // Actualizar cuenta como pagada
+                await updateAccountPayable(accountId, {
+                    status: 'paid',
+                    lastPaidDate: today
+                });
+
+                // Registrar en historial de pagos
+                const paymentRecord = {
+                    accountPayableId: accountId,
+                    amount: paymentData.amount || account.amount,
+                    paidDate: today,
+                    dueDate: account.nextDueDate,
+                    status: 'paid',
+                    paymentMethod: paymentData.paymentMethod || account.paymentMethod,
+                    notes: paymentData.notes || '',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    userId: currentUser.uid
+                };
+
+                await paymentHistoryCollection.add(paymentRecord);
+
+                // Crear transacción automáticamente si se solicita
+                if (paymentData.createTransaction) {
+                    const transactionData = {
+                        date: today,
+                        description: `Pago: ${account.name}`,
+                        amount: paymentData.amount || account.amount,
+                        type: 'expense',
+                        category: account.category,
+                        subcategory: account.subcategory || '',
+                        paymentMethod: paymentData.paymentMethod || account.paymentMethod,
+                        notes: `Pago automático de cuenta por pagar: ${account.name}`,
+                        accountPayableId: accountId
+                    };
+
+                    await transactionsCollection.add({
+                        ...transactionData,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+
+                // Procesar recurrencia si aplica
+                if (account.recurrenceType !== 'once') {
+                    const nextDueDate = calculateNextDueDate(
+                        account.nextDueDate,
+                        account.recurrenceType,
+                        account.customRecurrenceDays
+                    );
+
+                    if (nextDueDate) {
+                        await updateAccountPayable(accountId, {
+                            nextDueDate: nextDueDate,
+                            status: 'pending'
+                        });
+                    }
+                }
+
+                showSuccessMessage('Pago registrado exitosamente');
+            } catch (error) {
+                console.error('Error marking account as paid:', error);
+                showErrorMessage('Error al registrar el pago');
+                throw error;
+            }
+        };
+
+        const getUpcomingPayments = (days = 7) => {
+            const today = new Date();
+            const futureDate = new Date();
+            futureDate.setDate(today.getDate() + days);
+
+            return accountsPayable.filter(account => {
+                if (!account.isActive || account.status === 'paid') return false;
+
+                const dueDate = new Date(account.nextDueDate);
+                return dueDate >= today && dueDate <= futureDate;
+            }).sort((a, b) => new Date(a.nextDueDate) - new Date(b.nextDueDate));
+        };
+
+        const getOverduePayments = () => {
+            const today = new Date().toISOString().split('T')[0];
+
+            return accountsPayable.filter(account => {
+                return account.isActive &&
+                       account.status === 'overdue' &&
+                       account.nextDueDate < today;
+            }).sort((a, b) => new Date(a.nextDueDate) - new Date(b.nextDueDate));
+        };
+
+        const getMonthlyPaymentProjection = (month, year) => {
+            const startDate = new Date(year, month - 1, 1);
+            const endDate = new Date(year, month, 0);
+
+            let totalProjected = 0;
+            const paymentsInMonth = [];
+
+            accountsPayable.forEach(account => {
+                if (!account.isActive) return;
+
+                let currentDate = new Date(account.nextDueDate);
+
+                // Proyectar pagos recurrentes dentro del mes
+                while (currentDate <= endDate) {
+                    if (currentDate >= startDate && currentDate <= endDate) {
+                        paymentsInMonth.push({
+                            ...account,
+                            projectedDate: currentDate.toISOString().split('T')[0]
+                        });
+                        totalProjected += account.amount;
+                    }
+
+                    if (account.recurrenceType === 'once') break;
+
+                    const nextDate = calculateNextDueDate(
+                        currentDate.toISOString().split('T')[0],
+                        account.recurrenceType,
+                        account.customRecurrenceDays
+                    );
+
+                    if (!nextDate) break;
+                    currentDate = new Date(nextDate);
+                }
+            });
+
+            return {
+                totalProjected,
+                payments: paymentsInMonth.sort((a, b) =>
+                    new Date(a.projectedDate) - new Date(b.projectedDate)
+                )
+            };
+        };
+
         const renderSummary = () => {
             const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
             const totalExpense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
@@ -3319,6 +3838,573 @@
             if (newAmount >= 0) { await budgetDocRef.set({ amount: newAmount }); closeModal(budgetModalEl); }
         };
 
+        // 💳 ===== GESTIÓN DE CUENTAS POR PAGAR =====
+        const openAccountsPayableModal = () => {
+            renderAccountsPayableModal();
+            openModal(accountsPayableModalEl);
+            lucide.createIcons();
+        };
+
+        const renderAccountsPayableModal = () => {
+            const upcomingPayments = getUpcomingPayments(7);
+            const overduePayments = getOverduePayments();
+            const totalMonthly = accountsPayable
+                .filter(a => a.isActive && a.recurrenceType === 'monthly')
+                .reduce((sum, a) => sum + a.amount, 0);
+
+            accountsPayableModalEl.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 w-full max-w-6xl m-4 rounded-2xl shadow-xl flex flex-col h-[85vh]">
+                    <div class="flex justify-between items-center p-6 border-b dark:border-gray-700">
+                        <h3 class="text-xl font-semibold flex items-center gap-2">
+                            <i data-lucide="credit-card" class="text-purple-500"></i>
+                            Cuentas por Pagar
+                        </h3>
+                        <button class="js-close-modal p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    <!-- Resumen -->
+                    <div class="p-6 border-b dark:border-gray-700">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="calendar" class="w-5 h-5 text-blue-600"></i>
+                                    <span class="text-sm font-medium text-blue-600 dark:text-blue-400">Próximos 7 días</span>
+                                </div>
+                                <p class="text-2xl font-bold text-blue-700 dark:text-blue-300">${upcomingPayments.length}</p>
+                            </div>
+                            <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="alert-circle" class="w-5 h-5 text-red-600"></i>
+                                    <span class="text-sm font-medium text-red-600 dark:text-red-400">Vencidas</span>
+                                </div>
+                                <p class="text-2xl font-bold text-red-700 dark:text-red-300">${overduePayments.length}</p>
+                            </div>
+                            <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+                                    <span class="text-sm font-medium text-green-600 dark:text-green-400">Total Activas</span>
+                                </div>
+                                <p class="text-2xl font-bold text-green-700 dark:text-green-300">${accountsPayable.filter(a => a.isActive).length}</p>
+                            </div>
+                            <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="dollar-sign" class="w-5 h-5 text-purple-600"></i>
+                                    <span class="text-sm font-medium text-purple-600 dark:text-purple-400">Mensual</span>
+                                </div>
+                                <p class="text-lg font-bold text-purple-700 dark:text-purple-300">${formatCurrency(totalMonthly)}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Controles -->
+                    <div class="p-6 border-b dark:border-gray-700">
+                        <div class="flex flex-wrap gap-3 justify-between items-center">
+                            <div class="flex flex-wrap gap-2">
+                                <button id="add-account-payable-btn" class="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                                    <i data-lucide="plus" class="w-4 h-4"></i>
+                                    Nueva Cuenta
+                                </button>
+                                <button id="calendar-view-btn" class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                    <i data-lucide="calendar" class="w-4 h-4"></i>
+                                    Calendario
+                                </button>
+                            </div>
+                            <div class="flex gap-2">
+                                <select id="status-filter" class="px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                                    <option value="all">Todas</option>
+                                    <option value="pending">Pendientes</option>
+                                    <option value="paid">Pagadas</option>
+                                    <option value="overdue">Vencidas</option>
+                                </select>
+                                <select id="category-filter" class="px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                                    <option value="all">Todas las categorías</option>
+                                    ${getCategoriesForType('expense').map(cat =>
+                                        `<option value="${cat}">${cat}</option>`
+                                    ).join('')}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lista de cuentas -->
+                    <div class="flex-1 overflow-y-auto p-6">
+                        <div id="accounts-payable-list" class="space-y-4">
+                            <!-- Se llena dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            accountsPayableModalEl.querySelector('.js-close-modal').addEventListener('click', () => closeModal(accountsPayableModalEl));
+            accountsPayableModalEl.querySelector('#add-account-payable-btn').addEventListener('click', () => openAccountPayableForm());
+            accountsPayableModalEl.querySelector('#calendar-view-btn').addEventListener('click', () => openAccountsPayableCalendar());
+
+            // Event listeners para filtros
+            accountsPayableModalEl.querySelector('#status-filter').addEventListener('change', renderAccountsPayableList);
+            accountsPayableModalEl.querySelector('#category-filter').addEventListener('change', renderAccountsPayableList);
+
+            renderAccountsPayableList();
+        };
+
+        const renderAccountsPayableList = () => {
+            const listContainer = accountsPayableModalEl.querySelector('#accounts-payable-list');
+            if (!listContainer) return;
+
+            const statusFilter = accountsPayableModalEl.querySelector('#status-filter')?.value || 'all';
+            const categoryFilter = accountsPayableModalEl.querySelector('#category-filter')?.value || 'all';
+
+            let filteredAccounts = accountsPayable.filter(account => {
+                const statusMatch = statusFilter === 'all' || getAccountPayableStatus(account) === statusFilter;
+                const categoryMatch = categoryFilter === 'all' || account.category === categoryFilter;
+                return statusMatch && categoryMatch;
+            });
+
+            // Ordenar por fecha de vencimiento
+            filteredAccounts.sort((a, b) => new Date(a.nextDueDate) - new Date(b.nextDueDate));
+
+            if (filteredAccounts.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="text-center py-12">
+                        <i data-lucide="credit-card" class="w-16 h-16 mx-auto text-gray-400 mb-4"></i>
+                        <p class="text-gray-500 dark:text-gray-400">No hay cuentas por pagar que coincidan con los filtros</p>
+                    </div>
+                `;
+                return;
+            }
+
+            listContainer.innerHTML = filteredAccounts.map(account => {
+                const status = getAccountPayableStatus(account);
+                const statusInfo = paymentStatuses[status];
+                const daysUntilDue = Math.ceil((new Date(account.nextDueDate) - new Date()) / (1000 * 60 * 60 * 24));
+
+                return `
+                    <div class="bg-white dark:bg-gray-700 rounded-lg border dark:border-gray-600 p-4 hover:shadow-md transition-shadow">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <h4 class="font-semibold text-lg">${account.name}</h4>
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full ${statusInfo.color}">
+                                        ${statusInfo.label}
+                                    </span>
+                                    ${account.recurrenceType !== 'once' ?
+                                        `<span class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-600 rounded-full">
+                                            ${recurrenceTypes[account.recurrenceType]}
+                                        </span>` : ''
+                                    }
+                                </div>
+                                <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">${account.description || 'Sin descripción'}</p>
+                                <div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                                    <span class="flex items-center gap-1">
+                                        <i data-lucide="tag" class="w-4 h-4"></i>
+                                        ${account.category}${account.subcategory ? ` › ${account.subcategory}` : ''}
+                                    </span>
+                                    <span class="flex items-center gap-1">
+                                        <i data-lucide="calendar" class="w-4 h-4"></i>
+                                        ${formatDate(account.nextDueDate)}
+                                    </span>
+                                    ${daysUntilDue >= 0 ?
+                                        `<span class="flex items-center gap-1">
+                                            <i data-lucide="clock" class="w-4 h-4"></i>
+                                            ${daysUntilDue === 0 ? 'Vence hoy' :
+                                              daysUntilDue === 1 ? 'Vence mañana' :
+                                              `${daysUntilDue} días`}
+                                        </span>` :
+                                        `<span class="flex items-center gap-1 text-red-600">
+                                            <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                                            Vencida hace ${Math.abs(daysUntilDue)} días
+                                        </span>`
+                                    }
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <div class="text-right">
+                                    <p class="text-xl font-bold text-purple-600 dark:text-purple-400">
+                                        ${formatCurrency(account.amount)}
+                                    </p>
+                                    ${account.paymentMethod ?
+                                        `<p class="text-xs text-gray-500">${account.paymentMethod}</p>` : ''
+                                    }
+                                </div>
+                                <div class="flex flex-col gap-2">
+                                    ${status === 'pending' || status === 'overdue' ?
+                                        `<button class="pay-account-btn px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm" data-id="${account.id}">
+                                            <i data-lucide="check" class="w-4 h-4"></i>
+                                        </button>` : ''
+                                    }
+                                    <button class="edit-account-btn px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm" data-id="${account.id}">
+                                        <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                    </button>
+                                    <button class="delete-account-btn px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm" data-id="${account.id}">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Event listeners para botones de acción
+            listContainer.querySelectorAll('.pay-account-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const accountId = e.target.closest('.pay-account-btn').dataset.id;
+                    openPaymentModal(accountId);
+                });
+            });
+
+            listContainer.querySelectorAll('.edit-account-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const accountId = e.target.closest('.edit-account-btn').dataset.id;
+                    openAccountPayableForm(accountId);
+                });
+            });
+
+            listContainer.querySelectorAll('.delete-account-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const accountId = e.target.closest('.delete-account-btn').dataset.id;
+                    const account = accountsPayable.find(a => a.id === accountId);
+                    if (confirm(`¿Estás seguro de que quieres eliminar "${account.name}"?`)) {
+                        try {
+                            await deleteAccountPayable(accountId);
+                            renderAccountsPayableList();
+                        } catch (error) {
+                            console.error('Error deleting account:', error);
+                        }
+                    }
+                });
+            });
+
+            lucide.createIcons();
+        };
+
+        const openAccountPayableForm = (accountId = null) => {
+            currentEditingAccountId = accountId;
+            const account = accountId ? accountsPayable.find(a => a.id === accountId) : null;
+            const isEditing = !!account;
+
+            accountPayableFormModalEl.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 w-full max-w-2xl m-4 rounded-2xl shadow-xl flex flex-col max-h-[90vh]">
+                    <div class="flex justify-between items-center p-6 border-b dark:border-gray-700">
+                        <h3 class="text-xl font-semibold flex items-center gap-2">
+                            <i data-lucide="credit-card" class="text-purple-500"></i>
+                            ${isEditing ? 'Editar Cuenta por Pagar' : 'Nueva Cuenta por Pagar'}
+                        </h3>
+                        <button class="js-close-modal p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex-1 overflow-y-auto p-6">
+                        <form id="account-payable-form" class="space-y-6">
+                            <!-- Información básica -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Nombre de la cuenta *</label>
+                                    <input type="text" name="name" value="${account?.name || ''}"
+                                           class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+                                           placeholder="Ej: Servicio de Luz" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Monto *</label>
+                                    <input type="number" name="amount" value="${account?.amount || ''}"
+                                           class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+                                           placeholder="150000" min="0" step="1" required>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Descripción</label>
+                                <textarea name="description" rows="2"
+                                          class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+                                          placeholder="Descripción opcional">${account?.description || ''}</textarea>
+                            </div>
+
+                            <!-- Categorización -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Categoría *</label>
+                                    <select name="category" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600" required>
+                                        <option value="">Selecciona una categoría</option>
+                                        ${getCategoriesForType('expense').map(cat =>
+                                            `<option value="${cat}" ${account?.category === cat ? 'selected' : ''}>${cat}</option>`
+                                        ).join('')}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Subcategoría</label>
+                                    <select name="subcategory" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                                        <option value="">Selecciona una subcategoría</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Configuración de monto -->
+                            <div>
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" name="isFixedAmount" ${account?.isFixedAmount !== false ? 'checked' : ''}
+                                           class="rounded">
+                                    <span class="text-sm font-medium">Monto fijo</span>
+                                </label>
+                                <p class="text-xs text-gray-500 mt-1">Desmarcar si el monto puede variar cada mes</p>
+                            </div>
+
+                            <!-- Recurrencia -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Tipo de recurrencia *</label>
+                                    <select name="recurrenceType" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600" required>
+                                        ${Object.entries(recurrenceTypes).map(([key, label]) =>
+                                            `<option value="${key}" ${account?.recurrenceType === key ? 'selected' : ''}>${label}</option>`
+                                        ).join('')}
+                                    </select>
+                                </div>
+                                <div id="custom-recurrence-container" style="display: none;">
+                                    <label class="block text-sm font-medium mb-2">Días personalizados</label>
+                                    <input type="number" name="customRecurrenceDays" value="${account?.customRecurrenceDays || ''}"
+                                           class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+                                           placeholder="30" min="1">
+                                </div>
+                            </div>
+
+                            <!-- Fechas -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Primera fecha de vencimiento *</label>
+                                    <input type="date" name="firstDueDate" value="${account?.firstDueDate || account?.nextDueDate || ''}"
+                                           class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Días de alerta antes del vencimiento</label>
+                                    <select name="alertDaysBefore" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                                        <option value="1" ${account?.alertDaysBefore === 1 ? 'selected' : ''}>1 día</option>
+                                        <option value="3" ${account?.alertDaysBefore === 3 || !account ? 'selected' : ''}>3 días</option>
+                                        <option value="7" ${account?.alertDaysBefore === 7 ? 'selected' : ''}>7 días</option>
+                                        <option value="15" ${account?.alertDaysBefore === 15 ? 'selected' : ''}>15 días</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Información adicional -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Método de pago preferido</label>
+                                    <input type="text" name="paymentMethod" value="${account?.paymentMethod || ''}"
+                                           class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+                                           placeholder="Ej: Transferencia, Efectivo">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Número de cuenta/referencia</label>
+                                    <input type="text" name="accountNumber" value="${account?.accountNumber || ''}"
+                                           class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+                                           placeholder="Opcional">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Notas adicionales</label>
+                                <textarea name="notes" rows="2"
+                                          class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+                                          placeholder="Notas opcionales">${account?.notes || ''}</textarea>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="p-6 border-t dark:border-gray-700">
+                        <div class="flex gap-3 justify-end">
+                            <button type="button" class="js-close-modal px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                Cancelar
+                            </button>
+                            <button type="submit" form="account-payable-form" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                                ${isEditing ? 'Actualizar' : 'Crear'} Cuenta
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            openModal(accountPayableFormModalEl);
+            lucide.createIcons();
+
+            // Event listeners
+            accountPayableFormModalEl.querySelector('.js-close-modal').addEventListener('click', () => closeModal(accountPayableFormModalEl));
+            accountPayableFormModalEl.querySelector('#account-payable-form').addEventListener('submit', handleAccountPayableFormSubmit);
+
+            // Manejar cambio de categoría
+            const categorySelect = accountPayableFormModalEl.querySelector('[name="category"]');
+            const subcategorySelect = accountPayableFormModalEl.querySelector('[name="subcategory"]');
+
+            categorySelect.addEventListener('change', (e) => {
+                const category = e.target.value;
+                subcategorySelect.innerHTML = '<option value="">Selecciona una subcategoría</option>';
+
+                if (category) {
+                    const subcategories = getSubcategoriesForCategory('expense', category);
+                    subcategories.forEach(sub => {
+                        const option = document.createElement('option');
+                        option.value = sub;
+                        option.textContent = sub;
+                        if (account?.subcategory === sub) option.selected = true;
+                        subcategorySelect.appendChild(option);
+                    });
+                }
+            });
+
+            // Manejar recurrencia personalizada
+            const recurrenceSelect = accountPayableFormModalEl.querySelector('[name="recurrenceType"]');
+            const customContainer = accountPayableFormModalEl.querySelector('#custom-recurrence-container');
+
+            recurrenceSelect.addEventListener('change', (e) => {
+                customContainer.style.display = e.target.value === 'custom' ? 'block' : 'none';
+            });
+
+            // Inicializar subcategorías si hay categoría seleccionada
+            if (account?.category) {
+                categorySelect.dispatchEvent(new Event('change'));
+            }
+
+            // Mostrar recurrencia personalizada si aplica
+            if (account?.recurrenceType === 'custom') {
+                customContainer.style.display = 'block';
+            }
+        };
+
+        const handleAccountPayableFormSubmit = async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+
+            const accountData = {
+                name: formData.get('name'),
+                description: formData.get('description'),
+                amount: parseFloat(formData.get('amount')),
+                category: formData.get('category'),
+                subcategory: formData.get('subcategory') || null,
+                isFixedAmount: formData.has('isFixedAmount'),
+                recurrenceType: formData.get('recurrenceType'),
+                customRecurrenceDays: formData.get('customRecurrenceDays') ? parseInt(formData.get('customRecurrenceDays')) : null,
+                firstDueDate: formData.get('firstDueDate'),
+                nextDueDate: formData.get('firstDueDate'), // Inicialmente igual a la primera fecha
+                alertDaysBefore: parseInt(formData.get('alertDaysBefore')),
+                paymentMethod: formData.get('paymentMethod') || null,
+                accountNumber: formData.get('accountNumber') || null,
+                notes: formData.get('notes') || null
+            };
+
+            try {
+                if (currentEditingAccountId) {
+                    await updateAccountPayable(currentEditingAccountId, accountData);
+                } else {
+                    await createAccountPayable(accountData);
+                }
+
+                closeModal(accountPayableFormModalEl);
+                renderAccountsPayableList();
+            } catch (error) {
+                console.error('Error saving account payable:', error);
+            }
+        };
+
+        const openPaymentModal = (accountId) => {
+            const account = accountsPayable.find(a => a.id === accountId);
+            if (!account) return;
+
+            paymentModalEl.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 w-full max-w-md m-4 rounded-2xl shadow-xl">
+                    <div class="flex justify-between items-center p-6 border-b dark:border-gray-700">
+                        <h3 class="text-xl font-semibold flex items-center gap-2">
+                            <i data-lucide="check-circle" class="text-green-500"></i>
+                            Registrar Pago
+                        </h3>
+                        <button class="js-close-modal p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    <div class="p-6">
+                        <div class="mb-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <h4 class="font-semibold">${account.name}</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">Vence: ${formatDate(account.nextDueDate)}</p>
+                        </div>
+
+                        <form id="payment-form" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Monto a pagar *</label>
+                                <input type="number" name="amount" value="${account.amount}"
+                                       class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+                                       min="0" step="1" required ${account.isFixedAmount ? 'readonly' : ''}>
+                                ${!account.isFixedAmount ? '<p class="text-xs text-gray-500 mt-1">Puedes modificar el monto si es variable</p>' : ''}
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Método de pago</label>
+                                <input type="text" name="paymentMethod" value="${account.paymentMethod || ''}"
+                                       class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+                                       placeholder="Ej: Transferencia, Efectivo">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Notas del pago</label>
+                                <textarea name="notes" rows="2"
+                                          class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+                                          placeholder="Notas opcionales sobre este pago"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" name="createTransaction" checked class="rounded">
+                                    <span class="text-sm font-medium">Crear transacción automáticamente</span>
+                                </label>
+                                <p class="text-xs text-gray-500 mt-1">Se registrará como gasto en tus transacciones</p>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="p-6 border-t dark:border-gray-700">
+                        <div class="flex gap-3 justify-end">
+                            <button type="button" class="js-close-modal px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                Cancelar
+                            </button>
+                            <button type="submit" form="payment-form" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                Registrar Pago
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            openModal(paymentModalEl);
+            lucide.createIcons();
+
+            paymentModalEl.querySelector('.js-close-modal').addEventListener('click', () => closeModal(paymentModalEl));
+            paymentModalEl.querySelector('#payment-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const form = e.target;
+                const formData = new FormData(form);
+
+                const paymentData = {
+                    amount: parseFloat(formData.get('amount')),
+                    paymentMethod: formData.get('paymentMethod'),
+                    notes: formData.get('notes'),
+                    createTransaction: formData.has('createTransaction')
+                };
+
+                try {
+                    await markAccountAsPaid(accountId, paymentData);
+                    closeModal(paymentModalEl);
+                    renderAccountsPayableList();
+                } catch (error) {
+                    console.error('Error registering payment:', error);
+                }
+            });
+        };
+
+        const openAccountsPayableCalendar = () => {
+            // Placeholder para el calendario - se implementará en la siguiente fase
+            showNotification('Calendario de pagos - Próximamente disponible', 'info');
+        };
+
         const openAiChatModal = async () => {
             aiChatHistory = [];
 
@@ -4077,6 +5163,7 @@ ${transactionData}`;
             manageCategoriesBtn.addEventListener('click', openCategoriesModal);
             manageAssetsBtn.addEventListener('click', openAssetsModal);
             manageLiabilitiesBtn.addEventListener('click', openLiabilitiesModal);
+            manageAccountsPayableBtn.addEventListener('click', openAccountsPayableModal);
 
             console.log('✅ Event listeners inicializados');
         };

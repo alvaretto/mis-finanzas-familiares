@@ -4,36 +4,57 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // 👤 DATOS DE USUARIOS - Solo el usuario autenticado puede acceder a sus datos
+    // 🏗️ ESTRUCTURA PRINCIPAL DE LA APLICACIÓN
+    // Ruta: artifacts/{appId}/shared_transactions/family_data
+    match /artifacts/{appId}/shared_transactions/family_data/{document=**} {
+      allow read, write: if request.auth != null;
+    }
+
+    // 👤 DATOS DE USUARIOS INDIVIDUALES
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
-      
-      // 📊 TRANSACCIONES - Solo el propietario puede acceder
+
+      // 📊 TRANSACCIONES PERSONALES - Solo el propietario puede acceder
       match /transactions/{transactionId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
-      
-      // 🏷️ CATEGORÍAS - Solo el propietario puede acceder
+
+      // 🏷️ CATEGORÍAS PERSONALES - Solo el propietario puede acceder
       match /categories/{categoryId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
-      
-      // 💰 ACTIVOS - Solo el propietario puede acceder
+
+      // 💰 ACTIVOS PERSONALES - Solo el propietario puede acceder
       match /assets/{assetId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
-      
-      // 💳 PASIVOS - Solo el propietario puede acceder
+
+      // 💳 PASIVOS PERSONALES - Solo el propietario puede acceder
       match /liabilities/{liabilityId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
-      
-      // ⚙️ CONFIGURACIONES - Solo el propietario puede acceder
+
+      // 💳 CUENTAS POR PAGAR PERSONALES - Solo el propietario puede acceder
+      match /accounts_payable/{accountId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // 📋 HISTORIAL DE PAGOS PERSONAL - Solo el propietario puede acceder
+      match /payment_history/{paymentId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // ⚙️ CONFIGURACIONES PERSONALES - Solo el propietario puede acceder
       match /settings/{settingId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
     }
-    
+
+    // 🧠 SISTEMA DE IA - Datos de memoria y aprendizaje
+    match /artifacts/{appId}/ai_memory/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
     // ❌ DENEGAR TODO LO DEMÁS
     match /{document=**} {
       allow read, write: if false;
@@ -50,6 +71,16 @@ service cloud.firestore {
 
 // ✅ ESTAS REGLAS GARANTIZAN:
 // - Solo usuarios autenticados pueden acceder a datos
-// - Cada usuario solo ve sus propios datos
-// - No hay acceso cruzado entre usuarios
+// - Acceso compartido a datos familiares en artifacts/{appId}/shared_transactions/family_data
+// - Datos personales protegidos por usuario individual
+// - Cuentas por pagar y historial de pagos protegidos por usuario
+// - Sistema de IA con datos protegidos por usuario
 // - Protección completa contra acceso no autorizado
+
+// 🆕 NUEVAS FUNCIONALIDADES INCLUIDAS:
+// - 💳 Cuentas por Pagar: Gestión completa de pagos recurrentes
+// - 📋 Historial de Pagos: Registro detallado de todos los pagos
+// - 🔄 Sistema de Recurrencia: Pagos automáticos programados
+// - 🔔 Alertas y Notificaciones: Recordatorios de vencimientos
+// - 📊 Análisis Predictivo: Proyecciones de flujo de caja
+// - 📱 Optimizado para móviles Android
