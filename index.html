@@ -238,6 +238,41 @@
             }
         };
 
+        // 💾 Función para inicializar sistemas necesarios para testing
+        window.initializeSystemsForTesting = async function() {
+            console.log('💾 Inicializando sistemas para testing...');
+
+            try {
+                // Inicializar sistema de backups si no existe
+                if (!automaticBackupSystem && typeof AutomaticBackupSystem !== 'undefined') {
+                    console.log('💾 Inicializando AutomaticBackupSystem para testing...');
+                    automaticBackupSystem = new AutomaticBackupSystem();
+                    // No necesitamos inicializar completamente para testing básico
+                    console.log('✅ AutomaticBackupSystem inicializado para testing');
+                }
+
+                // Inicializar sistema de exportación si no existe
+                if (!multiExportSystem && typeof MultiExportSystem !== 'undefined') {
+                    console.log('📤 Inicializando MultiExportSystem para testing...');
+                    multiExportSystem = new MultiExportSystem();
+                    console.log('✅ MultiExportSystem inicializado para testing');
+                }
+
+                // Inicializar UI de backups si no existe
+                if (!backupManagementUI && typeof BackupManagementUI !== 'undefined') {
+                    console.log('🎨 Inicializando BackupManagementUI para testing...');
+                    backupManagementUI = new BackupManagementUI();
+                    console.log('✅ BackupManagementUI inicializado para testing');
+                }
+
+                console.log('✅ Sistemas inicializados para testing');
+                return true;
+            } catch (error) {
+                console.error('❌ Error inicializando sistemas para testing:', error);
+                return false;
+            }
+        };
+
         // 🧪 Auto-detectar si estamos en entorno de testing
         window.detectTestingEnvironment = function() {
             // Detectar si estamos ejecutando tests basado en varios indicadores
@@ -259,6 +294,8 @@
                 console.log('🧪 Entorno de testing detectado, habilitando modo testing...');
                 setTimeout(() => {
                     window.enableTestingMode();
+                    // 💾 Inicializar sistemas para testing
+                    window.initializeSystemsForTesting();
                 }, 100);
             }
 

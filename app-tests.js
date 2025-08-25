@@ -392,6 +392,11 @@ testFramework.describe('Tests End-to-End (E2E)', () => {
     });
 
     testFramework.it('Flujo completo: Responsive design', () => {
+        // 🧪 Asegurar que el elemento #app esté visible para testing
+        if (typeof window.enableTestingMode === 'function') {
+            window.enableTestingMode();
+        }
+
         // Verificar que la aplicación es responsive
         const app = document.getElementById('app');
         if (app) {
