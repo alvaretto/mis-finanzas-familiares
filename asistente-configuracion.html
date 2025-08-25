@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏠 Asistente de Configuración - Finanzas Familiares</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .step { display: none; }
+        .step.active { display: block; }
+        .progress-bar { transition: width 0.3s ease; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">🏠 Asistente de Configuración</h1>
+            <p class="text-xl text-gray-600">Configura tu App de Finanzas Familiares en 4 pasos fáciles</p>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="mb-8">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-sm font-medium text-gray-700">Progreso</span>
+                <span class="text-sm font-medium text-gray-700" id="progress-text">Paso 1 de 4</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-3">
+                <div class="bg-blue-600 h-3 rounded-full progress-bar" id="progress-bar" style="width: 25%"></div>
+            </div>
+        </div>
+
+        <!-- Step 1: Preparación -->
+        <div class="step active bg-white rounded-lg shadow-lg p-8" id="step1">
+            <div class="text-center mb-6">
+                <div class="text-6xl mb-4">📋</div>
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Paso 1: Preparación</h2>
+                <p class="text-gray-600">Vamos a preparar los archivos necesarios</p>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-4">
+                    <h3 class="font-bold text-blue-800 mb-2">✅ ¿Ya descargaste el proyecto?</h3>
+                    <p class="text-blue-700 mb-3">Si no lo has hecho, descárgalo desde:</p>
+                    <a href="https://github.com/alvaretto/mis-finanzas-familiares" target="_blank" 
+                       class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                        📥 Descargar Proyecto
+                    </a>
+                </div>
+
+                <div class="bg-green-50 border-l-4 border-green-400 p-4">
+                    <h3 class="font-bold text-green-800 mb-2">📝 Crear archivo de configuración</h3>
+                    <ol class="list-decimal list-inside text-green-700 space-y-1">
+                        <li>Busca el archivo <code class="bg-gray-200 px-1 rounded">config.example.js</code></li>
+                        <li>Cópialo y pégalo en la misma carpeta</li>
+                        <li>Renombra la copia a <code class="bg-gray-200 px-1 rounded">config.js</code></li>
+                    </ol>
+                </div>
+
+                <div class="text-center">
+                    <label class="flex items-center justify-center space-x-2 cursor-pointer">
+                        <input type="checkbox" id="step1-check" class="w-5 h-5 text-blue-600">
+                        <span class="text-lg">✅ He completado la preparación</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="text-center mt-8">
+                <button onclick="nextStep()" id="step1-btn" disabled 
+                        class="bg-gray-400 text-white px-8 py-3 rounded-lg text-lg font-semibold cursor-not-allowed">
+                    Siguiente: Configurar IA 🤖
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 2: Gemini AI -->
+        <div class="step bg-white rounded-lg shadow-lg p-8" id="step2">
+            <div class="text-center mb-6">
+                <div class="text-6xl mb-4">🤖</div>
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Paso 2: Configurar IA</h2>
+                <p class="text-gray-600">Configura Google Gemini para consejos inteligentes</p>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-purple-50 border-l-4 border-purple-400 p-4">
+                    <h3 class="font-bold text-purple-800 mb-2">🔑 Obtener API Key</h3>
+                    <ol class="list-decimal list-inside text-purple-700 space-y-1 mb-3">
+                        <li>Ve a Google AI Studio</li>
+                        <li>Inicia sesión con tu cuenta Google</li>
+                        <li>Crea una nueva API Key</li>
+                        <li>Copia la API Key generada</li>
+                    </ol>
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank" 
+                       class="inline-block bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition">
+                        🚀 Ir a Google AI Studio
+                    </a>
+                </div>
+
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                    <h3 class="font-bold text-yellow-800 mb-2">📝 Configurar en tu archivo</h3>
+                    <p class="text-yellow-700 mb-2">En tu archivo <code class="bg-gray-200 px-1 rounded">config.js</code>, busca:</p>
+                    <pre class="bg-gray-800 text-green-400 p-3 rounded text-sm overflow-x-auto">const GEMINI_API_KEY = "TU_API_KEY_DE_GEMINI_AQUI";</pre>
+                    <p class="text-yellow-700 mt-2">Y reemplaza <code class="bg-gray-200 px-1 rounded">TU_API_KEY_DE_GEMINI_AQUI</code> con tu API Key real.</p>
+                </div>
+
+                <div class="text-center">
+                    <label class="flex items-center justify-center space-x-2 cursor-pointer">
+                        <input type="checkbox" id="step2-check" class="w-5 h-5 text-blue-600">
+                        <span class="text-lg">✅ He configurado la API Key de Gemini</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex justify-between mt-8">
+                <button onclick="prevStep()" class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition">
+                    ← Anterior
+                </button>
+                <button onclick="nextStep()" id="step2-btn" disabled 
+                        class="bg-gray-400 text-white px-8 py-3 rounded-lg text-lg font-semibold cursor-not-allowed">
+                    Siguiente: Configurar Firebase 🔥
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 3: Firebase -->
+        <div class="step bg-white rounded-lg shadow-lg p-8" id="step3">
+            <div class="text-center mb-6">
+                <div class="text-6xl mb-4">🔥</div>
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Paso 3: Configurar Firebase</h2>
+                <p class="text-gray-600">Configura tu base de datos segura</p>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-red-50 border-l-4 border-red-400 p-4">
+                    <h3 class="font-bold text-red-800 mb-2">🏗️ Crear proyecto Firebase</h3>
+                    <ol class="list-decimal list-inside text-red-700 space-y-1 mb-3">
+                        <li>Ve a Firebase Console</li>
+                        <li>Crea un nuevo proyecto</li>
+                        <li>Ponle un nombre (ej: "mis-finanzas-familiares")</li>
+                        <li>Desactiva Google Analytics</li>
+                    </ol>
+                    <a href="https://console.firebase.google.com/" target="_blank" 
+                       class="inline-block bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition">
+                        🚀 Ir a Firebase Console
+                    </a>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="bg-orange-50 border-l-4 border-orange-400 p-4">
+                        <h3 class="font-bold text-orange-800 mb-2">🔐 Authentication</h3>
+                        <ol class="list-decimal list-inside text-orange-700 space-y-1 text-sm">
+                            <li>Clic en "Authentication"</li>
+                            <li>Clic en "Comenzar"</li>
+                            <li>Pestaña "Sign-in method"</li>
+                            <li>Habilitar "Email/password"</li>
+                        </ol>
+                    </div>
+
+                    <div class="bg-green-50 border-l-4 border-green-400 p-4">
+                        <h3 class="font-bold text-green-800 mb-2">💾 Firestore Database</h3>
+                        <ol class="list-decimal list-inside text-green-700 space-y-1 text-sm">
+                            <li>Clic en "Firestore Database"</li>
+                            <li>Clic en "Crear base de datos"</li>
+                            <li>"Modo de prueba"</li>
+                            <li>Elegir ubicación cercana</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-4">
+                    <h3 class="font-bold text-blue-800 mb-2">⚙️ Obtener configuración</h3>
+                    <ol class="list-decimal list-inside text-blue-700 space-y-1">
+                        <li>Clic en ⚙️ → "Configuración del proyecto"</li>
+                        <li>Bajar a "Tus apps" → Clic en "</>" (web)</li>
+                        <li>Nombre de app → "Registrar app"</li>
+                        <li>Copiar toda la configuración firebaseConfig</li>
+                        <li>Pegar en tu archivo config.js</li>
+                    </ol>
+                </div>
+
+                <div class="text-center">
+                    <label class="flex items-center justify-center space-x-2 cursor-pointer">
+                        <input type="checkbox" id="step3-check" class="w-5 h-5 text-blue-600">
+                        <span class="text-lg">✅ He configurado Firebase completamente</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex justify-between mt-8">
+                <button onclick="prevStep()" class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition">
+                    ← Anterior
+                </button>
+                <button onclick="nextStep()" id="step3-btn" disabled 
+                        class="bg-gray-400 text-white px-8 py-3 rounded-lg text-lg font-semibold cursor-not-allowed">
+                    Siguiente: Probar App 🚀
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 4: Testing -->
+        <div class="step bg-white rounded-lg shadow-lg p-8" id="step4">
+            <div class="text-center mb-6">
+                <div class="text-6xl mb-4">🚀</div>
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Paso 4: ¡Probar tu App!</h2>
+                <p class="text-gray-600">Vamos a verificar que todo funcione perfectamente</p>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-green-50 border-l-4 border-green-400 p-4">
+                    <h3 class="font-bold text-green-800 mb-2">🎯 Abrir la aplicación</h3>
+                    <ol class="list-decimal list-inside text-green-700 space-y-1">
+                        <li>Busca el archivo <code class="bg-gray-200 px-1 rounded">index.html</code></li>
+                        <li>Haz doble clic para abrirlo en tu navegador</li>
+                        <li>Deberías ver la pantalla de inicio de sesión</li>
+                    </ol>
+                </div>
+
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-4">
+                    <h3 class="font-bold text-blue-800 mb-2">👤 Crear tu primera cuenta</h3>
+                    <ol class="list-decimal list-inside text-blue-700 space-y-1">
+                        <li>Clic en "Regístrate"</li>
+                        <li>Ingresa tu email y contraseña</li>
+                        <li>Clic en "Crear Cuenta"</li>
+                        <li>¡Deberías entrar a la app!</li>
+                    </ol>
+                </div>
+
+                <div class="bg-purple-50 border-l-4 border-purple-400 p-4">
+                    <h3 class="font-bold text-purple-800 mb-2">🤖 Probar la IA</h3>
+                    <ol class="list-decimal list-inside text-purple-700 space-y-1">
+                        <li>Una vez dentro, clic en "Tips IA"</li>
+                        <li>Deberías recibir un consejo financiero</li>
+                        <li>¡Si funciona, todo está perfecto!</li>
+                    </ol>
+                </div>
+
+                <div class="text-center bg-gradient-to-r from-green-400 to-blue-500 text-white p-6 rounded-lg">
+                    <h3 class="text-2xl font-bold mb-2">🎉 ¡FELICITACIONES!</h3>
+                    <p class="text-lg">Tu aplicación de finanzas familiares está lista para usar</p>
+                </div>
+            </div>
+
+            <div class="flex justify-between mt-8">
+                <button onclick="prevStep()" class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition">
+                    ← Anterior
+                </button>
+                <button onclick="openApp()" class="bg-green-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-green-700 transition">
+                    🚀 Abrir Mi App
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 4;
+
+        // Enable/disable next button based on checkbox
+        document.getElementById('step1-check').addEventListener('change', function() {
+            const btn = document.getElementById('step1-btn');
+            if (this.checked) {
+                btn.disabled = false;
+                btn.className = 'bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition cursor-pointer';
+            } else {
+                btn.disabled = true;
+                btn.className = 'bg-gray-400 text-white px-8 py-3 rounded-lg text-lg font-semibold cursor-not-allowed';
+            }
+        });
+
+        document.getElementById('step2-check').addEventListener('change', function() {
+            const btn = document.getElementById('step2-btn');
+            if (this.checked) {
+                btn.disabled = false;
+                btn.className = 'bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition cursor-pointer';
+            } else {
+                btn.disabled = true;
+                btn.className = 'bg-gray-400 text-white px-8 py-3 rounded-lg text-lg font-semibold cursor-not-allowed';
+            }
+        });
+
+        document.getElementById('step3-check').addEventListener('change', function() {
+            const btn = document.getElementById('step3-btn');
+            if (this.checked) {
+                btn.disabled = false;
+                btn.className = 'bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition cursor-pointer';
+            } else {
+                btn.disabled = true;
+                btn.className = 'bg-gray-400 text-white px-8 py-3 rounded-lg text-lg font-semibold cursor-not-allowed';
+            }
+        });
+
+        function updateProgress() {
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            const percentage = (currentStep / totalSteps) * 100;
+            
+            progressBar.style.width = percentage + '%';
+            progressText.textContent = `Paso ${currentStep} de ${totalSteps}`;
+        }
+
+        function showStep(step) {
+            // Hide all steps
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            // Show current step
+            document.getElementById(`step${step}`).classList.add('active');
+            updateProgress();
+        }
+
+        function nextStep() {
+            if (currentStep < totalSteps) {
+                currentStep++;
+                showStep(currentStep);
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                showStep(currentStep);
+            }
+        }
+
+        function openApp() {
+            window.open('index.html', '_blank');
+        }
+    </script>
+</body>
+</html>

@@ -168,6 +168,27 @@ php -S localhost:8000
 
 5. **Accede a** `http://localhost:8000`
 
+### 🏠 **Herramientas de Configuración Fácil**
+
+Para usuarios que prefieren una configuración guiada, hemos creado herramientas especiales:
+
+#### 🎯 **Asistente Interactivo**
+- **Archivo**: `asistente-configuracion.html`
+- **Descripción**: Interfaz paso a paso con validación automática
+- **Ideal para**: Usuarios no técnicos que prefieren una guía visual
+
+#### 📖 **Guía Súper Fácil**
+- **Archivo**: `GUIA-CONFIGURACION-SIMPLE.md`
+- **Descripción**: Instrucciones detalladas en lenguaje simple
+- **Ideal para**: Usuarios que prefieren leer instrucciones paso a paso
+
+#### 🔍 **Verificador de Configuración**
+- **Archivo**: `verificar-configuracion.html`
+- **Descripción**: Valida automáticamente que tu configuración esté correcta
+- **Ideal para**: Verificar que todo funcione antes de usar la app
+
+> 💡 **Recomendación**: Usa el asistente interactivo para una experiencia más fácil, luego el verificador para confirmar que todo esté bien.
+
 ### 🔑 **Configuración de APIs (Solo Desarrolladores)**
 
 #### **Google Gemini API**
@@ -565,8 +586,8 @@ Esta roadmap está diseñada para desarrolladores que quieran expandir las funci
 
 **Impacto funcional**: Los usuarios podrán usar la aplicación sin conexión, instalarla como app nativa y recibir actualizaciones automáticas en segundo plano.
 
-**Stack tecnológico**: Service Worker API, Cache API, IndexedDB, Web App Manifest, Push API
-**Estimación**: 1-2 semanas
+**Stack tecnológico**: Service Worker API, Cache API, IndexedDB, Web App Manifest, Push API\
+**Estimación**: 1-2 semanas\
 **Prerequisitos**: Sistema de sincronización Firebase ya implementado
 
 #### 🎮 **Sistema de Gamificación Financiera**
@@ -574,8 +595,8 @@ Esta roadmap está diseñada para desarrolladores que quieran expandir las funci
 
 **Impacto funcional**: Motivar a toda la familia a mejorar hábitos financieros mediante mecánicas de juego, aumentando el engagement y la educación financiera.
 
-**Stack tecnológico**: JavaScript ES6+, Firebase Firestore (colecciones de achievements), Chart.js para visualización de progreso
-**Estimación**: 2 semanas
+**Stack tecnológico**: JavaScript ES6+, Firebase Firestore (colecciones de achievements), Chart.js para visualización de progreso\
+**Estimación**: 2 semanas\
 **Prerequisitos**: Sistema de transacciones y categorías ya funcional
 
 #### 🔔 **Sistema de Notificaciones Push Inteligentes**
@@ -583,8 +604,8 @@ Esta roadmap está diseñada para desarrolladores que quieran expandir las funci
 
 **Impacto funcional**: Mantener a los usuarios informados sobre su salud financiera con alertas oportunas y personalizadas, mejorando la adherencia al presupuesto.
 
-**Stack tecnológico**: Firebase Cloud Messaging, Service Worker, Notification API, Firebase Functions para triggers automáticos
-**Estimación**: 1-2 semanas
+**Stack tecnológico**: Firebase Cloud Messaging, Service Worker, Notification API, Firebase Functions para triggers automáticos\
+**Estimación**: 1-2 semanas\
 **Prerequisitos**: Sistema de análisis de patrones ya implementado
 
 ### 🟡 **Nivel Intermedio** (3-4 semanas)
@@ -594,8 +615,9 @@ Esta roadmap está diseñada para desarrolladores que quieran expandir las funci
 
 **Impacto funcional**: Eliminar la entrada manual de datos al fotografiar recibos, reduciendo errores y tiempo de registro de transacciones.
 
-**Stack tecnológico**: Google Vision API, Tesseract.js (alternativa offline), Canvas API para procesamiento de imágenes, ML para categorización automática
-**Estimación**: 3-4 semanas
+**Stack tecnológico**: Google Vision API, Tesseract.js (alternativa offline), Canvas API para procesamiento de imágenes, 
+ML para categorización automática\
+**Estimación**: 3-4 semanas\
 **Prerequisitos**: Sistema de categorías y transacciones implementado
 
 #### 🤖 **Machine Learning Avanzado para Predicciones**
@@ -603,8 +625,8 @@ Esta roadmap está diseñada para desarrolladores que quieran expandir las funci
 
 **Impacto funcional**: Proporcionar insights predictivos precisos y personalizados que ayuden a las familias a planificar mejor sus finanzas futuras.
 
-**Stack tecnológico**: TensorFlow.js, ML5.js, algoritmos de regresión lineal y redes neuronales simples, integración con Gemini AI
-**Estimación**: 4 semanas
+**Stack tecnológico**: TensorFlow.js, ML5.js, algoritmos de regresión lineal y redes neuronales simples, integración con Gemini AI\
+**Estimación**: 4 semanas\
 **Prerequisitos**: Dashboard predictivo básico ya implementado
 
 #### 📊 **Dashboard de Inversiones en Tiempo Real**
@@ -612,8 +634,9 @@ Esta roadmap está diseñada para desarrolladores que quieran expandir las funci
 
 **Impacto funcional**: Permitir a las familias monitorear y optimizar sus inversiones desde la misma plataforma de gestión financiera.
 
-**Stack tecnológico**: Alpha Vantage API, Yahoo Finance API, WebSocket para datos en tiempo real, Chart.js para visualizaciones avanzadas
-**Estimación**: 3-4 semanas
+**Stack tecnológico**: Alpha Vantage API, Yahoo Finance API, WebSocket para datos en tiempo real, Chart.js para 
+visualizaciones avanzadas\
+**Estimación**: 3-4 semanas\
 **Prerequisitos**: Sistema de activos y patrimonio neto implementado
 
 ### 🟠 **Nivel Avanzado** (1-2 meses)
@@ -623,8 +646,8 @@ Esta roadmap está diseñada para desarrolladores que quieran expandir las funci
 
 **Impacto funcional**: Automatizar completamente la entrada de datos financieros, proporcionando una vista unificada y actualizada de todas las cuentas bancarias.
 
-**Stack tecnológico**: OAuth 2.0, APIs REST bancarias, JWT para autenticación, cifrado AES para datos sensibles
-**Estimación**: 1-2 meses
+**Stack tecnológico**: OAuth 2.0, APIs REST bancarias, JWT para autenticación, cifrado AES para datos sensibles\
+**Estimación**: 1-2 meses\
 **Prerequisitos**: Sistema de seguridad robusto y manejo de transacciones implementado
 
 #### 🏢 **Arquitectura Multi-Tenant Familiar**
@@ -632,8 +655,9 @@ Esta roadmap está diseñada para desarrolladores que quieran expandir las funci
 
 **Impacto funcional**: Escalar la aplicación para servir a múltiples familias manteniendo privacidad y seguridad, abriendo posibilidades de monetización.
 
-**Stack tecnológico**: Firebase Security Rules avanzadas, Cloud Functions, sistema de roles personalizado, arquitectura de microservicios
-**Estimación**: 2 meses
+**Stack tecnológico**: Firebase Security Rules avanzadas, Cloud Functions, sistema de roles personalizado, 
+arquitectura de microservicios\
+**Estimación**: 2 meses\
 **Prerequisitos**: Sistema de autenticación y base de datos bien estructurada
 
 #### 🛒 **Marketplace Financiero Integrado**
@@ -641,8 +665,9 @@ Esta roadmap está diseñada para desarrolladores que quieran expandir las funci
 
 **Impacto funcional**: Ayudar a las familias a tomar decisiones financieras informadas comparando productos y encontrando las mejores opciones para su perfil.
 
-**Stack tecnológico**: APIs de instituciones financieras, algoritmos de matching, sistema de recomendaciones, integración con calculadoras financieras
-**Estimación**: 1-2 meses
+**Stack tecnológico**: APIs de instituciones financieras, algoritmos de matching, sistema de recomendaciones, 
+integración con calculadoras financieras\
+**Estimación**: 1-2 meses\
 **Prerequisitos**: Sistema de análisis financiero y perfil de usuario implementado
 
 ### 🔴 **Nivel Revolucionario** (2-3 meses)
@@ -652,8 +677,9 @@ Esta roadmap está diseñada para desarrolladores que quieran expandir las funci
 
 **Impacto funcional**: Transformar la gestión financiera personal en una experiencia social y educativa, fomentando mejores hábitos financieros a través de la comunidad.
 
-**Stack tecnológico**: Sistema de matching anónimo, algoritmos de recomendación social, WebRTC para comunicación, sistema de moderación automático
-**Estimación**: 3 meses
+**Stack tecnológico**: Sistema de matching anónimo, algoritmos de recomendación social, WebRTC para comunicación, 
+sistema de moderación automático\
+**Estimación**: 3 meses\
 **Prerequisitos**: Arquitectura multi-tenant y sistema de gamificación implementados
 
 #### 🧠 **IA Generativa para Reportes Narrativos**
@@ -661,8 +687,9 @@ Esta roadmap está diseñada para desarrolladores que quieran expandir las funci
 
 **Impacto funcional**: Proporcionar reportes financieros comprensibles y accionables que cualquier miembro de la familia pueda entender y seguir.
 
-**Stack tecnológico**: GPT-4 API, Gemini Pro, procesamiento de lenguaje natural, templates dinámicos, generación de gráficos automática
-**Estimación**: 2-3 meses
+**Stack tecnológico**: GPT-4 API, Gemini Pro, procesamiento de lenguaje natural, templates dinámicos, 
+generación de gráficos automática\
+**Estimación**: 2-3 meses\
 **Prerequisitos**: Sistema de IA avanzado y análisis de datos implementado
 
 #### 🏗️ **Arquitectura de Microservicios Empresarial**
@@ -670,8 +697,8 @@ Esta roadmap está diseñada para desarrolladores que quieran expandir las funci
 
 **Impacto funcional**: Escalar la aplicación para soportar millones de usuarios con alta disponibilidad, rendimiento optimizado y mantenimiento simplificado.
 
-**Stack tecnológico**: Docker, Kubernetes, API Gateway, microservicios independientes, CI/CD automatizado, monitoreo distribuido
-**Estimación**: 3 meses
+**Stack tecnológico**: Docker, Kubernetes, API Gateway, microservicios independientes, CI/CD automatizado, monitoreo distribuido\
+**Estimación**: 3 meses\
 **Prerequisitos**: Aplicación monolítica estable y bien documentada
 
 ### 🔒 **Consideraciones de Seguridad**

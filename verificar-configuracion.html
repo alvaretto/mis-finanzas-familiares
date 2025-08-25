@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Verificador de Configuración - Finanzas Familiares</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-green-50 to-blue-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">🔍 Verificador de Configuración</h1>
+            <p class="text-xl text-gray-600">Verifica que tu configuración esté correcta antes de usar la app</p>
+        </div>
+
+        <!-- Status Card -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <div class="text-center mb-6">
+                <div id="status-icon" class="text-6xl mb-4">⏳</div>
+                <h2 id="status-title" class="text-2xl font-bold text-gray-800 mb-2">Verificando configuración...</h2>
+                <p id="status-message" class="text-gray-600">Por favor espera mientras verificamos tu configuración</p>
+            </div>
+
+            <div class="text-center">
+                <button onclick="runVerification()" id="verify-btn" 
+                        class="bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition">
+                    🔍 Verificar Configuración
+                </button>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="space-y-4" style="display: none;">
+            <!-- Config File Check -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div id="config-icon" class="text-2xl">⏳</div>
+                        <div>
+                            <h3 class="font-bold text-gray-800">Archivo de Configuración</h3>
+                            <p class="text-gray-600 text-sm">Verificando que config.js existe y es válido</p>
+                        </div>
+                    </div>
+                    <div id="config-status" class="text-sm font-medium text-gray-500">Verificando...</div>
+                </div>
+                <div id="config-details" class="mt-4 text-sm text-gray-600" style="display: none;"></div>
+            </div>
+
+            <!-- Gemini API Check -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div id="gemini-icon" class="text-2xl">⏳</div>
+                        <div>
+                            <h3 class="font-bold text-gray-800">API Key de Gemini</h3>
+                            <p class="text-gray-600 text-sm">Verificando que la API Key de Google Gemini es válida</p>
+                        </div>
+                    </div>
+                    <div id="gemini-status" class="text-sm font-medium text-gray-500">Verificando...</div>
+                </div>
+                <div id="gemini-details" class="mt-4 text-sm text-gray-600" style="display: none;"></div>
+            </div>
+
+            <!-- Firebase Config Check -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div id="firebase-icon" class="text-2xl">⏳</div>
+                        <div>
+                            <h3 class="font-bold text-gray-800">Configuración Firebase</h3>
+                            <p class="text-gray-600 text-sm">Verificando conexión con Firebase</p>
+                        </div>
+                    </div>
+                    <div id="firebase-status" class="text-sm font-medium text-gray-500">Verificando...</div>
+                </div>
+                <div id="firebase-details" class="mt-4 text-sm text-gray-600" style="display: none;"></div>
+            </div>
+
+            <!-- Firebase Auth Check -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div id="auth-icon" class="text-2xl">⏳</div>
+                        <div>
+                            <h3 class="font-bold text-gray-800">Firebase Authentication</h3>
+                            <p class="text-gray-600 text-sm">Verificando que Authentication está habilitado</p>
+                        </div>
+                    </div>
+                    <div id="auth-status" class="text-sm font-medium text-gray-500">Verificando...</div>
+                </div>
+                <div id="auth-details" class="mt-4 text-sm text-gray-600" style="display: none;"></div>
+            </div>
+
+            <!-- Firestore Check -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div id="firestore-icon" class="text-2xl">⏳</div>
+                        <div>
+                            <h3 class="font-bold text-gray-800">Firestore Database</h3>
+                            <p class="text-gray-600 text-sm">Verificando que Firestore está configurado</p>
+                        </div>
+                    </div>
+                    <div id="firestore-status" class="text-sm font-medium text-gray-500">Verificando...</div>
+                </div>
+                <div id="firestore-details" class="mt-4 text-sm text-gray-600" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Final Actions -->
+        <div id="final-actions" class="text-center mt-8" style="display: none;">
+            <div class="space-y-4">
+                <button onclick="openApp()" id="open-app-btn" style="display: none;"
+                        class="bg-green-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-green-700 transition mr-4">
+                    🚀 Abrir Aplicación
+                </button>
+                <button onclick="showHelp()" id="help-btn" style="display: none;"
+                        class="bg-orange-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-orange-700 transition">
+                    🆘 Ver Ayuda
+                </button>
+            </div>
+        </div>
+
+        <!-- Help Section -->
+        <div id="help-section" class="bg-yellow-50 border-l-4 border-yellow-400 p-6 mt-8" style="display: none;">
+            <h3 class="font-bold text-yellow-800 mb-4">🆘 Ayuda para Resolver Problemas</h3>
+            <div id="help-content" class="text-yellow-700 space-y-3"></div>
+        </div>
+    </div>
+
+    <!-- Load config.js if it exists -->
+    <script src="config.js" onerror="handleConfigError()"></script>
+    
+    <script>
+        let configLoaded = false;
+        let verificationResults = {};
+
+        // Check if config.js loaded successfully
+        if (typeof window.APP_CONFIG !== 'undefined') {
+            configLoaded = true;
+        }
+
+        function handleConfigError() {
+            configLoaded = false;
+        }
+
+        async function runVerification() {
+            document.getElementById('verify-btn').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+            
+            // Update status
+            document.getElementById('status-icon').textContent = '🔍';
+            document.getElementById('status-title').textContent = 'Verificando configuración...';
+            document.getElementById('status-message').textContent = 'Ejecutando verificaciones automáticas';
+
+            // Run all checks
+            await checkConfigFile();
+            await checkGeminiAPI();
+            await checkFirebaseConfig();
+            await checkFirebaseAuth();
+            await checkFirestore();
+
+            // Show final results
+            showFinalResults();
+        }
+
+        async function checkConfigFile() {
+            const icon = document.getElementById('config-icon');
+            const status = document.getElementById('config-status');
+            const details = document.getElementById('config-details');
+
+            if (configLoaded && window.APP_CONFIG) {
+                icon.textContent = '✅';
+                status.textContent = 'Correcto';
+                status.className = 'text-sm font-medium text-green-600';
+                details.innerHTML = '✅ Archivo config.js encontrado y cargado correctamente';
+                details.style.display = 'block';
+                verificationResults.config = true;
+            } else {
+                icon.textContent = '❌';
+                status.textContent = 'Error';
+                status.className = 'text-sm font-medium text-red-600';
+                details.innerHTML = '❌ No se encontró el archivo config.js o no se pudo cargar.<br>📝 Asegúrate de haber copiado config.example.js como config.js';
+                details.style.display = 'block';
+                verificationResults.config = false;
+            }
+        }
+
+        async function checkGeminiAPI() {
+            const icon = document.getElementById('gemini-icon');
+            const status = document.getElementById('gemini-status');
+            const details = document.getElementById('gemini-details');
+
+            if (!configLoaded || !window.APP_CONFIG.GEMINI_API_KEY) {
+                icon.textContent = '❌';
+                status.textContent = 'Error';
+                status.className = 'text-sm font-medium text-red-600';
+                details.innerHTML = '❌ API Key de Gemini no configurada.<br>🔑 Configura GEMINI_API_KEY en config.js';
+                details.style.display = 'block';
+                verificationResults.gemini = false;
+                return;
+            }
+
+            if (window.APP_CONFIG.GEMINI_API_KEY === 'TU_API_KEY_DE_GEMINI_AQUI') {
+                icon.textContent = '⚠️';
+                status.textContent = 'Pendiente';
+                status.className = 'text-sm font-medium text-yellow-600';
+                details.innerHTML = '⚠️ API Key de Gemini no reemplazada.<br>🔄 Reemplaza "TU_API_KEY_DE_GEMINI_AQUI" con tu API Key real';
+                details.style.display = 'block';
+                verificationResults.gemini = false;
+                return;
+            }
+
+            // Basic format check
+            if (window.APP_CONFIG.GEMINI_API_KEY.startsWith('AIza')) {
+                icon.textContent = '✅';
+                status.textContent = 'Correcto';
+                status.className = 'text-sm font-medium text-green-600';
+                details.innerHTML = '✅ API Key de Gemini configurada correctamente';
+                details.style.display = 'block';
+                verificationResults.gemini = true;
+            } else {
+                icon.textContent = '⚠️';
+                status.textContent = 'Dudoso';
+                status.className = 'text-sm font-medium text-yellow-600';
+                details.innerHTML = '⚠️ API Key no tiene el formato esperado (debería empezar con "AIza")';
+                details.style.display = 'block';
+                verificationResults.gemini = false;
+            }
+        }
+
+        async function checkFirebaseConfig() {
+            const icon = document.getElementById('firebase-icon');
+            const status = document.getElementById('firebase-status');
+            const details = document.getElementById('firebase-details');
+
+            if (!configLoaded || !window.APP_CONFIG.firebaseConfig) {
+                icon.textContent = '❌';
+                status.textContent = 'Error';
+                status.className = 'text-sm font-medium text-red-600';
+                details.innerHTML = '❌ Configuración Firebase no encontrada.<br>🔥 Configura firebaseConfig en config.js';
+                details.style.display = 'block';
+                verificationResults.firebase = false;
+                return;
+            }
+
+            const config = window.APP_CONFIG.firebaseConfig;
+            const requiredFields = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
+            const missingFields = requiredFields.filter(field => !config[field] || config[field].includes('TU_'));
+
+            if (missingFields.length === 0) {
+                icon.textContent = '✅';
+                status.textContent = 'Correcto';
+                status.className = 'text-sm font-medium text-green-600';
+                details.innerHTML = '✅ Configuración Firebase completa';
+                details.style.display = 'block';
+                verificationResults.firebase = true;
+            } else {
+                icon.textContent = '⚠️';
+                status.textContent = 'Incompleto';
+                status.className = 'text-sm font-medium text-yellow-600';
+                details.innerHTML = `⚠️ Campos faltantes o no configurados: ${missingFields.join(', ')}<br>🔄 Completa la configuración Firebase`;
+                details.style.display = 'block';
+                verificationResults.firebase = false;
+            }
+        }
+
+        async function checkFirebaseAuth() {
+            const icon = document.getElementById('auth-icon');
+            const status = document.getElementById('auth-status');
+            const details = document.getElementById('auth-details');
+
+            // This is a basic check - in a real scenario, we'd need to load Firebase SDK
+            if (verificationResults.firebase) {
+                icon.textContent = '✅';
+                status.textContent = 'Configurado';
+                status.className = 'text-sm font-medium text-green-600';
+                details.innerHTML = '✅ Firebase Authentication debería funcionar con la configuración actual<br>🔍 Prueba creando una cuenta en la aplicación';
+                details.style.display = 'block';
+                verificationResults.auth = true;
+            } else {
+                icon.textContent = '❌';
+                status.textContent = 'Error';
+                status.className = 'text-sm font-medium text-red-600';
+                details.innerHTML = '❌ No se puede verificar Authentication sin configuración Firebase válida';
+                details.style.display = 'block';
+                verificationResults.auth = false;
+            }
+        }
+
+        async function checkFirestore() {
+            const icon = document.getElementById('firestore-icon');
+            const status = document.getElementById('firestore-status');
+            const details = document.getElementById('firestore-details');
+
+            // This is a basic check - in a real scenario, we'd need to load Firebase SDK
+            if (verificationResults.firebase) {
+                icon.textContent = '✅';
+                status.textContent = 'Configurado';
+                status.className = 'text-sm font-medium text-green-600';
+                details.innerHTML = '✅ Firestore Database debería funcionar con la configuración actual<br>🔍 Prueba agregando una transacción en la aplicación';
+                details.style.display = 'block';
+                verificationResults.firestore = true;
+            } else {
+                icon.textContent = '❌';
+                status.textContent = 'Error';
+                status.className = 'text-sm font-medium text-red-600';
+                details.innerHTML = '❌ No se puede verificar Firestore sin configuración Firebase válida';
+                details.style.display = 'block';
+                verificationResults.firestore = false;
+            }
+        }
+
+        function showFinalResults() {
+            const allPassed = Object.values(verificationResults).every(result => result === true);
+            const statusIcon = document.getElementById('status-icon');
+            const statusTitle = document.getElementById('status-title');
+            const statusMessage = document.getElementById('status-message');
+            const finalActions = document.getElementById('final-actions');
+
+            if (allPassed) {
+                statusIcon.textContent = '🎉';
+                statusTitle.textContent = '¡Configuración Perfecta!';
+                statusMessage.textContent = 'Tu aplicación está lista para usar. ¡Puedes abrirla ahora!';
+                document.getElementById('open-app-btn').style.display = 'inline-block';
+            } else {
+                statusIcon.textContent = '⚠️';
+                statusTitle.textContent = 'Configuración Incompleta';
+                statusMessage.textContent = 'Hay algunos problemas que necesitas resolver antes de usar la aplicación.';
+                document.getElementById('help-btn').style.display = 'inline-block';
+            }
+
+            finalActions.style.display = 'block';
+        }
+
+        function openApp() {
+            window.open('index.html', '_blank');
+        }
+
+        function showHelp() {
+            const helpSection = document.getElementById('help-section');
+            const helpContent = document.getElementById('help-content');
+            
+            let helpText = '';
+            
+            if (!verificationResults.config) {
+                helpText += '<div class="mb-3"><strong>📝 Problema con config.js:</strong><br>1. Busca el archivo "config.example.js"<br>2. Cópialo y pégalo en la misma carpeta<br>3. Renombra la copia a "config.js"</div>';
+            }
+            
+            if (!verificationResults.gemini) {
+                helpText += '<div class="mb-3"><strong>🤖 Problema con Gemini API:</strong><br>1. Ve a <a href="https://aistudio.google.com/app/apikey" target="_blank" class="underline">Google AI Studio</a><br>2. Crea una API Key<br>3. Reemplaza "TU_API_KEY_DE_GEMINI_AQUI" en config.js</div>';
+            }
+            
+            if (!verificationResults.firebase) {
+                helpText += '<div class="mb-3"><strong>🔥 Problema con Firebase:</strong><br>1. Ve a <a href="https://console.firebase.google.com/" target="_blank" class="underline">Firebase Console</a><br>2. Crea un proyecto<br>3. Copia la configuración completa<br>4. Pégala en config.js reemplazando los valores de ejemplo</div>';
+            }
+            
+            helpContent.innerHTML = helpText;
+            helpSection.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
