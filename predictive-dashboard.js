@@ -112,6 +112,48 @@ class PredictiveDashboard {
                         </div>
                     </div>
 
+                    <!-- 🎯 MÉTRICAS DE PRECISIÓN DEL MODELO -->
+                    <div class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 p-6 rounded-lg mb-6 border border-gray-200 dark:border-gray-600">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                            <i data-lucide="target" class="w-5 h-5 mr-2 text-blue-500"></i>
+                            Precisión del Modelo Predictivo
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div class="text-center p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+                                <div class="text-gray-600 dark:text-gray-400 text-sm font-medium">Precisión General</div>
+                                <div id="model-accuracy" class="text-2xl font-bold text-gray-900 dark:text-white">Calculando...</div>
+                                <div class="text-xs text-gray-500 mt-1">Predicciones correctas</div>
+                            </div>
+                            <div class="text-center p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+                                <div class="text-gray-600 dark:text-gray-400 text-sm font-medium">Salud del Modelo</div>
+                                <div id="model-health" class="text-lg font-semibold text-gray-900 dark:text-white">Evaluando...</div>
+                                <div class="text-xs text-gray-500 mt-1">Estado general</div>
+                            </div>
+                            <div class="text-center p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+                                <div class="text-gray-600 dark:text-gray-400 text-sm font-medium">Recomendaciones</div>
+                                <div id="model-recommendations" class="text-2xl font-bold text-orange-600">0</div>
+                                <div class="text-xs text-gray-500 mt-1">Mejoras sugeridas</div>
+                            </div>
+                        </div>
+                        <div class="flex justify-center space-x-3">
+                            <button onclick="window.predictiveDashboard.validateModelAccuracy()"
+                                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                                <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>
+                                Validar Precisión
+                            </button>
+                            <button onclick="window.predictiveDashboard.calibrateModel()"
+                                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center">
+                                <i data-lucide="settings" class="w-4 h-4 mr-2"></i>
+                                Calibrar Modelo
+                            </button>
+                            <button onclick="window.predictiveDashboard.refreshPredictions()"
+                                    class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center">
+                                <i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i>
+                                Actualizar
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- Gráficos principales -->
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                         <!-- Predicción de flujo de caja -->
@@ -269,29 +311,99 @@ class PredictiveDashboard {
         this.displayInsights();
     }
 
-    // 🔢 Actualizar métricas principales
+    // 🔢 ACTUALIZAR MÉTRICAS PRINCIPALES (MEJORADO)
     updateMainMetrics(predictions, trends) {
         const nextMonthKey = Object.keys(predictions)[0];
         const nextMonthPrediction = predictions[nextMonthKey];
-        
+
         if (nextMonthPrediction) {
             // Próximo mes
-            document.getElementById('next-month-prediction').textContent = 
+            document.getElementById('next-month-prediction').textContent =
                 this.formatCurrency(nextMonthPrediction.predictedExpenses);
-            
+
             // Tendencia
             const trendText = trends.cashFlow?.direction === 'increasing' ? '↗️ Creciente' :
                              trends.cashFlow?.direction === 'decreasing' ? '↘️ Decreciente' : '➡️ Estable';
             document.getElementById('trend-indicator').textContent = trendText;
-            
+
             // Confianza
-            document.getElementById('confidence-level').textContent = 
+            document.getElementById('confidence-level').textContent =
                 Math.round(nextMonthPrediction.confidence * 100) + '%';
-            
+
             // Alertas
             const highPriorityInsights = this.insights.filter(i => i.priority === 'high');
             document.getElementById('alerts-count').textContent = highPriorityInsights.length;
         }
+
+        // 🎯 NUEVAS MÉTRICAS DE PRECISIÓN
+        this.updateAccuracyMetrics();
+    }
+
+    // 🎯 Actualizar métricas de precisión (NUEVO)
+    async updateAccuracyMetrics() {
+        try {
+            // Obtener métricas de rendimiento del motor
+            const performanceMetrics = this.analyticsEngine.getPerformanceMetrics();
+
+            // Actualizar precisión del modelo
+            const accuracyElement = document.getElementById('model-accuracy');
+            if (accuracyElement && performanceMetrics.accuracy.overallAccuracy) {
+                const accuracy = (performanceMetrics.accuracy.overallAccuracy * 100).toFixed(1);
+                accuracyElement.textContent = accuracy + '%';
+
+                // Cambiar color basándose en precisión
+                accuracyElement.className = this.getAccuracyColorClass(performanceMetrics.accuracy.overallAccuracy);
+            }
+
+            // Actualizar salud del modelo
+            const healthElement = document.getElementById('model-health');
+            if (healthElement && performanceMetrics.modelHealth) {
+                const health = performanceMetrics.modelHealth;
+                healthElement.textContent = this.getHealthStatusText(health.status);
+                healthElement.className = this.getHealthColorClass(health.status);
+            }
+
+            // Actualizar recomendaciones
+            const recommendationsElement = document.getElementById('model-recommendations');
+            if (recommendationsElement && performanceMetrics.recommendations) {
+                const highPriorityRecs = performanceMetrics.recommendations.filter(r => r.priority === 'high');
+                recommendationsElement.textContent = highPriorityRecs.length;
+            }
+
+        } catch (error) {
+            console.error('❌ Error actualizando métricas de precisión:', error);
+        }
+    }
+
+    // Obtener clase CSS para precisión
+    getAccuracyColorClass(accuracy) {
+        if (accuracy > 0.85) return 'text-green-600 font-bold';
+        if (accuracy > 0.7) return 'text-yellow-600 font-bold';
+        return 'text-red-600 font-bold';
+    }
+
+    // Obtener texto de estado de salud
+    getHealthStatusText(status) {
+        const statusTexts = {
+            'excellent': '🟢 Excelente',
+            'good': '🟡 Bueno',
+            'fair': '🟠 Regular',
+            'poor': '🔴 Pobre',
+            'unknown': '⚪ Desconocido'
+        };
+        return statusTexts[status] || '⚪ Desconocido';
+    }
+
+    // Obtener clase CSS para salud del modelo
+    getHealthColorClass(status) {
+        const colorClasses = {
+            'excellent': 'text-green-600 font-bold',
+            'good': 'text-blue-600 font-bold',
+            'fair': 'text-yellow-600 font-bold',
+            'poor': 'text-red-600 font-bold',
+            'unknown': 'text-gray-600'
+        };
+        return colorClasses[status] || 'text-gray-600';
     }
 
     // 📊 Crear gráficos
@@ -528,23 +640,186 @@ class PredictiveDashboard {
     // 🔄 Actualizar predicciones
     async refreshPredictions() {
         this.showInsightNotification('Actualizando predicciones...');
-        
+
         // Reinicializar motor de análisis
         await this.analyticsEngine.initialize(this.currentData);
-        
+
         // Recargar datos y gráficos
         await this.loadDashboardData();
-        
+
         // Destruir gráficos existentes
         Object.values(this.charts).forEach(chart => {
             if (chart) chart.destroy();
         });
         this.charts = {};
-        
+
         // Recrear gráficos
         await this.createCharts();
-        
+
         this.showInsightNotification('Predicciones actualizadas correctamente');
+    }
+
+    // 🎯 VALIDAR PRECISIÓN DEL MODELO (NUEVO)
+    async validateModelAccuracy() {
+        try {
+            this.showInsightNotification('Validando precisión del modelo...');
+
+            // Ejecutar validación
+            const validationResults = await this.analyticsEngine.validatePredictionAccuracy();
+
+            // Mostrar resultados
+            const accuracy = (validationResults.accuracy * 100).toFixed(1);
+            const averageError = (validationResults.averageError * 100).toFixed(1);
+
+            this.showValidationResults({
+                accuracy: accuracy + '%',
+                averageError: averageError + '%',
+                details: validationResults.details
+            });
+
+            // Actualizar métricas en el dashboard
+            await this.updateAccuracyMetrics();
+
+            this.showInsightNotification(`Validación completada: Precisión ${accuracy}%`);
+
+        } catch (error) {
+            console.error('❌ Error validando modelo:', error);
+            this.showInsightNotification('Error validando modelo: ' + error.message);
+        }
+    }
+
+    // 🔧 CALIBRAR MODELO AUTOMÁTICAMENTE (NUEVO)
+    async calibrateModel() {
+        try {
+            this.showInsightNotification('Iniciando calibración automática...');
+
+            // Ejecutar calibración
+            const calibrationResults = await this.analyticsEngine.calibrateModels();
+
+            if (calibrationResults.calibrated) {
+                const improvement = (calibrationResults.improvement * 100).toFixed(1);
+                const newAccuracy = (calibrationResults.newAccuracy * 100).toFixed(1);
+
+                this.showCalibrationResults({
+                    calibrated: true,
+                    improvement: improvement + '%',
+                    newAccuracy: newAccuracy + '%'
+                });
+
+                // Actualizar predicciones después de calibración
+                await this.refreshPredictions();
+
+                this.showInsightNotification(`Calibración exitosa: Mejora de ${improvement}%`);
+            } else {
+                const currentAccuracy = (calibrationResults.currentAccuracy * 100).toFixed(1);
+                this.showInsightNotification(`Modelo ya optimizado: Precisión ${currentAccuracy}%`);
+            }
+
+        } catch (error) {
+            console.error('❌ Error calibrando modelo:', error);
+            this.showInsightNotification('Error calibrando modelo: ' + error.message);
+        }
+    }
+
+    // Mostrar resultados de validación
+    showValidationResults(results) {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        modal.innerHTML = `
+            <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">📊 Resultados de Validación</h3>
+                    <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Precisión General:</span>
+                        <span class="font-semibold ${this.getAccuracyColorClass(parseFloat(results.accuracy) / 100)}">${results.accuracy}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Error Promedio:</span>
+                        <span class="font-semibold text-gray-900">${results.averageError}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Predicciones Evaluadas:</span>
+                        <span class="font-semibold text-gray-900">${results.details.totalPredictions}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Predicciones Precisas:</span>
+                        <span class="font-semibold text-green-600">${results.details.accuratePredictions}</span>
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button onclick="this.closest('.fixed').remove()"
+                            class="px-4 py-2 text-gray-600 hover:text-gray-800">
+                        Cerrar
+                    </button>
+                    <button onclick="window.predictiveDashboard.calibrateModel(); this.closest('.fixed').remove()"
+                            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                        Calibrar Modelo
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Inicializar iconos
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    }
+
+    // Mostrar resultados de calibración
+    showCalibrationResults(results) {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        modal.innerHTML = `
+            <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">🔧 Resultados de Calibración</h3>
+                    <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <div class="space-y-3">
+                    ${results.calibrated ? `
+                        <div class="text-center p-4 bg-green-50 rounded-lg">
+                            <div class="text-green-600 text-2xl mb-2">✅</div>
+                            <div class="text-green-800 font-semibold">Calibración Exitosa</div>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Mejora Obtenida:</span>
+                            <span class="font-semibold text-green-600">+${results.improvement}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Nueva Precisión:</span>
+                            <span class="font-semibold text-blue-600">${results.newAccuracy}</span>
+                        </div>
+                    ` : `
+                        <div class="text-center p-4 bg-blue-50 rounded-lg">
+                            <div class="text-blue-600 text-2xl mb-2">ℹ️</div>
+                            <div class="text-blue-800 font-semibold">Modelo Ya Optimizado</div>
+                        </div>
+                    `}
+                </div>
+                <div class="mt-6 flex justify-end">
+                    <button onclick="this.closest('.fixed').remove()"
+                            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                        Entendido
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Inicializar iconos
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
     }
 
     // 🔔 Mostrar notificación

@@ -27,23 +27,40 @@ class ProactiveInsightsEngine {
         }
     }
 
-    // ⚙️ Configurar reglas por defecto
+    // ⚙️ CONFIGURAR REGLAS INTELIGENTES MEJORADAS
     setupDefaultRules() {
-        // Regla: Gastos excesivos
+        // 🚨 REGLA MEJORADA: Gastos excesivos con análisis inteligente
         this.rules.set('excessive_spending', {
             condition: (data) => {
                 const monthlyExpenses = this.calculateMonthlyExpenses(data.transactions);
                 const budget = data.budget || 0;
-                return budget > 0 && monthlyExpenses > budget * 1.1;
+                const historicalAvg = this.calculateHistoricalAverage(data.transactions);
+
+                // Múltiples condiciones para mayor precisión
+                return (budget > 0 && monthlyExpenses > budget * 1.1) ||
+                       (historicalAvg > 0 && monthlyExpenses > historicalAvg * 1.3);
             },
-            insight: (data) => ({
-                type: 'warning',
-                priority: 'high',
-                title: '⚠️ Gastos por encima del presupuesto',
-                message: 'Tus gastos este mes superan tu presupuesto en más del 10%.',
-                actions: ['Revisar gastos', 'Ajustar presupuesto', 'Identificar gastos innecesarios'],
-                category: 'budget'
-            })
+            insight: (data) => {
+                const monthlyExpenses = this.calculateMonthlyExpenses(data.transactions);
+                const budget = data.budget || 0;
+                const excess = monthlyExpenses - budget;
+                const percentage = budget > 0 ? ((excess / budget) * 100).toFixed(1) : 0;
+
+                return {
+                    type: 'warning',
+                    priority: 'high',
+                    title: '🚨 Alerta de Gastos Elevados',
+                    message: `Tus gastos este mes (${this.formatCurrency(monthlyExpenses)}) superan tu presupuesto en ${percentage}%. Esto representa ${this.formatCurrency(excess)} adicionales.`,
+                    actions: [
+                        'Revisar gastos por categoría',
+                        'Identificar gastos innecesarios',
+                        'Ajustar presupuesto si es necesario',
+                        'Establecer alertas automáticas'
+                    ],
+                    category: 'budget',
+                    urgency: excess > budget * 0.2 ? 'critical' : 'high'
+                };
+            }
         });
 
         // Regla: Oportunidad de ahorro
@@ -104,6 +121,92 @@ class ProactiveInsightsEngine {
                 };
             }
         });
+
+        // 📊 NUEVA REGLA: Patrón de gasto irregular mejorado
+        this.rules.set('irregular_spending_pattern', {
+            condition: (data) => {
+                const expenses = this.getLastMonthsExpenses(data.transactions, 3);
+                if (expenses.length < 3) return false;
+
+                const avg = expenses.reduce((sum, exp) => sum + exp, 0) / expenses.length;
+                const variance = expenses.reduce((sum, exp) => sum + Math.pow(exp - avg, 2), 0) / expenses.length;
+                const stdDev = Math.sqrt(variance);
+                const coefficientOfVariation = avg > 0 ? stdDev / avg : 0;
+
+                return coefficientOfVariation > 0.3; // Variabilidad alta
+            },
+            insight: (data) => ({
+                type: 'info',
+                priority: 'medium',
+                title: '📊 Patrón de Gastos Irregular Detectado',
+                message: 'Tus gastos varían significativamente mes a mes. Esto puede dificultar la planificación financiera.',
+                actions: [
+                    'Revisar gastos variables',
+                    'Crear presupuesto más flexible',
+                    'Identificar gastos estacionales',
+                    'Establecer fondo para gastos variables'
+                ],
+                category: 'planning'
+            })
+        });
+
+        // 🎯 NUEVA REGLA: Meta de ahorro alcanzable
+        this.rules.set('achievable_savings_goal', {
+            condition: (data) => {
+                const monthlyExpenses = this.calculateMonthlyExpenses(data.transactions);
+                const income = this.calculateMonthlyIncome(data.transactions);
+                const savingsRate = income > 0 ? (income - monthlyExpenses) / income : 0;
+
+                return savingsRate > 0.1 && savingsRate < 0.2; // Entre 10% y 20%
+            },
+            insight: (data) => {
+                const monthlyExpenses = this.calculateMonthlyExpenses(data.transactions);
+                const income = this.calculateMonthlyIncome(data.transactions);
+                const currentSavings = income - monthlyExpenses;
+                const savingsRate = income > 0 ? (currentSavings / income * 100).toFixed(1) : 0;
+
+                return {
+                    type: 'success',
+                    priority: 'low',
+                    title: '🎯 Meta de Ahorro Alcanzable',
+                    message: `Estás ahorrando ${savingsRate}% de tus ingresos (${this.formatCurrency(currentSavings)}). ¡Podrías aumentar gradualmente hasta 20%!`,
+                    actions: [
+                        'Aumentar ahorro en $50,000 mensual',
+                        'Automatizar transferencias a ahorros',
+                        'Revisar gastos no esenciales',
+                        'Establecer meta de ahorro específica'
+                    ],
+                    category: 'goals'
+                };
+            }
+        });
+
+        // ⚡ NUEVA REGLA: Gastos impulsivos detectados
+        this.rules.set('impulse_spending_detection', {
+            condition: (data) => {
+                const recentTransactions = this.getRecentTransactions(data.transactions, 7); // Última semana
+                const smallFrequentExpenses = recentTransactions.filter(t =>
+                    t.amount < 50000 && t.type === 'expense'
+                ).length;
+
+                return smallFrequentExpenses > 10; // Más de 10 gastos pequeños en una semana
+            },
+            insight: (data) => ({
+                type: 'warning',
+                priority: 'medium',
+                title: '⚡ Posibles Gastos Impulsivos Detectados',
+                message: 'Has realizado muchos gastos pequeños recientemente. Esto podría indicar compras impulsivas.',
+                actions: [
+                    'Revisar gastos pequeños de la última semana',
+                    'Implementar regla de espera 24h para compras',
+                    'Usar lista de compras',
+                    'Establecer límite diario de gastos menores'
+                ],
+                category: 'behavior'
+            })
+        });
+
+        console.log('✅ Reglas inteligentes mejoradas configuradas');
     }
 
     // 🔍 Generar insights basados en datos actuales
@@ -288,11 +391,76 @@ class ProactiveInsightsEngine {
     cleanupOldInsights() {
         const weekAgo = new Date();
         weekAgo.setDate(weekAgo.getDate() - 7);
-        
+
         this.insights = this.insights.filter(insight => {
             const insightDate = new Date(insight.timestamp);
             return insightDate > weekAgo;
         });
+    }
+
+    // 📊 NUEVAS FUNCIONES AUXILIARES PARA REGLAS MEJORADAS
+
+    // Obtener gastos de los últimos N meses
+    getLastMonthsExpenses(transactions, months) {
+        const now = new Date();
+        const monthsAgo = new Date(now.getFullYear(), now.getMonth() - months, 1);
+
+        const monthlyExpenses = {};
+
+        transactions.filter(t => t.type === 'expense' && new Date(t.date) >= monthsAgo)
+            .forEach(t => {
+                const monthKey = new Date(t.date).toISOString().substring(0, 7); // YYYY-MM
+                monthlyExpenses[monthKey] = (monthlyExpenses[monthKey] || 0) + t.amount;
+            });
+
+        return Object.values(monthlyExpenses);
+    }
+
+    // Obtener transacciones recientes (últimos N días)
+    getRecentTransactions(transactions, days) {
+        const now = new Date();
+        const daysAgo = new Date(now.getTime() - (days * 24 * 60 * 60 * 1000));
+
+        return transactions.filter(t => new Date(t.date) >= daysAgo);
+    }
+
+    // Calcular gastos del mes anterior
+    getLastMonthExpenses(transactions) {
+        const now = new Date();
+        const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        return transactions
+            .filter(t => t.type === 'expense' &&
+                    new Date(t.date) >= lastMonth &&
+                    new Date(t.date) < thisMonth)
+            .reduce((sum, t) => sum + t.amount, 0);
+    }
+
+    // Calcular promedio histórico de gastos
+    calculateHistoricalAverage(transactions) {
+        const monthlyExpenses = this.getLastMonthsExpenses(transactions, 6);
+        return monthlyExpenses.length > 0 ?
+            monthlyExpenses.reduce((sum, exp) => sum + exp, 0) / monthlyExpenses.length : 0;
+    }
+
+    // Calcular ingresos mensuales
+    calculateMonthlyIncome(transactions) {
+        const now = new Date();
+        const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        return transactions
+            .filter(t => t.type === 'income' && new Date(t.date) >= thisMonth)
+            .reduce((sum, t) => sum + t.amount, 0);
+    }
+
+    // 💰 Formatear moneda
+    formatCurrency(amount) {
+        return new Intl.NumberFormat('es-CO', {
+            style: 'currency',
+            currency: 'COP',
+            minimumFractionDigits: 0
+        }).format(amount);
     }
 }
 

@@ -33,3 +33,8 @@ build/
 # 📊 ARCHIVOS DE ANÁLISIS
 coverage/
 .nyc_output/
+
+# Credenciales y configuración sensible
+config.js
+.env
+*.key
