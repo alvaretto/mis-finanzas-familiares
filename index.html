@@ -277,18 +277,12 @@
         window.detectTestingEnvironment = function() {
             // Detectar si estamos ejecutando tests basado en varios indicadores
             const isTestingEnvironment =
-                // Verificar si existen funciones de testing
-                (typeof TestingFramework !== 'undefined') ||
-                (typeof testRunner !== 'undefined') ||
-                (typeof window.appTests !== 'undefined') ||
-                // Verificar si la URL contiene indicadores de testing
-                (window.location.href.includes('test')) ||
-                (window.location.href.includes('auto-test')) ||
+                // Solo activar modo testing si se llama explícitamente
+                (window.isTestingMode === true) ||
+                // O si se está ejecutando desde una función de testing específica
                 (window.location.href.includes('execute-tests')) ||
-                // Verificar si hay elementos de testing en el DOM
-                (document.querySelector('[id*="test"]')) ||
-                // Verificar variables globales de testing
-                (window.isTestingMode === true);
+                // O si se detecta una ejecución manual de tests
+                (window.manualTestExecution === true);
 
             if (isTestingEnvironment) {
                 console.log('🧪 Entorno de testing detectado, habilitando modo testing...');

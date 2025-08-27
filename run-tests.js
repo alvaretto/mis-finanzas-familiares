@@ -5,6 +5,9 @@ async function runTestsInConsole() {
     console.log('🧪 Iniciando ejecución de tests...');
 
     try {
+        // 🧪 Activar explícitamente el modo de testing
+        window.manualTestExecution = true;
+
         // 🧪 Habilitar modo de testing para hacer visible el elemento #app
         if (typeof window.enableTestingMode === 'function') {
             window.enableTestingMode();
