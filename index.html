@@ -3888,7 +3888,7 @@
                 .reduce((sum, a) => sum + a.amount, 0);
 
             accountsPayableModalEl.innerHTML = `
-                <div class="bg-white dark:bg-gray-800 w-full max-w-6xl m-4 rounded-2xl shadow-xl flex flex-col h-[85vh]">
+                <div class="bg-white dark:bg-gray-800 w-full max-w-7xl xl:max-w-[90vw] m-4 rounded-2xl shadow-xl flex flex-col h-[90vh] min-w-[320px]">
                     <div class="flex justify-between items-center p-6 border-b dark:border-gray-700">
                         <h3 class="text-xl font-semibold flex items-center gap-2">
                             <i data-lucide="credit-card" class="text-purple-500"></i>
@@ -3901,7 +3901,7 @@
 
                     <!-- Resumen -->
                     <div class="p-6 border-b dark:border-gray-700">
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
                                 <div class="flex items-center gap-2">
                                     <i data-lucide="calendar" class="w-5 h-5 text-blue-600"></i>
@@ -3935,25 +3935,25 @@
 
                     <!-- Controles -->
                     <div class="p-6 border-b dark:border-gray-700">
-                        <div class="flex flex-wrap gap-3 justify-between items-center">
-                            <div class="flex flex-wrap gap-2">
-                                <button id="add-account-payable-btn" class="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                        <div class="flex flex-col lg:flex-row gap-4 lg:justify-between lg:items-center">
+                            <div class="flex flex-wrap gap-3">
+                                <button id="add-account-payable-btn" class="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium">
                                     <i data-lucide="plus" class="w-4 h-4"></i>
-                                    Nueva Cuenta
+                                    <span>Nueva Cuenta</span>
                                 </button>
-                                <button id="calendar-view-btn" class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                <button id="calendar-view-btn" class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
                                     <i data-lucide="calendar" class="w-4 h-4"></i>
-                                    Calendario
+                                    <span>Calendario</span>
                                 </button>
                             </div>
-                            <div class="flex gap-2">
-                                <select id="status-filter" class="px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <select id="status-filter" class="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white min-w-[140px]">
                                     <option value="all">Todas</option>
                                     <option value="pending">Pendientes</option>
                                     <option value="paid">Pagadas</option>
                                     <option value="overdue">Vencidas</option>
                                 </select>
-                                <select id="category-filter" class="px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                                <select id="category-filter" class="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white min-w-[180px]">
                                     <option value="all">Todas las categorías</option>
                                     ${getCategoriesForType('expense').map(cat =>
                                         `<option value="${cat}">${cat}</option>`
@@ -4015,64 +4015,67 @@
                 const daysUntilDue = Math.ceil((new Date(account.nextDueDate) - new Date()) / (1000 * 60 * 60 * 24));
 
                 return `
-                    <div class="bg-white dark:bg-gray-700 rounded-lg border dark:border-gray-600 p-4 hover:shadow-md transition-shadow">
-                        <div class="flex items-center justify-between">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-3 mb-2">
-                                    <h4 class="font-semibold text-lg">${account.name}</h4>
-                                    <span class="px-2 py-1 text-xs font-medium rounded-full ${statusInfo.color}">
+                    <div class="bg-white dark:bg-gray-700 rounded-lg border dark:border-gray-600 p-5 hover:shadow-md transition-shadow">
+                        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex flex-wrap items-center gap-3 mb-3">
+                                    <h4 class="font-semibold text-lg text-gray-900 dark:text-white truncate">${account.name}</h4>
+                                    <span class="px-3 py-1 text-xs font-medium rounded-full ${statusInfo.color} whitespace-nowrap">
                                         ${statusInfo.label}
                                     </span>
                                     ${account.recurrenceType !== 'once' ?
-                                        `<span class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-600 rounded-full">
+                                        `<span class="px-3 py-1 text-xs bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-full whitespace-nowrap">
                                             ${recurrenceTypes[account.recurrenceType]}
                                         </span>` : ''
                                     }
                                 </div>
-                                <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">${account.description || 'Sin descripción'}</p>
-                                <div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                                    <span class="flex items-center gap-1">
-                                        <i data-lucide="tag" class="w-4 h-4"></i>
-                                        ${account.category}${account.subcategory ? ` › ${account.subcategory}` : ''}
+                                <p class="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">${account.description || 'Sin descripción'}</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm text-gray-500 dark:text-gray-400">
+                                    <span class="flex items-center gap-2">
+                                        <i data-lucide="tag" class="w-4 h-4 flex-shrink-0"></i>
+                                        <span class="truncate">${account.category}${account.subcategory ? ` › ${account.subcategory}` : ''}</span>
                                     </span>
-                                    <span class="flex items-center gap-1">
-                                        <i data-lucide="calendar" class="w-4 h-4"></i>
-                                        ${formatDate(account.nextDueDate)}
+                                    <span class="flex items-center gap-2">
+                                        <i data-lucide="calendar" class="w-4 h-4 flex-shrink-0"></i>
+                                        <span class="whitespace-nowrap">${formatDate(account.nextDueDate)}</span>
                                     </span>
                                     ${daysUntilDue >= 0 ?
-                                        `<span class="flex items-center gap-1">
-                                            <i data-lucide="clock" class="w-4 h-4"></i>
-                                            ${daysUntilDue === 0 ? 'Vence hoy' :
+                                        `<span class="flex items-center gap-2">
+                                            <i data-lucide="clock" class="w-4 h-4 flex-shrink-0"></i>
+                                            <span class="whitespace-nowrap">${daysUntilDue === 0 ? 'Vence hoy' :
                                               daysUntilDue === 1 ? 'Vence mañana' :
-                                              `${daysUntilDue} días`}
+                                              `${daysUntilDue} días`}</span>
                                         </span>` :
-                                        `<span class="flex items-center gap-1 text-red-600">
-                                            <i data-lucide="alert-circle" class="w-4 h-4"></i>
-                                            Vencida hace ${Math.abs(daysUntilDue)} días
+                                        `<span class="flex items-center gap-2 text-red-600">
+                                            <i data-lucide="alert-circle" class="w-4 h-4 flex-shrink-0"></i>
+                                            <span class="whitespace-nowrap">Vencida hace ${Math.abs(daysUntilDue)} días</span>
                                         </span>`
                                     }
                                 </div>
                             </div>
-                            <div class="flex items-center gap-4">
-                                <div class="text-right">
-                                    <p class="text-xl font-bold text-purple-600 dark:text-purple-400">
+                            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 lg:gap-6">
+                                <div class="text-left sm:text-right">
+                                    <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">
                                         ${formatCurrency(account.amount)}
                                     </p>
                                     ${account.paymentMethod ?
-                                        `<p class="text-xs text-gray-500">${account.paymentMethod}</p>` : ''
+                                        `<p class="text-sm text-gray-500 dark:text-gray-400 mt-1">${account.paymentMethod}</p>` : ''
                                     }
                                 </div>
-                                <div class="flex flex-col gap-2">
+                                <div class="flex flex-row sm:flex-col gap-2">
                                     ${status === 'pending' || status === 'overdue' ?
-                                        `<button class="pay-account-btn px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm" data-id="${account.id}">
+                                        `<button class="pay-account-btn px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex items-center gap-2" data-id="${account.id}">
                                             <i data-lucide="check" class="w-4 h-4"></i>
+                                            <span class="hidden sm:inline">Pagar</span>
                                         </button>` : ''
                                     }
-                                    <button class="edit-account-btn px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm" data-id="${account.id}">
+                                    <button class="edit-account-btn px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex items-center gap-2" data-id="${account.id}">
                                         <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                        <span class="hidden sm:inline">Editar</span>
                                     </button>
-                                    <button class="delete-account-btn px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm" data-id="${account.id}">
+                                    <button class="delete-account-btn px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium flex items-center gap-2" data-id="${account.id}">
                                         <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        <span class="hidden sm:inline">Eliminar</span>
                                     </button>
                                 </div>
                             </div>
