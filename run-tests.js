@@ -14,6 +14,13 @@ async function runTestsInConsole() {
             console.log('✅ Modo de testing habilitado');
         }
 
+        // 💾 Inicializar sistemas necesarios para testing
+        if (typeof window.initializeSystemsForTesting === 'function') {
+            console.log('💾 Inicializando sistemas para testing...');
+            await window.initializeSystemsForTesting();
+            console.log('✅ Sistemas inicializados para testing');
+        }
+
         // Verificar que el framework de testing esté disponible
         if (typeof TestingFramework === 'undefined') {
             console.error('❌ TestingFramework no está disponible');
@@ -28,7 +35,7 @@ async function runTestsInConsole() {
         // Crear y configurar el test runner
         const testRunner = new TestRunner();
         testRunner.initialize(window.appTests);
-        
+
         // Ejecutar todos los tests
         console.log('🚀 Ejecutando todos los tests...');
         const results = await testRunner.runAllTests();

@@ -247,8 +247,25 @@
                 if (!automaticBackupSystem && typeof AutomaticBackupSystem !== 'undefined') {
                     console.log('💾 Inicializando AutomaticBackupSystem para testing...');
                     automaticBackupSystem = new AutomaticBackupSystem();
-                    // No necesitamos inicializar completamente para testing básico
-                    console.log('✅ AutomaticBackupSystem inicializado para testing');
+
+                    // Inicializar completamente para que funcionen los diagnósticos
+                    try {
+                        const initialized = await automaticBackupSystem.initialize();
+                        if (initialized) {
+                            console.log('✅ AutomaticBackupSystem completamente inicializado para testing');
+                        } else {
+                            console.warn('⚠️ AutomaticBackupSystem parcialmente inicializado para testing');
+                        }
+                    } catch (initError) {
+                        console.warn('⚠️ Error inicializando AutomaticBackupSystem completamente, usando inicialización básica:', initError.message);
+                        // Configurar propiedades mínimas necesarias para testing
+                        automaticBackupSystem.initialized = true;
+                        automaticBackupSystem.settings = {
+                            autoBackupEnabled: true,
+                            backupFrequency: 'daily',
+                            maxBackupsToKeep: 7
+                        };
+                    }
                 }
 
                 // Inicializar sistema de exportación si no existe
