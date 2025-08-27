@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Incremental</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <h1>Test Incremental</h1>
+    <div id="status"></div>
+    
+    <!-- Cargar scripts uno por uno y reportar estado -->
+    <script>
+        const status = document.getElementById('status');
+        
+        function log(message) {
+            console.log(message);
+            status.innerHTML += '<div>' + message + '</div>';
+        }
+        
+        log('✅ Página cargada');
+        
+        // Cargar secure-config.js
+        const script1 = document.createElement('script');
+        script1.src = 'secure-config.js';
+        script1.onload = () => {
+            log('✅ secure-config.js cargado');
+            
+            // Cargar ai-memory-system.js
+            const script2 = document.createElement('script');
+            script2.src = 'ai-memory-system.js';
+            script2.onload = () => {
+                log('✅ ai-memory-system.js cargado');
+                
+                // Cargar ai-learning-engine.js
+                const script3 = document.createElement('script');
+                script3.src = 'ai-learning-engine.js';
+                script3.onload = () => {
+                    log('✅ ai-learning-engine.js cargado');
+                    
+                    // Cargar proactive-insights-engine.js
+                    const script4 = document.createElement('script');
+                    script4.src = 'proactive-insights-engine.js';
+                    script4.onload = () => {
+                        log('✅ proactive-insights-engine.js cargado');
+                        log('✅ Todos los scripts cargados exitosamente');
+                    };
+                    script4.onerror = (e) => {
+                        log('❌ Error cargando proactive-insights-engine.js: ' + e);
+                    };
+                    document.head.appendChild(script4);
+                };
+                script3.onerror = (e) => {
+                    log('❌ Error cargando ai-learning-engine.js: ' + e);
+                };
+                document.head.appendChild(script3);
+            };
+            script2.onerror = (e) => {
+                log('❌ Error cargando ai-memory-system.js: ' + e);
+            };
+            document.head.appendChild(script2);
+        };
+        script1.onerror = (e) => {
+            log('❌ Error cargando secure-config.js: ' + e);
+        };
+        document.head.appendChild(script1);
+        
+        // Capturar errores de sintaxis
+        window.addEventListener('error', function(e) {
+            if (e.error && e.error.message && e.error.message.includes('Unexpected token')) {
+                log('🔍 Error de sintaxis capturado: ' + e.error.message + ' en línea ' + e.lineno);
+            }
+        });
+    </script>
+</body>
+</html>

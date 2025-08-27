@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Minimal</title>
+</head>
+<body>
+    <h1>Test Minimal</h1>
+    
+    <!-- Cargar solo secure-config.js para probar -->
+    <script src="secure-config.js"></script>
+    
+    <!-- Cargar scripts de IA uno por uno -->
+    <script src="ai-memory-system.js"></script>
+    <script src="ai-learning-engine.js"></script>
+    <script src="proactive-insights-engine.js"></script>
+    
+    <script>
+        console.log('✅ Scripts cargados en test minimal');
+        console.log('AIMemorySystem:', typeof AIMemorySystem);
+        console.log('AILearningEngine:', typeof AILearningEngine);
+        console.log('ProactiveInsightsEngine:', typeof ProactiveInsightsEngine);
+    </script>
+</body>
+</html>
