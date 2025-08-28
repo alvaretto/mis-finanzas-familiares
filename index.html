@@ -695,6 +695,73 @@
                 border-radius: 2px;
             }
         }
+
+        /* 📱 Correcciones específicas para dispositivos móviles - Scroll en selectores */
+        .mobile-select-fix {
+            /* Mejorar scroll táctil en iOS */
+            -webkit-overflow-scrolling: touch;
+            /* Permitir interacción táctil suave */
+            touch-action: manipulation;
+            /* Asegurar que el elemento sea scrolleable */
+            overflow-y: auto;
+            /* Mejorar rendimiento en dispositivos móviles */
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+            /* Prevenir zoom accidental en iOS */
+            -webkit-text-size-adjust: 100%;
+        }
+
+        /* Correcciones específicas para contenedores scrolleables en móviles */
+        .mobile-scroll-container {
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
+            overflow-y: auto;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+        }
+
+        /* Correcciones para modales en dispositivos móviles */
+        @media (max-width: 768px) {
+            .modal-backdrop {
+                /* Prevenir scroll del body cuando el modal está abierto */
+                overscroll-behavior: contain;
+            }
+
+            /* Mejorar scroll en listas de elementos */
+            #accounts-payable-list {
+                -webkit-overflow-scrolling: touch;
+                touch-action: pan-y;
+                overscroll-behavior: contain;
+            }
+
+            /* Asegurar que los selectores funcionen correctamente en móviles */
+            select.mobile-select-fix {
+                /* Altura mínima para facilitar el toque */
+                min-height: 44px;
+                /* Espaciado interno adecuado para móviles */
+                padding: 12px 16px;
+                /* Tamaño de fuente legible en móviles */
+                font-size: 16px;
+                /* Prevenir zoom automático en iOS */
+                -webkit-appearance: none;
+                appearance: none;
+            }
+        }
+
+        /* Correcciones adicionales para Android */
+        @media (max-width: 768px) and (-webkit-min-device-pixel-ratio: 1) {
+            .mobile-select-fix option {
+                /* Asegurar que las opciones sean visibles */
+                background-color: white;
+                color: black;
+                padding: 8px 12px;
+            }
+
+            .dark .mobile-select-fix option {
+                background-color: #374151;
+                color: white;
+            }
+        }
     </style>
 </head>
 <body class="bg-slate-100 dark:bg-gray-900 text-slate-800 dark:text-slate-200 antialiased">
@@ -2406,21 +2473,21 @@
                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         <div>
                                             <label for="category" class="block text-sm font-medium mb-1">Categoría Principal</label>
-                                            <select id="category" class="w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-md focus:ring-2 focus:ring-indigo-500" required>
+                                            <select id="category" class="w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-md focus:ring-2 focus:ring-indigo-500 mobile-select-fix" required>
                                                 <option value="">Selecciona una categoría</option>
                                             </select>
                                         </div>
 
                                         <div id="subcategory-container" style="display: none;">
                                             <label for="subcategory" class="block text-sm font-medium mb-1">Subcategoría</label>
-                                            <select id="subcategory" class="w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-md focus:ring-2 focus:ring-indigo-500">
+                                            <select id="subcategory" class="w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-md focus:ring-2 focus:ring-indigo-500 mobile-select-fix">
                                                 <option value="">Sin subcategoría</option>
                                             </select>
                                         </div>
 
                                         <div id="subsubcategory-container" style="display: none;">
                                             <label for="subsubcategory" class="block text-sm font-medium mb-1">Detalle</label>
-                                            <select id="subsubcategory" class="w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-md focus:ring-2 focus:ring-indigo-500">
+                                            <select id="subsubcategory" class="w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-md focus:ring-2 focus:ring-indigo-500 mobile-select-fix">
                                                 <option value="">Sin detalle específico</option>
                                             </select>
                                         </div>
@@ -3964,13 +4031,13 @@
                                 </button>
                             </div>
                             <div class="flex flex-col sm:flex-row gap-3">
-                                <select id="status-filter" class="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white min-w-[140px]">
+                                <select id="status-filter" class="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white min-w-[140px] mobile-select-fix">
                                     <option value="all">Todas</option>
                                     <option value="pending">Pendientes</option>
                                     <option value="paid">Pagadas</option>
                                     <option value="overdue">Vencidas</option>
                                 </select>
-                                <select id="category-filter" class="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white min-w-[180px]">
+                                <select id="category-filter" class="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white min-w-[180px] mobile-select-fix">
                                     <option value="all">Todas las categorías</option>
                                     ${getCategoriesForType('expense').map(cat =>
                                         `<option value="${cat}">${cat}</option>`
@@ -3981,7 +4048,7 @@
                     </div>
 
                     <!-- Lista de cuentas -->
-                    <div class="flex-1 overflow-y-auto p-6">
+                    <div class="flex-1 overflow-y-auto p-6 mobile-scroll-container">
                         <div id="accounts-payable-list" class="space-y-4">
                             <!-- Se llena dinámicamente -->
                         </div>
@@ -4180,7 +4247,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium mb-2">Categoría *</label>
-                                    <select name="category" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600" required>
+                                    <select name="category" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 mobile-select-fix" required>
                                         <option value="">Selecciona una categoría</option>
                                         ${getCategoriesForType('expense').map(cat =>
                                             `<option value="${cat}" ${account?.category === cat ? 'selected' : ''}>${cat}</option>`
@@ -4189,7 +4256,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium mb-2">Subcategoría</label>
-                                    <select name="subcategory" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                                    <select name="subcategory" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 mobile-select-fix">
                                         <option value="">Selecciona una subcategoría</option>
                                     </select>
                                 </div>
