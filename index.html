@@ -4206,10 +4206,6 @@
                                     <i data-lucide="calendar" class="w-4 h-4"></i>
                                     <span>Calendario</span>
                                 </button>
-                                <button id="create-test-data-btn" class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
-                                    <i data-lucide="flask-conical" class="w-4 h-4"></i>
-                                    <span>Datos de Prueba</span>
-                                </button>
                             </div>
                             <div class="flex flex-col sm:flex-row gap-3">
                                 <select id="status-filter" class="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white min-w-[140px] mobile-select-fix">
@@ -4271,7 +4267,6 @@
             accountsPayableModalEl.querySelector('.js-close-modal').addEventListener('click', () => closeModal(accountsPayableModalEl));
             accountsPayableModalEl.querySelector('#add-account-payable-btn').addEventListener('click', () => openAccountPayableForm());
             accountsPayableModalEl.querySelector('#calendar-view-btn').addEventListener('click', () => openAccountsPayableCalendar());
-            accountsPayableModalEl.querySelector('#create-test-data-btn').addEventListener('click', createTestAccountsPayable);
 
             // Event listeners para filtros
             accountsPayableModalEl.querySelector('#status-filter').addEventListener('change', renderAccountsPayableList);
@@ -4289,36 +4284,10 @@
             const statusFilter = accountsPayableModalEl.querySelector('#status-filter')?.value || 'all';
             const categoryFilter = selectedCategoryFilter || 'all';
 
-            // 🐛 Debug: Logging para verificar filtrado
-            console.log('🔍 Filtrado de cuentas por pagar:', {
-                totalAccounts: accountsPayable.length,
-                statusFilter,
-                categoryFilter,
-                selectedCategoryFilter,
-                accountsWithCategories: accountsPayable.map(a => ({ name: a.name, category: a.category }))
-            });
-
             let filteredAccounts = accountsPayable.filter(account => {
                 const statusMatch = statusFilter === 'all' || getAccountPayableStatus(account) === statusFilter;
                 const categoryMatch = categoryFilter === 'all' || account.category === categoryFilter;
-
-                // 🐛 Debug: Logging detallado de cada cuenta
-                if (categoryFilter !== 'all') {
-                    console.log(`🔍 Verificando cuenta "${account.name}":`, {
-                        accountCategory: account.category,
-                        filterCategory: categoryFilter,
-                        categoryMatch,
-                        statusMatch
-                    });
-                }
-
                 return statusMatch && categoryMatch;
-            });
-
-            // 🐛 Debug: Resultado del filtrado
-            console.log('✅ Cuentas filtradas:', {
-                filteredCount: filteredAccounts.length,
-                accounts: filteredAccounts.map(a => ({ name: a.name, category: a.category }))
             });
 
             // Ordenar por fecha de vencimiento
@@ -4536,7 +4505,6 @@
             categoryText.textContent = 'Todas las categorías';
             clearBtn.style.display = 'none';
 
-            console.log('🧹 Filtro de categoría limpiado');
             renderAccountsPayableList();
         };
 
@@ -4612,80 +4580,10 @@
             // Mostrar/ocultar botón de limpiar filtro
             clearBtn.style.display = selectedCategoryFilter === 'all' ? 'none' : 'flex';
 
-            console.log('✅ Filtro de categoría aplicado:', selectedCategoryFilter);
             renderAccountsPayableList();
         };
 
-        // 🧪 Función para crear datos de prueba (solo para testing)
-        const createTestAccountsPayable = () => {
-            const testAccounts = [
-                {
-                    id: 'test-1',
-                    name: 'Factura de Luz',
-                    category: 'Servicios Públicos',
-                    subcategory: 'Electricidad',
-                    amount: 85000,
-                    nextDueDate: '2025-09-15',
-                    status: 'pending',
-                    isActive: true,
-                    recurrenceType: 'monthly'
-                },
-                {
-                    id: 'test-2',
-                    name: 'Factura de Agua',
-                    category: 'Servicios Públicos',
-                    subcategory: 'Agua',
-                    amount: 45000,
-                    nextDueDate: '2025-09-20',
-                    status: 'pending',
-                    isActive: true,
-                    recurrenceType: 'monthly'
-                },
-                {
-                    id: 'test-3',
-                    name: 'Internet Hogar',
-                    category: 'Servicios Públicos',
-                    subcategory: 'Internet',
-                    amount: 65000,
-                    nextDueDate: '2025-09-10',
-                    status: 'pending',
-                    isActive: true,
-                    recurrenceType: 'monthly'
-                },
-                {
-                    id: 'test-4',
-                    name: 'Supermercado Mensual',
-                    category: 'Alimentación',
-                    subcategory: 'SuperMercado',
-                    amount: 300000,
-                    nextDueDate: '2025-09-05',
-                    status: 'pending',
-                    isActive: true,
-                    recurrenceType: 'monthly'
-                },
-                {
-                    id: 'test-5',
-                    name: 'Seguro del Carro',
-                    category: 'Seguros',
-                    subcategory: 'Vehículo',
-                    amount: 120000,
-                    nextDueDate: '2025-09-25',
-                    status: 'pending',
-                    isActive: true,
-                    recurrenceType: 'monthly'
-                }
-            ];
 
-            // Agregar cuentas de prueba al array principal
-            testAccounts.forEach(account => {
-                if (!accountsPayable.find(a => a.id === account.id)) {
-                    accountsPayable.push(account);
-                }
-            });
-
-            console.log('🧪 Datos de prueba creados:', testAccounts.length, 'cuentas agregadas');
-            renderAccountsPayableList();
-        };
 
         const openAccountPayableForm = (accountId = null) => {
             currentEditingAccountId = accountId;
