@@ -762,6 +762,183 @@
                 color: white;
             }
         }
+
+        /* 🎨 Estilos para el overlay de selección de categorías */
+        .category-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.75);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+        .category-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .category-overlay-content {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            max-width: 90vw;
+            max-height: 85vh;
+            width: 100%;
+            margin: 20px;
+            display: flex;
+            flex-direction: column;
+            transform: scale(0.95) translateY(20px);
+            transition: transform 0.3s ease;
+            overflow: hidden;
+        }
+
+        .dark .category-overlay-content {
+            background: #1f2937;
+            border: 1px solid #374151;
+        }
+
+        .category-overlay.active .category-overlay-content {
+            transform: scale(1) translateY(0);
+        }
+
+        .category-overlay-header {
+            padding: 24px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .dark .category-overlay-header {
+            border-bottom-color: #374151;
+        }
+
+        .category-overlay-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .category-option {
+            display: flex;
+            align-items: center;
+            padding: 16px 24px;
+            border-bottom: 1px solid #f3f4f6;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            user-select: none;
+        }
+
+        .dark .category-option {
+            border-bottom-color: #374151;
+        }
+
+        .category-option:hover {
+            background-color: #f9fafb;
+        }
+
+        .dark .category-option:hover {
+            background-color: #374151;
+        }
+
+        .category-option.selected {
+            background-color: #ede9fe;
+            color: #7c3aed;
+            font-weight: 600;
+        }
+
+        .dark .category-option.selected {
+            background-color: #4c1d95;
+            color: #c4b5fd;
+        }
+
+        .category-option-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .category-option.selected .category-option-icon {
+            opacity: 1;
+        }
+
+        .category-overlay-footer {
+            padding: 24px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            flex-shrink: 0;
+        }
+
+        .dark .category-overlay-footer {
+            border-top-color: #374151;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .category-overlay-content {
+                margin: 10px;
+                max-height: 90vh;
+                border-radius: 12px;
+            }
+
+            .category-overlay-header,
+            .category-overlay-footer {
+                padding: 16px;
+            }
+
+            .category-option {
+                padding: 14px 16px;
+            }
+        }
+
+        /* Accessibility improvements */
+        .category-overlay:focus-within {
+            outline: none;
+        }
+
+        .category-option:focus {
+            outline: 2px solid #7c3aed;
+            outline-offset: -2px;
+        }
+
+        /* Animation for better UX */
+        @keyframes overlayFadeIn {
+            from {
+                opacity: 0;
+                backdrop-filter: blur(0px);
+            }
+            to {
+                opacity: 1;
+                backdrop-filter: blur(4px);
+            }
+        }
+
+        @keyframes overlaySlideUp {
+            from {
+                transform: scale(0.95) translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body class="bg-slate-100 dark:bg-gray-900 text-slate-800 dark:text-slate-200 antialiased">
@@ -4037,12 +4214,10 @@
                                     <option value="paid">Pagadas</option>
                                     <option value="overdue">Vencidas</option>
                                 </select>
-                                <select id="category-filter" class="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white min-w-[180px] mobile-select-fix">
-                                    <option value="all">Todas las categorías</option>
-                                    ${getCategoriesForType('expense').map(cat =>
-                                        `<option value="${cat}">${cat}</option>`
-                                    ).join('')}
-                                </select>
+                                <button id="category-filter-btn" class="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white min-w-[180px] text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                                    <span id="category-filter-text">Todas las categorías</span>
+                                    <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -4054,6 +4229,34 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Overlay de selección de categorías -->
+                <div id="category-overlay" class="category-overlay">
+                    <div class="category-overlay-content">
+                        <div class="category-overlay-header">
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900 dark:text-white">Seleccionar Categoría</h4>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Elige una categoría para filtrar las cuentas</p>
+                            </div>
+                            <button id="category-overlay-close" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
+                            </button>
+                        </div>
+                        <div class="category-overlay-body">
+                            <div id="category-options-list">
+                                <!-- Las opciones se generarán dinámicamente -->
+                            </div>
+                        </div>
+                        <div class="category-overlay-footer">
+                            <button id="category-overlay-cancel" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                Cancelar
+                            </button>
+                            <button id="category-overlay-save" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium">
+                                Aplicar Filtro
+                            </button>
+                        </div>
+                    </div>
+                </div>
             `;
 
             accountsPayableModalEl.querySelector('.js-close-modal').addEventListener('click', () => closeModal(accountsPayableModalEl));
@@ -4062,7 +4265,9 @@
 
             // Event listeners para filtros
             accountsPayableModalEl.querySelector('#status-filter').addEventListener('change', renderAccountsPayableList);
-            accountsPayableModalEl.querySelector('#category-filter').addEventListener('change', renderAccountsPayableList);
+
+            // Event listeners para el overlay de categorías
+            setupCategoryOverlay();
 
             renderAccountsPayableList();
         };
@@ -4072,7 +4277,7 @@
             if (!listContainer) return;
 
             const statusFilter = accountsPayableModalEl.querySelector('#status-filter')?.value || 'all';
-            const categoryFilter = accountsPayableModalEl.querySelector('#category-filter')?.value || 'all';
+            const categoryFilter = selectedCategoryFilter || 'all';
 
             let filteredAccounts = accountsPayable.filter(account => {
                 const statusMatch = statusFilter === 'all' || getAccountPayableStatus(account) === statusFilter;
@@ -4199,6 +4404,121 @@
             });
 
             lucide.createIcons();
+        };
+
+        // 🎨 Funciones para el overlay de selección de categorías
+        let selectedCategoryFilter = 'all';
+
+        const setupCategoryOverlay = () => {
+            const categoryBtn = accountsPayableModalEl.querySelector('#category-filter-btn');
+            const overlay = accountsPayableModalEl.querySelector('#category-overlay');
+            const closeBtn = accountsPayableModalEl.querySelector('#category-overlay-close');
+            const cancelBtn = accountsPayableModalEl.querySelector('#category-overlay-cancel');
+            const saveBtn = accountsPayableModalEl.querySelector('#category-overlay-save');
+
+            // Abrir overlay
+            categoryBtn.addEventListener('click', () => {
+                openCategoryOverlay();
+            });
+
+            // Cerrar overlay
+            const closeOverlay = () => {
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            };
+
+            closeBtn.addEventListener('click', closeOverlay);
+            cancelBtn.addEventListener('click', closeOverlay);
+
+            // Cerrar al hacer clic en el fondo
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    closeOverlay();
+                }
+            });
+
+            // Guardar selección
+            saveBtn.addEventListener('click', () => {
+                applyCategoryFilter();
+                closeOverlay();
+            });
+
+            // Navegación por teclado
+            overlay.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeOverlay();
+                }
+            });
+        };
+
+        const openCategoryOverlay = () => {
+            const overlay = accountsPayableModalEl.querySelector('#category-overlay');
+            const optionsList = accountsPayableModalEl.querySelector('#category-options-list');
+
+            // Generar opciones de categorías
+            const categories = ['all', ...getCategoriesForType('expense')];
+
+            optionsList.innerHTML = categories.map(category => {
+                const isSelected = selectedCategoryFilter === category;
+                const displayName = category === 'all' ? 'Todas las categorías' : category;
+
+                return `
+                    <div class="category-option ${isSelected ? 'selected' : ''}" data-category="${category}" tabindex="0">
+                        <i data-lucide="check" class="category-option-icon w-5 h-5 text-purple-600"></i>
+                        <span class="flex-1">${displayName}</span>
+                    </div>
+                `;
+            }).join('');
+
+            // Event listeners para las opciones
+            optionsList.querySelectorAll('.category-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    selectCategoryOption(option.dataset.category);
+                });
+
+                option.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        selectCategoryOption(option.dataset.category);
+                    }
+                });
+            });
+
+            // Mostrar overlay
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+            // Enfocar la opción seleccionada
+            const selectedOption = optionsList.querySelector('.category-option.selected');
+            if (selectedOption) {
+                selectedOption.focus();
+            }
+
+            lucide.createIcons();
+        };
+
+        const selectCategoryOption = (category) => {
+            const optionsList = accountsPayableModalEl.querySelector('#category-options-list');
+
+            // Remover selección anterior
+            optionsList.querySelectorAll('.category-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+
+            // Agregar selección nueva
+            const selectedOption = optionsList.querySelector(`[data-category="${category}"]`);
+            if (selectedOption) {
+                selectedOption.classList.add('selected');
+                selectedCategoryFilter = category;
+            }
+        };
+
+        const applyCategoryFilter = () => {
+            const categoryText = accountsPayableModalEl.querySelector('#category-filter-text');
+            const displayName = selectedCategoryFilter === 'all' ? 'Todas las categorías' : selectedCategoryFilter;
+
+            categoryText.textContent = displayName;
+            renderAccountsPayableList();
         };
 
         const openAccountPayableForm = (accountId = null) => {
