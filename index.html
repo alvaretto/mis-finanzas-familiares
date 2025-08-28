@@ -4206,6 +4206,10 @@
                                     <i data-lucide="calendar" class="w-4 h-4"></i>
                                     <span>Calendario</span>
                                 </button>
+                                <button id="create-test-data-btn" class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+                                    <i data-lucide="flask-conical" class="w-4 h-4"></i>
+                                    <span>Datos de Prueba</span>
+                                </button>
                             </div>
                             <div class="flex flex-col sm:flex-row gap-3">
                                 <select id="status-filter" class="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white min-w-[140px] mobile-select-fix">
@@ -4214,10 +4218,15 @@
                                     <option value="paid">Pagadas</option>
                                     <option value="overdue">Vencidas</option>
                                 </select>
-                                <button id="category-filter-btn" class="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white min-w-[180px] text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                                    <span id="category-filter-text">Todas las categorías</span>
-                                    <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
-                                </button>
+                                <div class="flex items-center gap-2">
+                                    <button id="category-filter-btn" class="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white min-w-[180px] text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                                        <span id="category-filter-text">Todas las categorías</span>
+                                        <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
+                                    </button>
+                                    <button id="clear-category-filter-btn" class="px-3 py-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" title="Limpiar filtro de categoría" style="display: none;">
+                                        <i data-lucide="x" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -4262,6 +4271,7 @@
             accountsPayableModalEl.querySelector('.js-close-modal').addEventListener('click', () => closeModal(accountsPayableModalEl));
             accountsPayableModalEl.querySelector('#add-account-payable-btn').addEventListener('click', () => openAccountPayableForm());
             accountsPayableModalEl.querySelector('#calendar-view-btn').addEventListener('click', () => openAccountsPayableCalendar());
+            accountsPayableModalEl.querySelector('#create-test-data-btn').addEventListener('click', createTestAccountsPayable);
 
             // Event listeners para filtros
             accountsPayableModalEl.querySelector('#status-filter').addEventListener('change', renderAccountsPayableList);
@@ -4279,26 +4289,85 @@
             const statusFilter = accountsPayableModalEl.querySelector('#status-filter')?.value || 'all';
             const categoryFilter = selectedCategoryFilter || 'all';
 
+            // 🐛 Debug: Logging para verificar filtrado
+            console.log('🔍 Filtrado de cuentas por pagar:', {
+                totalAccounts: accountsPayable.length,
+                statusFilter,
+                categoryFilter,
+                selectedCategoryFilter,
+                accountsWithCategories: accountsPayable.map(a => ({ name: a.name, category: a.category }))
+            });
+
             let filteredAccounts = accountsPayable.filter(account => {
                 const statusMatch = statusFilter === 'all' || getAccountPayableStatus(account) === statusFilter;
                 const categoryMatch = categoryFilter === 'all' || account.category === categoryFilter;
+
+                // 🐛 Debug: Logging detallado de cada cuenta
+                if (categoryFilter !== 'all') {
+                    console.log(`🔍 Verificando cuenta "${account.name}":`, {
+                        accountCategory: account.category,
+                        filterCategory: categoryFilter,
+                        categoryMatch,
+                        statusMatch
+                    });
+                }
+
                 return statusMatch && categoryMatch;
+            });
+
+            // 🐛 Debug: Resultado del filtrado
+            console.log('✅ Cuentas filtradas:', {
+                filteredCount: filteredAccounts.length,
+                accounts: filteredAccounts.map(a => ({ name: a.name, category: a.category }))
             });
 
             // Ordenar por fecha de vencimiento
             filteredAccounts.sort((a, b) => new Date(a.nextDueDate) - new Date(b.nextDueDate));
 
+            // 📊 Mostrar contador de resultados
+            const counterText = categoryFilter === 'all'
+                ? `${filteredAccounts.length} cuenta${filteredAccounts.length !== 1 ? 's' : ''} por pagar`
+                : `${filteredAccounts.length} cuenta${filteredAccounts.length !== 1 ? 's' : ''} en ${categoryFilter}`;
+
             if (filteredAccounts.length === 0) {
+                const emptyMessage = categoryFilter === 'all'
+                    ? 'No hay cuentas por pagar que coincidan con los filtros'
+                    : `No hay cuentas por pagar en la categoría "${categoryFilter}"`;
+
                 listContainer.innerHTML = `
                     <div class="text-center py-12">
                         <i data-lucide="credit-card" class="w-16 h-16 mx-auto text-gray-400 mb-4"></i>
-                        <p class="text-gray-500 dark:text-gray-400">No hay cuentas por pagar que coincidan con los filtros</p>
+                        <p class="text-gray-500 dark:text-gray-400">${emptyMessage}</p>
+                        ${categoryFilter !== 'all' ? `
+                            <button id="clear-filter-from-empty" class="mt-4 px-4 py-2 text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium">
+                                Ver todas las cuentas
+                            </button>
+                        ` : ''}
                     </div>
                 `;
+
+                // Event listener para limpiar filtro desde estado vacío
+                if (categoryFilter !== 'all') {
+                    listContainer.querySelector('#clear-filter-from-empty')?.addEventListener('click', clearCategoryFilter);
+                }
                 return;
             }
 
-            listContainer.innerHTML = filteredAccounts.map(account => {
+            // 📊 Header con contador de resultados
+            const headerHtml = `
+                <div class="px-6 py-3 bg-gray-50 dark:bg-gray-800 border-b dark:border-gray-700 flex items-center justify-between">
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        ${counterText}
+                    </span>
+                    ${categoryFilter !== 'all' ? `
+                        <button id="clear-filter-from-header" class="text-xs px-2 py-1 text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded transition-colors">
+                            Limpiar filtro
+                        </button>
+                    ` : ''}
+                </div>
+            `;
+
+            listContainer.innerHTML = headerHtml + filteredAccounts.map(account => {
                 const status = getAccountPayableStatus(account);
                 const statusInfo = paymentStatuses[status];
                 const daysUntilDue = Math.ceil((new Date(account.nextDueDate) - new Date()) / (1000 * 60 * 60 * 24));
@@ -4403,6 +4472,9 @@
                 });
             });
 
+            // Event listener para limpiar filtro desde header
+            listContainer.querySelector('#clear-filter-from-header')?.addEventListener('click', clearCategoryFilter);
+
             lucide.createIcons();
         };
 
@@ -4411,6 +4483,7 @@
 
         const setupCategoryOverlay = () => {
             const categoryBtn = accountsPayableModalEl.querySelector('#category-filter-btn');
+            const clearBtn = accountsPayableModalEl.querySelector('#clear-category-filter-btn');
             const overlay = accountsPayableModalEl.querySelector('#category-overlay');
             const closeBtn = accountsPayableModalEl.querySelector('#category-overlay-close');
             const cancelBtn = accountsPayableModalEl.querySelector('#category-overlay-cancel');
@@ -4420,6 +4493,9 @@
             categoryBtn.addEventListener('click', () => {
                 openCategoryOverlay();
             });
+
+            // Limpiar filtro
+            clearBtn.addEventListener('click', clearCategoryFilter);
 
             // Cerrar overlay
             const closeOverlay = () => {
@@ -4449,6 +4525,19 @@
                     closeOverlay();
                 }
             });
+        };
+
+        // 🧹 Función para limpiar filtro de categoría
+        const clearCategoryFilter = () => {
+            selectedCategoryFilter = 'all';
+            const categoryText = accountsPayableModalEl.querySelector('#category-filter-text');
+            const clearBtn = accountsPayableModalEl.querySelector('#clear-category-filter-btn');
+
+            categoryText.textContent = 'Todas las categorías';
+            clearBtn.style.display = 'none';
+
+            console.log('🧹 Filtro de categoría limpiado');
+            renderAccountsPayableList();
         };
 
         const openCategoryOverlay = () => {
@@ -4515,9 +4604,86 @@
 
         const applyCategoryFilter = () => {
             const categoryText = accountsPayableModalEl.querySelector('#category-filter-text');
+            const clearBtn = accountsPayableModalEl.querySelector('#clear-category-filter-btn');
             const displayName = selectedCategoryFilter === 'all' ? 'Todas las categorías' : selectedCategoryFilter;
 
             categoryText.textContent = displayName;
+
+            // Mostrar/ocultar botón de limpiar filtro
+            clearBtn.style.display = selectedCategoryFilter === 'all' ? 'none' : 'flex';
+
+            console.log('✅ Filtro de categoría aplicado:', selectedCategoryFilter);
+            renderAccountsPayableList();
+        };
+
+        // 🧪 Función para crear datos de prueba (solo para testing)
+        const createTestAccountsPayable = () => {
+            const testAccounts = [
+                {
+                    id: 'test-1',
+                    name: 'Factura de Luz',
+                    category: 'Servicios Públicos',
+                    subcategory: 'Electricidad',
+                    amount: 85000,
+                    nextDueDate: '2025-09-15',
+                    status: 'pending',
+                    isActive: true,
+                    recurrenceType: 'monthly'
+                },
+                {
+                    id: 'test-2',
+                    name: 'Factura de Agua',
+                    category: 'Servicios Públicos',
+                    subcategory: 'Agua',
+                    amount: 45000,
+                    nextDueDate: '2025-09-20',
+                    status: 'pending',
+                    isActive: true,
+                    recurrenceType: 'monthly'
+                },
+                {
+                    id: 'test-3',
+                    name: 'Internet Hogar',
+                    category: 'Servicios Públicos',
+                    subcategory: 'Internet',
+                    amount: 65000,
+                    nextDueDate: '2025-09-10',
+                    status: 'pending',
+                    isActive: true,
+                    recurrenceType: 'monthly'
+                },
+                {
+                    id: 'test-4',
+                    name: 'Supermercado Mensual',
+                    category: 'Alimentación',
+                    subcategory: 'SuperMercado',
+                    amount: 300000,
+                    nextDueDate: '2025-09-05',
+                    status: 'pending',
+                    isActive: true,
+                    recurrenceType: 'monthly'
+                },
+                {
+                    id: 'test-5',
+                    name: 'Seguro del Carro',
+                    category: 'Seguros',
+                    subcategory: 'Vehículo',
+                    amount: 120000,
+                    nextDueDate: '2025-09-25',
+                    status: 'pending',
+                    isActive: true,
+                    recurrenceType: 'monthly'
+                }
+            ];
+
+            // Agregar cuentas de prueba al array principal
+            testAccounts.forEach(account => {
+                if (!accountsPayable.find(a => a.id === account.id)) {
+                    accountsPayable.push(account);
+                }
+            });
+
+            console.log('🧪 Datos de prueba creados:', testAccounts.length, 'cuentas agregadas');
             renderAccountsPayableList();
         };
 
