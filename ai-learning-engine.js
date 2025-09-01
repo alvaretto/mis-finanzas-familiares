@@ -738,5 +738,99 @@ class AdviceOptimizer {
     }
 }
 
+// 💳 ANÁLISIS DE MÉTODOS DE PAGO
+class PaymentMethodAnalyzer {
+    constructor(transactions) {
+        this.transactions = transactions || [];
+    }
+
+    // 📊 Analizar patrones por método de pago
+    analyzePaymentMethodPatterns() {
+        const patterns = [];
+        const methodStats = {};
+
+        // Procesar transacciones
+        this.transactions.forEach(transaction => {
+            if (transaction.paymentMethod && transaction.type === 'expense') {
+                const methodId = transaction.paymentMethod.id || transaction.paymentMethod.provider || 'unknown';
+                const methodName = transaction.paymentMethod.displayName || transaction.paymentMethod.provider || 'Desconocido';
+
+                if (!methodStats[methodId]) {
+                    methodStats[methodId] = {
+                        name: methodName,
+                        total: 0,
+                        count: 0,
+                        categories: {},
+                        avgAmount: 0,
+                        lastUsed: null,
+                        color: transaction.paymentMethod.color || '#6B7280'
+                    };
+                }
+
+                methodStats[methodId].total += transaction.amount;
+                methodStats[methodId].count++;
+
+                // Categorías por método
+                const category = transaction.category || 'Sin categoría';
+                if (!methodStats[methodId].categories[category]) {
+                    methodStats[methodId].categories[category] = 0;
+                }
+                methodStats[methodId].categories[category] += transaction.amount;
+
+                // Fecha de último uso
+                const transactionDate = transaction.date ? new Date(transaction.date) : transaction.createdAt?.toDate();
+                if (!methodStats[methodId].lastUsed || transactionDate > methodStats[methodId].lastUsed) {
+                    methodStats[methodId].lastUsed = transactionDate;
+                }
+            }
+        });
+
+        // Calcular promedios
+        Object.values(methodStats).forEach(method => {
+            method.avgAmount = method.total / method.count;
+        });
+
+        // Generar insights
+        const methods = Object.entries(methodStats).sort(([,a], [,b]) => b.total - a.total);
+
+        if (methods.length > 0) {
+            const topMethod = methods[0][1];
+            patterns.push({
+                type: 'payment_preference',
+                message: `Tu método de pago preferido es "${topMethod.name}" con $${topMethod.total.toLocaleString()} en ${topMethod.count} transacciones`,
+                data: topMethod
+            });
+
+            // Análisis de categorías por método
+            const topCategories = Object.entries(topMethod.categories)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 3);
+
+            if (topCategories.length > 0) {
+                const topCategory = topCategories[0];
+                const percentage = ((topCategory[1] / topMethod.total) * 100).toFixed(1);
+                patterns.push({
+                    type: 'category_by_method',
+                    message: `Con "${topMethod.name}" gastas principalmente en "${topCategory[0]}" (${percentage}% del total)`,
+                    data: { method: topMethod.name, category: topCategory[0], percentage }
+                });
+            }
+        }
+
+        return patterns;
+    }
+
+    // 📈 Generar reporte completo
+    generatePaymentMethodReport() {
+        const patterns = this.analyzePaymentMethodPatterns();
+
+        return {
+            patterns,
+            timestamp: new Date().toISOString()
+        };
+    }
+}
+
 // 🌟 Instancia global del motor de aprendizaje
 window.AILearningEngine = AILearningEngine;
+window.PaymentMethodAnalyzer = PaymentMethodAnalyzer;

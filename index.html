@@ -994,6 +994,28 @@
             <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md"><h2 class="text-sm font-medium text-slate-500 dark:text-slate-400">Gastos Totales</h2><p id="total-expense" class="text-2xl font-semibold mt-1 text-red-500">$0.00</p></div>
         </section>
 
+        <!-- 💳 Métodos de Pago Section -->
+        <section id="payment-methods-section" class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md mb-6">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
+                <h2 class="text-lg font-semibold flex items-center gap-2">
+                    <i data-lucide="credit-card" class="w-5 h-5 text-green-500"></i>
+                    Métodos de Pago
+                </h2>
+                <button id="refresh-payment-methods-btn" class="flex items-center gap-1 px-3 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors min-h-[44px] touch-manipulation">
+                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Actualizar</span>
+                </button>
+            </div>
+
+            <div id="payment-methods-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Los métodos de pago se cargarán aquí dinámicamente -->
+                <div class="text-center py-8 col-span-full">
+                    <i data-lucide="credit-card" class="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-2"></i>
+                    <p class="text-slate-500 dark:text-slate-400">Registra transacciones con métodos de pago para ver el análisis aquí</p>
+                </div>
+            </div>
+        </section>
+
         <!-- Patrimonio Section -->
         <section class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md mb-6">
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
@@ -1121,6 +1143,9 @@
     <!-- 🚀 Optimizaciones de Rendimiento -->
     <script src="performance-optimizer.js"></script>
     <script src="firebase-query-optimizer.js"></script>
+
+    <!-- 💳 Sistema de Métodos de Pago -->
+    <script src="payment-methods-structure.js"></script>
 
     <!-- 🧪 Sistema de Testing Avanzado -->
     <script src="testing-framework.js"></script>
@@ -2412,6 +2437,22 @@
                     }
                 }
 
+                // 💳 Construir información del método de pago
+                let paymentMethodDisplay = '';
+                if (t.paymentMethod) {
+                    const method = t.paymentMethod;
+                    const methodColor = method.color || '#6B7280';
+                    const methodIcon = method.icon || 'credit-card';
+                    const methodName = method.displayName || method.provider || 'Método no especificado';
+
+                    paymentMethodDisplay = `
+                        <div class="flex items-center gap-1 mt-1">
+                            <i data-lucide="${methodIcon}" class="w-3 h-3" style="color: ${methodColor}"></i>
+                            <span class="text-xs" style="color: ${methodColor}">${methodName}</span>
+                        </div>
+                    `;
+                }
+
                 const li = document.createElement('div');
                 li.className = 'bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md flex items-center justify-between';
                 li.innerHTML = `
@@ -2425,6 +2466,7 @@
                                 ${t.date ? new Date(t.date).toLocaleDateString('es-ES') : t.createdAt?.toDate().toLocaleDateString('es-ES')}
                             </p>
                             ${t.subcategory || t.subsubcategory ? `<p class="text-xs text-slate-400 dark:text-slate-500 truncate mt-1" title="${categoryDisplay}">${categoryDisplay}</p>` : ''}
+                            ${paymentMethodDisplay}
                             ${t.specificDetails ? renderSpecificDetailsPreview(t.specificDetails) : ''}
                         </div>
                     </div>
@@ -2553,7 +2595,17 @@
             financialHealthBarEl.className = `h-2 rounded-full transition-all duration-500 ${healthColor}`;
         };
 
-        const updateAllUI = () => { renderSummary(); renderBudget(); renderTransactions(); updateChart(); renderPatrimony(); };
+        const updateAllUI = () => {
+            renderSummary();
+            renderBudget();
+            renderTransactions();
+            updateChart();
+            renderPatrimony();
+            // 💳 Renderizar métodos de pago
+            if (window.renderPaymentMethods) {
+                window.renderPaymentMethods();
+            }
+        };
         const openModal = (modalEl) => modalEl.classList.remove('hidden');
         const closeModal = (modalEl) => modalEl.classList.add('hidden');
 
@@ -2615,6 +2667,42 @@
                                         <input type="text" id="description" value="${transaction?.description || ''}"
                                                class="w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-md focus:ring-2 focus:ring-indigo-500"
                                                placeholder="Describe brevemente esta transacción..." required>
+                                    </div>
+                                </div>
+
+                                <!-- 💳 Sección: Método de Pago -->
+                                <div class="bg-slate-50 dark:bg-gray-700/50 p-4 rounded-lg form-section">
+                                    <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+                                        <i data-lucide="credit-card" class="w-4 h-4 text-green-500"></i>
+                                        Método de Pago
+                                    </h4>
+                                    <div>
+                                        <label for="payment-method" class="block text-sm font-medium mb-2">¿Cómo pagaste esta transacción?</label>
+                                        <select id="payment-method" class="w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-md focus:ring-2 focus:ring-indigo-500 mobile-select-fix" required>
+                                            <option value="">Selecciona el método de pago</option>
+                                            <optgroup label="💵 Efectivo">
+                                                <option value="cash" data-icon="banknote" data-color="#10B981">Efectivo</option>
+                                            </optgroup>
+                                            <optgroup label="🏦 Transferencias Bancarias">
+                                                <option value="davivienda_transfer" data-icon="building-2" data-color="#DC2626">Transferencia Davivienda</option>
+                                                <option value="bancolombia_transfer" data-icon="building-2" data-color="#FBBF24">Transferencia Bancolombia</option>
+                                            </optgroup>
+                                            <optgroup label="💳 Tarjetas">
+                                                <option value="credit_card" data-icon="credit-card" data-color="#8B5CF6">Tarjeta de Crédito</option>
+                                                <option value="debit_card" data-icon="credit-card" data-color="#06B6D4">Tarjeta Débito</option>
+                                            </optgroup>
+                                            <optgroup label="📱 Billeteras Digitales">
+                                                <option value="nequi" data-icon="smartphone" data-color="#FF6B35">Nequi</option>
+                                                <option value="daviplata" data-icon="smartphone" data-color="#DC2626">DaviPlata</option>
+                                            </optgroup>
+                                            <optgroup label="🔄 Otros">
+                                                <option value="other" data-icon="more-horizontal" data-color="#6B7280">Otro Método</option>
+                                            </optgroup>
+                                        </select>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                            <i data-lucide="info" class="w-3 h-3 inline mr-1"></i>
+                                            Esta información te ayudará a controlar mejor tus saldos por método de pago
+                                        </p>
                                     </div>
                                 </div>
 
@@ -2740,6 +2828,13 @@
             if (transaction) {
                 setTimeout(() => {
                     if (transaction.category) categorySelect.value = transaction.category;
+
+                    // 💳 Restaurar método de pago
+                    const paymentMethodSelect = transactionModalEl.querySelector('#payment-method');
+                    if (transaction.paymentMethod && paymentMethodSelect) {
+                        paymentMethodSelect.value = transaction.paymentMethod.id || transaction.paymentMethod.provider || '';
+                    }
+
                     if (transaction.subcategory) {
                         updateSubcategoryOptions(transaction.category);
                         setTimeout(() => {
@@ -4005,6 +4100,22 @@
                 category: form.category.value,
                 date: form['transaction-date'].value
             };
+
+            // 💳 Agregar método de pago
+            const paymentMethodId = form['payment-method'].value;
+            if (paymentMethodId && window.PaymentMethodsSystem) {
+                const method = window.PaymentMethodsSystem.catalog[paymentMethodId];
+                if (method) {
+                    formData.paymentMethod = {
+                        id: paymentMethodId,
+                        type: method.type,
+                        provider: method.provider,
+                        displayName: method.displayName,
+                        icon: method.icon,
+                        color: method.color
+                    };
+                }
+            }
 
             // Agregar subcategorías si están seleccionadas
             const subcategory = form.subcategory?.value;
@@ -5754,6 +5865,104 @@ ${transactionData}`;
                     initializeTestingSystem();
                 }
             }, 5000);
+
+            // 💳 Función para renderizar métodos de pago
+            window.renderPaymentMethods = () => {
+                const paymentMethodsGrid = document.getElementById('payment-methods-grid');
+                if (!paymentMethodsGrid) return;
+
+                // Analizar transacciones por método de pago
+                const paymentMethodStats = {};
+
+                transactions.forEach(transaction => {
+                    if (transaction.paymentMethod) {
+                        const methodId = transaction.paymentMethod.id || transaction.paymentMethod.provider || 'unknown';
+                        const method = transaction.paymentMethod;
+
+                        if (!paymentMethodStats[methodId]) {
+                            paymentMethodStats[methodId] = {
+                                method: method,
+                                totalAmount: 0,
+                                transactionCount: 0,
+                                lastUsed: null,
+                                transactions: []
+                            };
+                        }
+
+                        const amount = transaction.type === 'expense' ? -transaction.amount : transaction.amount;
+                        paymentMethodStats[methodId].totalAmount += amount;
+                        paymentMethodStats[methodId].transactionCount++;
+                        paymentMethodStats[methodId].transactions.push(transaction);
+
+                        const transactionDate = transaction.date ? new Date(transaction.date) : transaction.createdAt?.toDate();
+                        if (!paymentMethodStats[methodId].lastUsed || transactionDate > paymentMethodStats[methodId].lastUsed) {
+                            paymentMethodStats[methodId].lastUsed = transactionDate;
+                        }
+                    }
+                });
+
+                // Si no hay datos, mostrar mensaje
+                if (Object.keys(paymentMethodStats).length === 0) {
+                    paymentMethodsGrid.innerHTML = `
+                        <div class="text-center py-8 col-span-full">
+                            <i data-lucide="credit-card" class="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-2"></i>
+                            <p class="text-slate-500 dark:text-slate-400">Registra transacciones con métodos de pago para ver el análisis aquí</p>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+
+                // Renderizar tarjetas de métodos de pago
+                paymentMethodsGrid.innerHTML = Object.entries(paymentMethodStats)
+                    .sort(([,a], [,b]) => b.transactionCount - a.transactionCount)
+                    .map(([methodId, stats]) => {
+                        const method = stats.method;
+                        const methodColor = method.color || '#6B7280';
+                        const methodIcon = method.icon || 'credit-card';
+                        const methodName = method.displayName || method.provider || 'Método desconocido';
+
+                        const avgAmount = stats.totalAmount / stats.transactionCount;
+                        const lastUsedText = stats.lastUsed ? stats.lastUsed.toLocaleDateString('es-ES') : 'Nunca';
+
+                        return `
+                            <div class="bg-slate-50 dark:bg-gray-700/50 p-4 rounded-lg border-l-4" style="border-left-color: ${methodColor}">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center gap-2">
+                                        <i data-lucide="${methodIcon}" class="w-5 h-5" style="color: ${methodColor}"></i>
+                                        <h3 class="font-semibold text-sm">${methodName}</h3>
+                                    </div>
+                                    <span class="text-xs px-2 py-1 bg-white dark:bg-gray-800 rounded-full">
+                                        ${stats.transactionCount} transacciones
+                                    </span>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-xs text-slate-500 dark:text-slate-400">Total gastado:</span>
+                                        <span class="text-sm font-medium ${stats.totalAmount < 0 ? 'text-red-500' : 'text-green-500'}">
+                                            ${formatCurrency(Math.abs(stats.totalAmount))}
+                                        </span>
+                                    </div>
+
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-xs text-slate-500 dark:text-slate-400">Promedio:</span>
+                                        <span class="text-sm font-medium">
+                                            ${formatCurrency(Math.abs(avgAmount))}
+                                        </span>
+                                    </div>
+
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-xs text-slate-500 dark:text-slate-400">Último uso:</span>
+                                        <span class="text-sm">${lastUsedText}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                lucide.createIcons();
+            };
 
             // Configurar listener de autenticación
             auth.onAuthStateChanged(user => user ? showApp(user) : showAuth());
