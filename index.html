@@ -1016,6 +1016,107 @@
             </div>
         </section>
 
+        <!-- 💰 Préstamos Section -->
+        <section id="loans-section" class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md mb-6">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
+                <h2 class="text-lg font-semibold flex items-center gap-2">
+                    <i data-lucide="hand-coins" class="w-5 h-5 text-amber-500"></i>
+                    Gestión de Préstamos
+                </h2>
+                <button id="refresh-loans-btn" class="flex items-center gap-1 px-3 py-2 text-sm font-medium text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-md transition-colors min-h-[44px] touch-manipulation">
+                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Actualizar</span>
+                </button>
+            </div>
+
+            <!-- Resumen de Préstamos -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg border border-amber-200 dark:border-amber-800">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-sm font-semibold text-amber-700 dark:text-amber-300">Préstamos Otorgados</h3>
+                        <i data-lucide="arrow-up-right" class="w-4 h-4 text-amber-500"></i>
+                    </div>
+                    <p class="text-2xl font-bold text-amber-600 dark:text-amber-400" id="loans-given-total">$0</p>
+                    <p class="text-xs text-amber-600 dark:text-amber-400" id="loans-given-count">0 préstamos activos</p>
+                </div>
+                <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-sm font-semibold text-purple-700 dark:text-purple-300">Préstamos Recibidos</h3>
+                        <i data-lucide="arrow-down-left" class="w-4 h-4 text-purple-500"></i>
+                    </div>
+                    <p class="text-2xl font-bold text-purple-600 dark:text-purple-400" id="loans-received-total">$0</p>
+                    <p class="text-xs text-purple-600 dark:text-purple-400" id="loans-received-count">0 préstamos activos</p>
+                </div>
+            </div>
+
+            <!-- Lista de Préstamos Activos -->
+            <div>
+                <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Préstamos Activos</h3>
+                <div id="active-loans-list" class="space-y-3">
+                    <!-- Los préstamos activos se cargarán aquí dinámicamente -->
+                    <div class="text-center py-8">
+                        <i data-lucide="hand-coins" class="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-2"></i>
+                        <p class="text-slate-500 dark:text-slate-400">No hay préstamos activos</p>
+                        <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Los préstamos aparecerán aquí cuando registres transacciones de tipo préstamo</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 🔍 Conciliación de Saldos Section -->
+        <section id="balance-reconciliation-section" class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md mb-6">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
+                <h2 class="text-lg font-semibold flex items-center gap-2">
+                    <i data-lucide="balance-scale" class="w-5 h-5 text-blue-500"></i>
+                    Conciliación de Saldos
+                </h2>
+                <div class="flex gap-2">
+                    <button id="reconcile-balances-btn" class="flex items-center gap-1 px-3 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors min-h-[44px] touch-manipulation">
+                        <i data-lucide="check-circle" class="w-4 h-4"></i>
+                        <span class="hidden sm:inline">Conciliar</span>
+                    </button>
+                    <button id="adjust-balances-btn" class="flex items-center gap-1 px-3 py-2 text-sm font-medium text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-md transition-colors min-h-[44px] touch-manipulation">
+                        <i data-lucide="settings" class="w-4 h-4"></i>
+                        <span class="hidden sm:inline">Ajustar</span>
+                    </button>
+                    <button id="test-accounting-system-btn" class="flex items-center gap-1 px-3 py-2 text-sm font-medium text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-md transition-colors min-h-[44px] touch-manipulation">
+                        <i data-lucide="flask" class="w-4 h-4"></i>
+                        <span class="hidden sm:inline">Probar Sistema</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Estado de Conciliación -->
+            <div id="reconciliation-status" class="mb-4">
+                <div class="flex items-center gap-2 p-3 bg-slate-50 dark:bg-gray-700/50 rounded-lg">
+                    <i data-lucide="info" class="w-4 h-4 text-blue-500"></i>
+                    <span class="text-sm text-slate-600 dark:text-slate-400">
+                        Última conciliación: <span id="last-reconciliation-date">Nunca</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Comparación de Saldos -->
+            <div id="balance-comparison-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Los métodos de pago con comparación se cargarán aquí dinámicamente -->
+                <div class="text-center py-8 col-span-full">
+                    <i data-lucide="balance-scale" class="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-2"></i>
+                    <p class="text-slate-500 dark:text-slate-400">Haz clic en "Conciliar" para comparar saldos registrados vs. reales</p>
+                </div>
+            </div>
+
+            <!-- Discrepancias Detectadas -->
+            <div id="discrepancies-section" class="mt-6" style="display: none;">
+                <h3 class="text-sm font-semibold text-red-700 dark:text-red-300 mb-3 flex items-center gap-2">
+                    <i data-lucide="alert-triangle" class="w-4 h-4 text-red-500"></i>
+                    Discrepancias Detectadas
+                </h3>
+                <div id="discrepancies-list" class="space-y-3">
+                    <!-- Las discrepancias se mostrarán aquí -->
+                </div>
+            </div>
+        </section>
+
         <!-- Patrimonio Section -->
         <section class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md mb-6">
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
@@ -1146,6 +1247,12 @@
 
     <!-- 💳 Sistema de Métodos de Pago -->
     <script src="payment-methods-structure.js"></script>
+
+    <!-- 🏦 Sistema Avanzado de Transacciones Contables -->
+    <script src="advanced-transaction-system.js"></script>
+
+    <!-- 🧪 Sistema de Pruebas Contables -->
+    <script src="accounting-system-tests.js"></script>
 
     <!-- 🧪 Sistema de Testing Avanzado -->
     <script src="testing-framework.js"></script>
@@ -1981,6 +2088,32 @@
             return transactions || [];
         };
 
+        // 🆕 Función para obtener transacciones con análisis contable correcto
+        const getTransactionsForAnalysis = () => {
+            if (!window.AccountingCalculator) {
+                return transactions || [];
+            }
+
+            const calculator = new window.AccountingCalculator();
+            const allTransactions = transactions || [];
+
+            // Agregar metadatos contables a cada transacción
+            return allTransactions.map(transaction => {
+                const impact = calculator.calculateTransactionImpact(transaction);
+                return {
+                    ...transaction,
+                    // Metadatos contables
+                    accountingImpact: impact,
+                    isRealExpense: impact.expense > 0,
+                    isRealIncome: impact.income > 0,
+                    affectsCashFlow: impact.cashFlow !== 0,
+                    isTransfer: transaction.type === 'transfer',
+                    isLoan: ['loan_given', 'loan_received'].includes(transaction.type),
+                    isLoanPayment: ['loan_payment_received', 'loan_payment_made'].includes(transaction.type)
+                };
+            });
+        };
+
         // 🧠 Inicializar Sistema de IA Avanzado - Desafío 1
         const initializeAdvancedAI = async (userId) => {
             try {
@@ -2010,12 +2143,13 @@
                 predictiveDashboard = new PredictiveDashboard();
 
                 // Integrar insights del dashboard predictivo
-                const transactions = getTransactions();
-                if (transactions.length > 0) {
-                    await predictiveAnalyticsEngine.initialize(transactions);
+                const transactionsForAnalysis = getTransactionsForAnalysis();
+                if (transactionsForAnalysis.length > 0) {
+                    await predictiveAnalyticsEngine.initialize(transactionsForAnalysis);
                     const dashboardInsights = predictiveAnalyticsEngine.generateInsightsForDashboard();
                     proactiveInsights.push(...dashboardInsights);
                     console.log('📊 Dashboard predictivo integrado con', dashboardInsights.length, 'insights adicionales');
+                    console.log('🆕 Análisis contable aplicado a', transactionsForAnalysis.length, 'transacciones');
                 }
 
                 // 💾 Inicializar Sistema de Backups Automáticos
@@ -2396,18 +2530,40 @@
         };
 
         const renderSummary = () => {
-            const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
-            const totalExpense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
-            const balance = totalIncome - totalExpense;
-            balanceEl.textContent = formatCurrency(balance);
-            totalIncomeEl.textContent = formatCurrency(totalIncome);
-            totalExpenseEl.textContent = formatCurrency(totalExpense);
-            balanceEl.classList.toggle('text-red-500', balance < 0);
-            balanceEl.classList.toggle('text-green-500', balance >= 0);
+            // 🆕 Usar el nuevo sistema contable para cálculos correctos
+            if (window.AccountingCalculator) {
+                const calculator = new window.AccountingCalculator();
+                const metrics = calculator.calculateCorrectedMetrics(transactions);
+
+                balanceEl.textContent = formatCurrency(metrics.netCashFlow);
+                totalIncomeEl.textContent = formatCurrency(metrics.totalIncome);
+                totalExpenseEl.textContent = formatCurrency(metrics.totalExpense);
+                balanceEl.classList.toggle('text-red-500', metrics.netCashFlow < 0);
+                balanceEl.classList.toggle('text-green-500', metrics.netCashFlow >= 0);
+            } else {
+                // Fallback al sistema anterior
+                const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+                const totalExpense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+                const balance = totalIncome - totalExpense;
+                balanceEl.textContent = formatCurrency(balance);
+                totalIncomeEl.textContent = formatCurrency(totalIncome);
+                totalExpenseEl.textContent = formatCurrency(totalExpense);
+                balanceEl.classList.toggle('text-red-500', balance < 0);
+                balanceEl.classList.toggle('text-green-500', balance >= 0);
+            }
         };
 
         const renderBudget = () => {
-            const totalExpense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+            // 🆕 Usar solo gastos reales (excluir transferencias y préstamos)
+            let totalExpense = 0;
+            if (window.AccountingCalculator) {
+                const calculator = new window.AccountingCalculator();
+                const metrics = calculator.calculateCorrectedMetrics(transactions);
+                totalExpense = metrics.totalExpense;
+            } else {
+                totalExpense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+            }
+
             budgetSpentEl.textContent = formatCurrency(totalExpense);
             budgetTotalEl.textContent = formatCurrency(monthlyBudget);
             let percentage = 0;
@@ -2426,7 +2582,11 @@
                 return;
             }
             [...transactions].sort((a, b) => b.createdAt?.toDate() - a.createdAt?.toDate()).forEach(t => {
+                // 🆕 Usar el nuevo sistema de tipos de transacciones
+                const transactionConfig = window.TRANSACTION_TYPES?.[t.type] || window.TRANSACTION_TYPES?.expense;
                 const isIncome = t.type === 'income';
+                const isTransfer = t.type === 'transfer';
+                const isLoan = ['loan_given', 'loan_received', 'loan_payment_received', 'loan_payment_made'].includes(t.type);
 
                 // Construir la cadena de categorías
                 let categoryDisplay = t.category;
@@ -2437,15 +2597,39 @@
                     }
                 }
 
-                // 💳 Construir información del método de pago
-                let paymentMethodDisplay = '';
-                if (t.paymentMethod) {
+                // 🆕 Construir información específica según tipo de transacción
+                let typeSpecificDisplay = '';
+
+                if (isTransfer && t.transferDetails) {
+                    typeSpecificDisplay = `
+                        <div class="flex items-center gap-1 mt-1">
+                            <i data-lucide="arrow-right" class="w-3 h-3 text-indigo-500"></i>
+                            <span class="text-xs text-indigo-600 dark:text-indigo-400">
+                                ${t.transferDetails.fromMethod.displayName} → ${t.transferDetails.toMethod.displayName}
+                            </span>
+                        </div>
+                    `;
+                } else if (isLoan && t.loanDetails) {
+                    const person = t.loanDetails.borrower || t.loanDetails.lender;
+                    if (person) {
+                        const relationText = t.type === 'loan_given' ? 'a' : 'de';
+                        typeSpecificDisplay = `
+                            <div class="flex items-center gap-1 mt-1">
+                                <i data-lucide="user" class="w-3 h-3" style="color: ${transactionConfig.color}"></i>
+                                <span class="text-xs" style="color: ${transactionConfig.color}">
+                                    ${relationText} ${person.name}
+                                </span>
+                            </div>
+                        `;
+                    }
+                } else if (t.paymentMethod) {
+                    // 💳 Información del método de pago para tipos normales
                     const method = t.paymentMethod;
                     const methodColor = method.color || '#6B7280';
                     const methodIcon = method.icon || 'credit-card';
                     const methodName = method.displayName || method.provider || 'Método no especificado';
 
-                    paymentMethodDisplay = `
+                    typeSpecificDisplay = `
                         <div class="flex items-center gap-1 mt-1">
                             <i data-lucide="${methodIcon}" class="w-3 h-3" style="color: ${methodColor}"></i>
                             <span class="text-xs" style="color: ${methodColor}">${methodName}</span>
@@ -2453,27 +2637,86 @@
                     `;
                 }
 
+                // 🆕 Determinar colores y iconos según el tipo de transacción
+                let bgClass, iconClass, amountClass, amountPrefix;
+
+                switch (t.type) {
+                    case 'income':
+                        bgClass = 'bg-green-100 dark:bg-green-900/50';
+                        iconClass = 'text-green-500';
+                        amountClass = 'text-green-500';
+                        amountPrefix = '+';
+                        break;
+                    case 'expense':
+                        bgClass = 'bg-red-100 dark:bg-red-900/50';
+                        iconClass = 'text-red-500';
+                        amountClass = 'text-red-500';
+                        amountPrefix = '-';
+                        break;
+                    case 'transfer':
+                        bgClass = 'bg-indigo-100 dark:bg-indigo-900/50';
+                        iconClass = 'text-indigo-500';
+                        amountClass = 'text-indigo-500';
+                        amountPrefix = '↔';
+                        break;
+                    case 'loan_given':
+                        bgClass = 'bg-amber-100 dark:bg-amber-900/50';
+                        iconClass = 'text-amber-500';
+                        amountClass = 'text-amber-500';
+                        amountPrefix = '→';
+                        break;
+                    case 'loan_received':
+                        bgClass = 'bg-purple-100 dark:bg-purple-900/50';
+                        iconClass = 'text-purple-500';
+                        amountClass = 'text-purple-500';
+                        amountPrefix = '←';
+                        break;
+                    case 'loan_payment_received':
+                        bgClass = 'bg-emerald-100 dark:bg-emerald-900/50';
+                        iconClass = 'text-emerald-500';
+                        amountClass = 'text-emerald-500';
+                        amountPrefix = '+';
+                        break;
+                    case 'loan_payment_made':
+                        bgClass = 'bg-rose-100 dark:bg-rose-900/50';
+                        iconClass = 'text-rose-500';
+                        amountClass = 'text-rose-500';
+                        amountPrefix = '-';
+                        break;
+                    default:
+                        bgClass = 'bg-gray-100 dark:bg-gray-900/50';
+                        iconClass = 'text-gray-500';
+                        amountClass = 'text-gray-500';
+                        amountPrefix = '';
+                }
+
                 const li = document.createElement('div');
                 li.className = 'bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md flex items-center justify-between';
                 li.innerHTML = `
                     <div class="flex items-center overflow-hidden mr-2">
-                        <div class="p-2 rounded-full mr-4 flex-shrink-0 ${isIncome ? 'bg-green-100 dark:bg-green-900/50' : 'bg-red-100 dark:bg-red-900/50'}">
-                            <i data-lucide="${isIncome ? 'arrow-down-circle' : 'arrow-up-circle'}" class="${isIncome ? 'text-green-500' : 'text-red-500'}"></i>
+                        <div class="p-2 rounded-full mr-4 flex-shrink-0 ${bgClass}">
+                            <i data-lucide="${transactionConfig.icon}" class="${iconClass}"></i>
                         </div>
                         <div class="min-w-0 flex-1">
-                            <p class="font-semibold truncate">${t.description}</p>
+                            <div class="flex items-center gap-2 mb-1">
+                                <p class="font-semibold truncate">${t.description}</p>
+                                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium"
+                                      style="background-color: ${transactionConfig.color}20; color: ${transactionConfig.color}">
+                                    ${transactionConfig.name}
+                                </span>
+                            </div>
                             <p class="text-sm text-slate-500 dark:text-slate-400">
                                 ${t.date ? new Date(t.date).toLocaleDateString('es-ES') : t.createdAt?.toDate().toLocaleDateString('es-ES')}
                             </p>
                             ${t.subcategory || t.subsubcategory ? `<p class="text-xs text-slate-400 dark:text-slate-500 truncate mt-1" title="${categoryDisplay}">${categoryDisplay}</p>` : ''}
-                            ${paymentMethodDisplay}
+                            ${typeSpecificDisplay}
                             ${t.specificDetails ? renderSpecificDetailsPreview(t.specificDetails) : ''}
                         </div>
                     </div>
                     <div class="text-right flex items-center gap-2 flex-shrink-0">
                         <div>
-                            <p class="font-semibold ${isIncome ? 'text-green-500' : 'text-red-500'}">${isIncome ? '+' : '-'}${formatCurrency(t.amount)}</p>
-                            <span class="text-xs px-2 py-1 bg-slate-200 dark:bg-gray-700 rounded-full" title="${categoryDisplay}">${t.category}</span>
+                            <p class="font-semibold ${amountClass}">${amountPrefix}${formatCurrency(t.amount)}</p>
+                            ${t.category ? `<span class="text-xs px-2 py-1 bg-slate-200 dark:bg-gray-700 rounded-full" title="${categoryDisplay}">${t.category}</span>` : ''}
                         </div>
                         <div class="flex flex-col gap-2">
                             <button class="edit-btn text-slate-400 hover:text-indigo-500" data-id="${t.id}">
@@ -2523,6 +2766,7 @@
             if (financeChart) {
                 financeChart.destroy();
             }
+            // 🆕 Filtrar solo gastos reales (excluir transferencias, préstamos, etc.)
             const expenses = transactions.filter(t => t.type === 'expense');
             const hasExpenses = expenses.length > 0;
             chartCanvas.classList.toggle('hidden', !hasExpenses);
@@ -2604,6 +2848,14 @@
             // 💳 Renderizar métodos de pago
             if (window.renderPaymentMethods) {
                 window.renderPaymentMethods();
+            }
+            // 💰 Renderizar préstamos
+            if (window.renderLoans) {
+                window.renderLoans();
+            }
+            // 🔍 Renderizar conciliación de saldos
+            if (window.renderBalanceReconciliation) {
+                window.renderBalanceReconciliation();
             }
         };
         const openModal = (modalEl) => modalEl.classList.remove('hidden');
@@ -2715,21 +2967,58 @@
 
                                     <div class="mb-4">
                                         <span class="block text-sm font-medium mb-2">Tipo de Transacción</span>
-                                        <div class="grid grid-cols-2 gap-3">
-                                            <label class="flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all hover:border-green-300 has-[:checked]:border-green-500 has-[:checked]:bg-green-50 dark:has-[:checked]:bg-green-900/20">
+                                        <div class="grid grid-cols-2 lg:grid-cols-3 gap-2">
+                                            <!-- Tipos básicos -->
+                                            <label class="flex items-center p-2 border-2 rounded-lg cursor-pointer transition-all hover:border-green-300 has-[:checked]:border-green-500 has-[:checked]:bg-green-50 dark:has-[:checked]:bg-green-900/20">
                                                 <input type="radio" name="type" value="income" class="sr-only" ${type === 'income' ? 'checked' : ''}>
-                                                <i data-lucide="trending-up" class="text-green-500 mr-3 w-5 h-5"></i>
+                                                <i data-lucide="trending-up" class="text-green-500 mr-2 w-4 h-4"></i>
                                                 <div>
-                                                    <div class="font-medium">Ingreso</div>
+                                                    <div class="font-medium text-sm">Ingreso</div>
                                                     <div class="text-xs text-slate-500">Dinero que entra</div>
                                                 </div>
                                             </label>
-                                            <label class="flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all hover:border-red-300 has-[:checked]:border-red-500 has-[:checked]:bg-red-50 dark:has-[:checked]:bg-red-900/20">
+                                            <label class="flex items-center p-2 border-2 rounded-lg cursor-pointer transition-all hover:border-red-300 has-[:checked]:border-red-500 has-[:checked]:bg-red-50 dark:has-[:checked]:bg-red-900/20">
                                                 <input type="radio" name="type" value="expense" class="sr-only" ${type === 'expense' ? 'checked' : ''}>
-                                                <i data-lucide="trending-down" class="text-red-500 mr-3 w-5 h-5"></i>
+                                                <i data-lucide="trending-down" class="text-red-500 mr-2 w-4 h-4"></i>
                                                 <div>
-                                                    <div class="font-medium">Gasto</div>
+                                                    <div class="font-medium text-sm">Gasto</div>
                                                     <div class="text-xs text-slate-500">Dinero que sale</div>
+                                                </div>
+                                            </label>
+                                            <!-- NUEVO: Transferencia -->
+                                            <label class="flex items-center p-2 border-2 rounded-lg cursor-pointer transition-all hover:border-indigo-300 has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50 dark:has-[:checked]:bg-indigo-900/20">
+                                                <input type="radio" name="type" value="transfer" class="sr-only" ${type === 'transfer' ? 'checked' : ''}>
+                                                <i data-lucide="arrow-left-right" class="text-indigo-500 mr-2 w-4 h-4"></i>
+                                                <div>
+                                                    <div class="font-medium text-sm">Transferencia</div>
+                                                    <div class="text-xs text-slate-500">Entre mis cuentas</div>
+                                                </div>
+                                            </label>
+                                            <!-- NUEVO: Préstamo Otorgado -->
+                                            <label class="flex items-center p-2 border-2 rounded-lg cursor-pointer transition-all hover:border-amber-300 has-[:checked]:border-amber-500 has-[:checked]:bg-amber-50 dark:has-[:checked]:bg-amber-900/20">
+                                                <input type="radio" name="type" value="loan_given" class="sr-only" ${type === 'loan_given' ? 'checked' : ''}>
+                                                <i data-lucide="hand-coins" class="text-amber-500 mr-2 w-4 h-4"></i>
+                                                <div>
+                                                    <div class="font-medium text-sm">Préstamo Dado</div>
+                                                    <div class="text-xs text-slate-500">Presto dinero</div>
+                                                </div>
+                                            </label>
+                                            <!-- NUEVO: Préstamo Recibido -->
+                                            <label class="flex items-center p-2 border-2 rounded-lg cursor-pointer transition-all hover:border-purple-300 has-[:checked]:border-purple-500 has-[:checked]:bg-purple-50 dark:has-[:checked]:bg-purple-900/20">
+                                                <input type="radio" name="type" value="loan_received" class="sr-only" ${type === 'loan_received' ? 'checked' : ''}>
+                                                <i data-lucide="piggy-bank" class="text-purple-500 mr-2 w-4 h-4"></i>
+                                                <div>
+                                                    <div class="font-medium text-sm">Préstamo Recibido</div>
+                                                    <div class="text-xs text-slate-500">Me prestan dinero</div>
+                                                </div>
+                                            </label>
+                                            <!-- NUEVO: Pago de Préstamo Recibido -->
+                                            <label class="flex items-center p-2 border-2 rounded-lg cursor-pointer transition-all hover:border-emerald-300 has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50 dark:has-[:checked]:bg-emerald-900/20">
+                                                <input type="radio" name="type" value="loan_payment_received" class="sr-only" ${type === 'loan_payment_received' ? 'checked' : ''}>
+                                                <i data-lucide="coins" class="text-emerald-500 mr-2 w-4 h-4"></i>
+                                                <div>
+                                                    <div class="font-medium text-sm">Pago Recibido</div>
+                                                    <div class="text-xs text-slate-500">Me pagan préstamo</div>
                                                 </div>
                                             </label>
                                         </div>
@@ -2755,6 +3044,163 @@
                                             <select id="subsubcategory" class="w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-md focus:ring-2 focus:ring-indigo-500 mobile-select-fix">
                                                 <option value="">Sin detalle específico</option>
                                             </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 🔄 Sección: Campos de Transferencia -->
+                                <div id="transfer-fields-section" class="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-lg form-section" style="display: none;">
+                                    <h4 class="text-sm font-semibold text-indigo-700 dark:text-indigo-300 mb-3 flex items-center gap-2">
+                                        <i data-lucide="arrow-left-right" class="w-4 h-4 text-indigo-500"></i>
+                                        Detalles de Transferencia
+                                    </h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label for="transfer-from" class="block text-sm font-medium mb-2">Desde (Origen)</label>
+                                            <select id="transfer-from" class="w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-md focus:ring-2 focus:ring-indigo-500 mobile-select-fix">
+                                                <option value="">Selecciona origen</option>
+                                                <optgroup label="💵 Efectivo">
+                                                    <option value="cash">Efectivo</option>
+                                                </optgroup>
+                                                <optgroup label="🏦 Transferencias Bancarias">
+                                                    <option value="davivienda_transfer">Davivienda</option>
+                                                    <option value="bancolombia_transfer">Bancolombia</option>
+                                                </optgroup>
+                                                <optgroup label="💳 Tarjetas">
+                                                    <option value="credit_card">Tarjeta de Crédito</option>
+                                                    <option value="debit_card">Tarjeta Débito</option>
+                                                </optgroup>
+                                                <optgroup label="📱 Billeteras Digitales">
+                                                    <option value="nequi">Nequi</option>
+                                                    <option value="daviplata">DaviPlata</option>
+                                                </optgroup>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="transfer-to" class="block text-sm font-medium mb-2">Hacia (Destino)</label>
+                                            <select id="transfer-to" class="w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-md focus:ring-2 focus:ring-indigo-500 mobile-select-fix">
+                                                <option value="">Selecciona destino</option>
+                                                <optgroup label="💵 Efectivo">
+                                                    <option value="cash">Efectivo</option>
+                                                </optgroup>
+                                                <optgroup label="🏦 Transferencias Bancarias">
+                                                    <option value="davivienda_transfer">Davivienda</option>
+                                                    <option value="bancolombia_transfer">Bancolombia</option>
+                                                </optgroup>
+                                                <optgroup label="💳 Tarjetas">
+                                                    <option value="credit_card">Tarjeta de Crédito</option>
+                                                    <option value="debit_card">Tarjeta Débito</option>
+                                                </optgroup>
+                                                <optgroup label="📱 Billeteras Digitales">
+                                                    <option value="nequi">Nequi</option>
+                                                    <option value="daviplata">DaviPlata</option>
+                                                </optgroup>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <label for="transfer-fees" class="block text-sm font-medium mb-2">Comisiones (opcional)</label>
+                                        <input type="number" id="transfer-fees" min="0" step="100"
+                                               class="w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-md focus:ring-2 focus:ring-indigo-500"
+                                               placeholder="0">
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                            <i data-lucide="info" class="w-3 h-3 inline mr-1"></i>
+                                            Costo de la transferencia (si aplica)
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- 💰 Sección: Campos de Préstamos -->
+                                <div id="loan-fields-section" class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg form-section" style="display: none;">
+                                    <h4 class="text-sm font-semibold text-amber-700 dark:text-amber-300 mb-3 flex items-center gap-2">
+                                        <i data-lucide="hand-coins" class="w-4 h-4 text-amber-500"></i>
+                                        Detalles del Préstamo
+                                    </h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label for="loan-person-name" class="block text-sm font-medium mb-2">Nombre de la Persona</label>
+                                            <input type="text" id="loan-person-name"
+                                                   class="w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-md focus:ring-2 focus:ring-amber-500"
+                                                   placeholder="Ej: Juan Pérez">
+                                        </div>
+                                        <div>
+                                            <label for="loan-relationship" class="block text-sm font-medium mb-2">Relación</label>
+                                            <select id="loan-relationship" class="w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-md focus:ring-2 focus:ring-amber-500 mobile-select-fix">
+                                                <option value="">Selecciona relación</option>
+                                                <option value="family">Familiar</option>
+                                                <option value="friend">Amigo</option>
+                                                <option value="colleague">Compañero de trabajo</option>
+                                                <option value="neighbor">Vecino</option>
+                                                <option value="bank">Banco</option>
+                                                <option value="institution">Institución</option>
+                                                <option value="other">Otro</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                                        <div>
+                                            <label for="loan-interest-rate" class="block text-sm font-medium mb-2">Tasa de Interés (%)</label>
+                                            <input type="number" id="loan-interest-rate" min="0" max="100" step="0.1"
+                                                   class="w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-md focus:ring-2 focus:ring-amber-500"
+                                                   placeholder="0" value="0">
+                                        </div>
+                                        <div>
+                                            <label for="loan-due-date" class="block text-sm font-medium mb-2">Fecha de Vencimiento</label>
+                                            <input type="date" id="loan-due-date"
+                                                   class="w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-md focus:ring-2 focus:ring-amber-500">
+                                        </div>
+                                        <div>
+                                            <label for="loan-contact" class="block text-sm font-medium mb-2">Contacto (opcional)</label>
+                                            <input type="text" id="loan-contact"
+                                                   class="w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-md focus:ring-2 focus:ring-amber-500"
+                                                   placeholder="Teléfono o email">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 💸 Sección: Campos de Pagos de Préstamos -->
+                                <div id="loan-payment-fields-section" class="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-lg form-section" style="display: none;">
+                                    <h4 class="text-sm font-semibold text-emerald-700 dark:text-emerald-300 mb-3 flex items-center gap-2">
+                                        <i data-lucide="coins" class="w-4 h-4 text-emerald-500"></i>
+                                        Pago de Préstamo
+                                    </h4>
+                                    <div class="mb-4">
+                                        <label for="existing-loan-select" class="block text-sm font-medium mb-2">Seleccionar Préstamo</label>
+                                        <select id="existing-loan-select" class="w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-md focus:ring-2 focus:ring-emerald-500 mobile-select-fix">
+                                            <option value="">Selecciona el préstamo a pagar</option>
+                                            <!-- Las opciones se cargarán dinámicamente -->
+                                        </select>
+                                    </div>
+                                    <div id="selected-loan-details" class="bg-white dark:bg-gray-700 p-3 rounded-lg border" style="display: none;">
+                                        <h5 class="text-sm font-semibold mb-2">Detalles del Préstamo</h5>
+                                        <div class="grid grid-cols-2 gap-3 text-sm">
+                                            <div>
+                                                <span class="text-slate-500 dark:text-slate-400">Persona:</span>
+                                                <p class="font-semibold" id="loan-detail-person">-</p>
+                                            </div>
+                                            <div>
+                                                <span class="text-slate-500 dark:text-slate-400">Saldo Pendiente:</span>
+                                                <p class="font-semibold text-emerald-600" id="loan-detail-balance">$0</p>
+                                            </div>
+                                            <div>
+                                                <span class="text-slate-500 dark:text-slate-400">Fecha Vencimiento:</span>
+                                                <p class="font-semibold" id="loan-detail-due-date">-</p>
+                                            </div>
+                                            <div>
+                                                <span class="text-slate-500 dark:text-slate-400">Interés:</span>
+                                                <p class="font-semibold" id="loan-detail-interest">0%</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <label for="payment-amount-suggestion" class="block text-sm font-medium mb-2">Monto Sugerido</label>
+                                        <div class="flex gap-2">
+                                            <button type="button" id="pay-full-amount-btn" class="px-3 py-2 text-xs bg-emerald-100 text-emerald-700 rounded-md hover:bg-emerald-200 transition-colors">
+                                                Pagar Total
+                                            </button>
+                                            <button type="button" id="pay-partial-amount-btn" class="px-3 py-2 text-xs bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors">
+                                                Pago Parcial
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -2805,6 +3251,8 @@
                 radio.addEventListener('change', (e) => {
                     updateCategoryOptions(e.target.value);
                     hideSubcategories();
+                    // 🆕 Mostrar/ocultar campos específicos según tipo
+                    updateTransactionTypeFields(e.target.value);
                 });
             });
 
@@ -2823,6 +3271,8 @@
 
             // Inicializar con el tipo actual
             updateCategoryOptions(type);
+            // 🆕 Inicializar campos específicos del tipo
+            updateTransactionTypeFields(type);
 
             // Si estamos editando, restaurar valores
             if (transaction) {
@@ -2864,6 +3314,159 @@
                     }
                 }, 50);
             }
+        };
+
+        // 🆕 Función para mostrar/ocultar campos según tipo de transacción
+        const updateTransactionTypeFields = (type) => {
+            const transferFields = transactionModalEl.querySelector('#transfer-fields-section');
+            const loanFields = transactionModalEl.querySelector('#loan-fields-section');
+            const loanPaymentFields = transactionModalEl.querySelector('#loan-payment-fields-section');
+            const paymentMethodSection = transactionModalEl.querySelector('#payment-method').closest('.form-section');
+
+            // Ocultar todos los campos específicos primero
+            if (transferFields) transferFields.style.display = 'none';
+            if (loanFields) loanFields.style.display = 'none';
+            if (loanPaymentFields) loanPaymentFields.style.display = 'none';
+
+            // Mostrar campos según el tipo seleccionado
+            switch (type) {
+                case 'transfer':
+                    if (transferFields) transferFields.style.display = 'block';
+                    // Para transferencias, ocultar el campo de método de pago normal
+                    if (paymentMethodSection) paymentMethodSection.style.display = 'none';
+                    break;
+
+                case 'loan_given':
+                case 'loan_received':
+                    if (loanFields) loanFields.style.display = 'block';
+                    // Actualizar etiquetas según el tipo de préstamo
+                    const loanTitle = loanFields.querySelector('h4');
+                    if (type === 'loan_given') {
+                        if (loanTitle) loanTitle.innerHTML = '<i data-lucide="hand-coins" class="w-4 h-4 text-amber-500"></i> Detalles del Préstamo Otorgado';
+                        loanFields.querySelector('#loan-person-name').previousElementSibling.textContent = 'Nombre del Beneficiario';
+                    } else {
+                        if (loanTitle) loanTitle.innerHTML = '<i data-lucide="piggy-bank" class="w-4 h-4 text-purple-500"></i> Detalles del Préstamo Recibido';
+                        loanFields.querySelector('#loan-person-name').previousElementSibling.textContent = 'Nombre del Prestamista';
+                    }
+                    if (paymentMethodSection) paymentMethodSection.style.display = 'block';
+                    break;
+
+                case 'loan_payment_received':
+                case 'loan_payment_made':
+                    if (loanPaymentFields) {
+                        loanPaymentFields.style.display = 'block';
+                        // Actualizar título según el tipo de pago
+                        const paymentTitle = loanPaymentFields.querySelector('h4');
+                        if (type === 'loan_payment_received') {
+                            if (paymentTitle) paymentTitle.innerHTML = '<i data-lucide="coins" class="w-4 h-4 text-emerald-500"></i> Pago de Préstamo Recibido';
+                        } else {
+                            if (paymentTitle) paymentTitle.innerHTML = '<i data-lucide="credit-card" class="w-4 h-4 text-rose-500"></i> Pago de Préstamo Realizado';
+                        }
+                        // Cargar préstamos existentes
+                        loadExistingLoans(type);
+                    }
+                    if (paymentMethodSection) paymentMethodSection.style.display = 'block';
+                    break;
+
+                default:
+                    // Para income y expense, mostrar método de pago normal
+                    if (paymentMethodSection) paymentMethodSection.style.display = 'block';
+                    break;
+            }
+
+            // Actualizar iconos de Lucide
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        };
+
+        // 💰 Función para cargar préstamos existentes en el selector
+        const loadExistingLoans = (paymentType) => {
+            const existingLoanSelect = transactionModalEl.querySelector('#existing-loan-select');
+            const selectedLoanDetails = transactionModalEl.querySelector('#selected-loan-details');
+
+            if (!existingLoanSelect) return;
+
+            // Filtrar préstamos según el tipo de pago
+            let availableLoans = [];
+            if (paymentType === 'loan_payment_received') {
+                // Para pagos recibidos, mostrar préstamos que YO otorgué (loan_given)
+                availableLoans = transactions.filter(t =>
+                    t.type === 'loan_given' &&
+                    t.loanDetails?.status === 'active' &&
+                    (t.loanDetails?.balance || t.amount) > 0
+                );
+            } else if (paymentType === 'loan_payment_made') {
+                // Para pagos realizados, mostrar préstamos que YO recibí (loan_received)
+                availableLoans = transactions.filter(t =>
+                    t.type === 'loan_received' &&
+                    t.loanDetails?.status === 'active' &&
+                    (t.loanDetails?.balance || t.amount) > 0
+                );
+            }
+
+            // Limpiar opciones existentes
+            existingLoanSelect.innerHTML = '<option value="">Selecciona el préstamo a pagar</option>';
+
+            if (availableLoans.length === 0) {
+                existingLoanSelect.innerHTML += '<option value="" disabled>No hay préstamos activos disponibles</option>';
+                return;
+            }
+
+            // Agregar opciones de préstamos
+            availableLoans.forEach(loan => {
+                const person = loan.loanDetails?.borrower || loan.loanDetails?.lender;
+                const balance = loan.loanDetails?.balance || loan.amount;
+                const dueDate = loan.loanDetails?.terms?.dueDate;
+
+                const optionText = `${person?.name || 'Desconocido'} - ${formatCurrency(balance)} (Vence: ${new Date(dueDate).toLocaleDateString('es-ES')})`;
+                existingLoanSelect.innerHTML += `<option value="${loan.id}">${optionText}</option>`;
+            });
+
+            // Event listener para mostrar detalles del préstamo seleccionado
+            existingLoanSelect.addEventListener('change', (e) => {
+                const selectedLoanId = e.target.value;
+                if (!selectedLoanId) {
+                    selectedLoanDetails.style.display = 'none';
+                    return;
+                }
+
+                const selectedLoan = availableLoans.find(loan => loan.id === selectedLoanId);
+                if (selectedLoan) {
+                    const person = selectedLoan.loanDetails?.borrower || selectedLoan.loanDetails?.lender;
+                    const balance = selectedLoan.loanDetails?.balance || selectedLoan.amount;
+                    const dueDate = selectedLoan.loanDetails?.terms?.dueDate;
+                    const interestRate = selectedLoan.loanDetails?.terms?.interestRate || 0;
+
+                    // Actualizar detalles mostrados
+                    transactionModalEl.querySelector('#loan-detail-person').textContent = person?.name || 'Desconocido';
+                    transactionModalEl.querySelector('#loan-detail-balance').textContent = formatCurrency(balance);
+                    transactionModalEl.querySelector('#loan-detail-due-date').textContent = new Date(dueDate).toLocaleDateString('es-ES');
+                    transactionModalEl.querySelector('#loan-detail-interest').textContent = `${interestRate}%`;
+
+                    selectedLoanDetails.style.display = 'block';
+
+                    // Configurar botones de pago
+                    const payFullBtn = transactionModalEl.querySelector('#pay-full-amount-btn');
+                    const payPartialBtn = transactionModalEl.querySelector('#pay-partial-amount-btn');
+                    const amountInput = transactionModalEl.querySelector('#amount');
+
+                    if (payFullBtn && amountInput) {
+                        payFullBtn.onclick = () => {
+                            amountInput.value = balance;
+                            amountInput.dispatchEvent(new Event('input'));
+                        };
+                    }
+
+                    if (payPartialBtn && amountInput) {
+                        payPartialBtn.onclick = () => {
+                            const partialAmount = Math.round(balance * 0.5); // 50% del saldo
+                            amountInput.value = partialAmount;
+                            amountInput.dispatchEvent(new Event('input'));
+                        };
+                    }
+                }
+            });
         };
 
         // Funciones para manejar las opciones de categorías y subcategorías
@@ -4101,20 +4704,159 @@
                 date: form['transaction-date'].value
             };
 
-            // 💳 Agregar método de pago
-            const paymentMethodId = form['payment-method'].value;
-            if (paymentMethodId && window.PaymentMethodsSystem) {
-                const method = window.PaymentMethodsSystem.catalog[paymentMethodId];
-                if (method) {
-                    formData.paymentMethod = {
-                        id: paymentMethodId,
-                        type: method.type,
-                        provider: method.provider,
-                        displayName: method.displayName,
-                        icon: method.icon,
-                        color: method.color
+            // 🔄 Procesar campos específicos según tipo de transacción
+            switch (formData.type) {
+                case 'transfer':
+                    // Datos de transferencia
+                    const transferFrom = form['transfer-from']?.value;
+                    const transferTo = form['transfer-to']?.value;
+                    const transferFees = parseFloat(form['transfer-fees']?.value || 0);
+
+                    if (!transferFrom || !transferTo) {
+                        alert('Por favor selecciona tanto el origen como el destino de la transferencia');
+                        return;
+                    }
+
+                    if (transferFrom === transferTo) {
+                        alert('El origen y destino de la transferencia no pueden ser iguales');
+                        return;
+                    }
+
+                    formData.transferDetails = {
+                        fromMethod: {
+                            id: transferFrom,
+                            displayName: window.PaymentMethodsSystem?.catalog[transferFrom]?.displayName || transferFrom
+                        },
+                        toMethod: {
+                            id: transferTo,
+                            displayName: window.PaymentMethodsSystem?.catalog[transferTo]?.displayName || transferTo
+                        },
+                        transferType: 'internal',
+                        fees: transferFees
                     };
-                }
+                    break;
+
+                case 'loan_given':
+                case 'loan_received':
+                    // Datos de préstamo
+                    const personName = form['loan-person-name']?.value;
+                    const relationship = form['loan-relationship']?.value;
+                    const interestRate = parseFloat(form['loan-interest-rate']?.value || 0);
+                    const dueDate = form['loan-due-date']?.value;
+                    const contact = form['loan-contact']?.value;
+
+                    if (!personName) {
+                        alert('Por favor ingresa el nombre de la persona');
+                        return;
+                    }
+
+                    if (!dueDate) {
+                        alert('Por favor selecciona la fecha de vencimiento');
+                        return;
+                    }
+
+                    formData.loanDetails = {
+                        [formData.type === 'loan_given' ? 'borrower' : 'lender']: {
+                            name: personName,
+                            relationship: relationship,
+                            contact: contact
+                        },
+                        terms: {
+                            principalAmount: formData.amount,
+                            interestRate: interestRate,
+                            dueDate: dueDate,
+                            installments: 1,
+                            installmentAmount: formData.amount,
+                            paymentFrequency: 'once'
+                        },
+                        status: 'active',
+                        balance: formData.amount
+                    };
+
+                    // Agregar método de pago para préstamos
+                    const loanPaymentMethodId = form['payment-method']?.value;
+                    if (loanPaymentMethodId && window.PaymentMethodsSystem) {
+                        const method = window.PaymentMethodsSystem.catalog[loanPaymentMethodId];
+                        if (method) {
+                            formData.paymentMethod = {
+                                id: loanPaymentMethodId,
+                                type: method.type,
+                                provider: method.provider,
+                                displayName: method.displayName,
+                                icon: method.icon,
+                                color: method.color
+                            };
+                        }
+                    }
+                    break;
+
+                case 'loan_payment_received':
+                case 'loan_payment_made':
+                    // Datos de pago de préstamo
+                    const selectedLoanId = form['existing-loan-select']?.value;
+
+                    if (!selectedLoanId) {
+                        alert('Por favor selecciona el préstamo que deseas pagar');
+                        return;
+                    }
+
+                    // Buscar el préstamo original
+                    const originalLoan = transactions.find(t => t.id === selectedLoanId);
+                    if (!originalLoan) {
+                        alert('No se encontró el préstamo seleccionado');
+                        return;
+                    }
+
+                    const currentBalance = originalLoan.loanDetails?.balance || originalLoan.amount;
+                    if (formData.amount > currentBalance) {
+                        alert(`El monto del pago (${formatCurrency(formData.amount)}) no puede ser mayor al saldo pendiente (${formatCurrency(currentBalance)})`);
+                        return;
+                    }
+
+                    // Configurar datos del pago
+                    formData.loanDetails = {
+                        originalLoanId: selectedLoanId,
+                        originalLoanType: originalLoan.type,
+                        paymentAmount: formData.amount,
+                        remainingBalance: currentBalance - formData.amount,
+                        person: originalLoan.loanDetails?.borrower || originalLoan.loanDetails?.lender,
+                        isFullPayment: (currentBalance - formData.amount) <= 0
+                    };
+
+                    // Agregar método de pago
+                    const loanPaymentMethodId2 = form['payment-method']?.value;
+                    if (loanPaymentMethodId && window.PaymentMethodsSystem) {
+                        const method = window.PaymentMethodsSystem.catalog[loanPaymentMethodId];
+                        if (method) {
+                            formData.paymentMethod = {
+                                id: loanPaymentMethodId,
+                                type: method.type,
+                                provider: method.provider,
+                                displayName: method.displayName,
+                                icon: method.icon,
+                                color: method.color
+                            };
+                        }
+                    }
+                    break;
+
+                default:
+                    // Para income y expense, agregar método de pago normal
+                    const paymentMethodId = form['payment-method']?.value;
+                    if (paymentMethodId && window.PaymentMethodsSystem) {
+                        const method = window.PaymentMethodsSystem.catalog[paymentMethodId];
+                        if (method) {
+                            formData.paymentMethod = {
+                                id: paymentMethodId,
+                                type: method.type,
+                                provider: method.provider,
+                                displayName: method.displayName,
+                                icon: method.icon,
+                                color: method.color
+                            };
+                        }
+                    }
+                    break;
             }
 
             // Agregar subcategorías si están seleccionadas
@@ -4158,6 +4900,12 @@
                     showSuccessMessage('Transacción agregada exitosamente');
                 }
 
+                // 💰 Actualizar saldo del préstamo original si es un pago de préstamo
+                if ((formData.type === 'loan_payment_received' || formData.type === 'loan_payment_made') &&
+                    formData.loanDetails?.originalLoanId) {
+                    await updateOriginalLoanBalance(formData);
+                }
+
                 // 🧠 Análisis inteligente después de agregar/actualizar transacción
                 setTimeout(async () => {
                     await generateInsightsAfterTransaction(formData);
@@ -4167,6 +4915,37 @@
             } catch (error) {
                 console.error("Error saving transaction:", error);
                 showErrorMessage('Error al guardar la transacción');
+            }
+        };
+
+        // 💰 Función para actualizar el saldo del préstamo original
+        const updateOriginalLoanBalance = async (paymentData) => {
+            try {
+                const originalLoanId = paymentData.loanDetails.originalLoanId;
+                const paymentAmount = paymentData.amount;
+                const remainingBalance = paymentData.loanDetails.remainingBalance;
+                const isFullPayment = paymentData.loanDetails.isFullPayment;
+
+                // Actualizar el préstamo original
+                const updateData = {
+                    'loanDetails.balance': remainingBalance,
+                    'loanDetails.status': isFullPayment ? 'paid' : 'active',
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                await transactionsCollection.doc(originalLoanId).update(updateData);
+
+                console.log(`💰 Préstamo ${originalLoanId} actualizado: saldo restante ${formatCurrency(remainingBalance)}`);
+
+                if (isFullPayment) {
+                    showSuccessMessage(`¡Préstamo pagado completamente! 🎉`);
+                } else {
+                    showSuccessMessage(`Pago registrado. Saldo restante: ${formatCurrency(remainingBalance)}`);
+                }
+
+            } catch (error) {
+                console.error('Error actualizando saldo del préstamo:', error);
+                showErrorMessage('Error al actualizar el saldo del préstamo');
             }
         };
 
@@ -4186,9 +4965,9 @@
 
                 // 📊 Actualizar análisis predictivo
                 if (predictiveAnalyticsEngine) {
-                    const allTransactions = getTransactions();
-                    if (allTransactions.length > 0) {
-                        await predictiveAnalyticsEngine.initialize(allTransactions);
+                    const allTransactionsForAnalysis = getTransactionsForAnalysis();
+                    if (allTransactionsForAnalysis.length > 0) {
+                        await predictiveAnalyticsEngine.initialize(allTransactionsForAnalysis);
 
                         // Generar insights del dashboard predictivo
                         const dashboardInsights = predictiveAnalyticsEngine.generateInsightsForDashboard();
@@ -5416,25 +6195,25 @@ ${aiMemorySystem.userProfile.behaviorInsights.slice(0, 3).map(insight => `- ${in
                     predictiveDashboard = new PredictiveDashboard();
                 }
 
-                // Obtener transacciones actuales
-                console.log('📋 Obteniendo transacciones...');
-                const transactions = getTransactions();
-                console.log('📋 Transacciones obtenidas:', transactions.length);
+                // Obtener transacciones actuales con análisis contable
+                console.log('📋 Obteniendo transacciones con análisis contable...');
+                const transactionsForAnalysis = getTransactionsForAnalysis();
+                console.log('📋 Transacciones obtenidas:', transactionsForAnalysis.length);
 
-                if (transactions.length === 0) {
+                if (transactionsForAnalysis.length === 0) {
                     console.log('⚠️ No hay transacciones disponibles');
                     addAiMessage("📊 **Dashboard Predictivo**\n\nPara generar predicciones precisas, necesitas tener al menos algunas transacciones registradas.\n\n💡 **Sugerencia**: Agrega algunas transacciones de ejemplo y luego vuelve a abrir el dashboard.");
                     openAiChatModal();
                     return;
                 }
 
-                // Inicializar motor de análisis con transacciones
-                console.log('🔧 Inicializando motor de análisis...');
-                await predictiveAnalyticsEngine.initialize(transactions);
+                // Inicializar motor de análisis con transacciones enriquecidas
+                console.log('🔧 Inicializando motor de análisis con datos contables...');
+                await predictiveAnalyticsEngine.initialize(transactionsForAnalysis);
 
                 // Inicializar dashboard
                 console.log('🔧 Inicializando dashboard...');
-                await predictiveDashboard.initialize(predictiveAnalyticsEngine, transactions);
+                await predictiveDashboard.initialize(predictiveAnalyticsEngine, transactionsForAnalysis);
 
                 // Mostrar dashboard
                 console.log('📊 Mostrando dashboard...');
@@ -5604,7 +6383,17 @@ ${aiMemorySystem.userProfile.behaviorInsights.slice(0, 3).map(insight => `- ${in
         };
 
         const handleGenerateTips = async () => {
-            const transactionData = transactions.filter(t => t.type === 'expense').map(t => {
+            // 🆕 Usar el nuevo sistema contable para obtener solo gastos reales
+            let expenseTransactions = [];
+            if (window.AccountingCalculator) {
+                const calculator = new window.AccountingCalculator();
+                expenseTransactions = calculator.filterTransactionsByType(transactions, 'expense');
+            } else {
+                // Fallback al sistema anterior
+                expenseTransactions = transactions.filter(t => t.type === 'expense');
+            }
+
+            const transactionData = expenseTransactions.map(t => {
                 let categoryInfo = t.category;
                 if (t.subcategory) categoryInfo += ` › ${t.subcategory}`;
                 if (t.subsubcategory) categoryInfo += ` › ${t.subsubcategory}`;
@@ -5615,14 +6404,43 @@ ${aiMemorySystem.userProfile.behaviorInsights.slice(0, 3).map(insight => `- ${in
                 return;
             }
 
+            // 🆕 Agregar información de contexto sobre tipos de transacciones
+            let contextInfo = '';
+            if (window.AccountingCalculator) {
+                const calculator = new window.AccountingCalculator();
+                const summary = calculator.getTransactionSummaryByType(transactions);
+
+                contextInfo = `
+CONTEXTO FINANCIERO ADICIONAL:
+- Transferencias internas: ${summary.transfer?.count || 0} (${formatCurrency(summary.transfer?.totalAmount || 0)})
+- Préstamos otorgados: ${summary.loan_given?.count || 0} (${formatCurrency(summary.loan_given?.totalAmount || 0)})
+- Préstamos recibidos: ${summary.loan_received?.count || 0} (${formatCurrency(summary.loan_received?.totalAmount || 0)})
+- Pagos de préstamos recibidos: ${summary.loan_payment_received?.count || 0} (${formatCurrency(summary.loan_payment_received?.totalAmount || 0)})
+- Pagos de préstamos realizados: ${summary.loan_payment_made?.count || 0} (${formatCurrency(summary.loan_payment_made?.totalAmount || 0)})
+
+NOTA IMPORTANTE: Los análisis deben enfocarse SOLO en los gastos reales. Las transferencias NO son gastos, son movimientos internos entre cuentas propias.
+`;
+            }
+
                         // 🚀 PROMPT MEJORADO: Audaz, perspicaz y centrado en la familia
             const familyContext = `El análisis es para una familia. El objetivo es mejorar su salud financiera, optimizar gastos y aumentar ahorros.`;
             const prompt = `Eres FinGenius, un asesor financiero personal brillante, audaz y perspicaz. Tu especialidad son las finanzas familiares.
 ${familyContext}
+
+${contextInfo}
+
 Analiza estas transacciones y descubre patrones ocultos, correlaciones inesperadas y oportunidades de optimización significativas. No des consejos genéricos. Sé valiente en tus conclusiones y ofrece perspectivas que el usuario no haya considerado.
+
+IMPORTANTE: Al analizar, ten en cuenta que:
+- Las transferencias entre cuentas propias NO son gastos reales
+- Los préstamos otorgados son inversiones/activos, no gastos
+- Los préstamos recibidos aumentan liquidez pero crean deuda
+- Solo analiza patrones de gastos reales para dar consejos de ahorro
+
 Ignora por completo conceptos de finanzas corporativas (ej. inventarios, EBITDA, etc.).
 Tu respuesta DEBE ser un objeto JSON válido y nada más, sin markdown. El formato es: {"tips": [{"title": "string", "short_description": "string", "details": "string", "actionable_advice": "string"}]}.
-Transacciones:
+
+Gastos reales analizados (NO incluye transferencias ni préstamos):
 ${transactionData}`;
 
             try {
@@ -5782,6 +6600,71 @@ ${transactionData}`;
             manageLiabilitiesBtn.addEventListener('click', openLiabilitiesModal);
             manageAccountsPayableBtn.addEventListener('click', openAccountsPayableModal);
 
+            // 💰 Event listener para actualizar préstamos
+            const refreshLoansBtn = document.getElementById('refresh-loans-btn');
+            if (refreshLoansBtn) {
+                refreshLoansBtn.addEventListener('click', () => {
+                    if (window.renderLoans) {
+                        window.renderLoans();
+                        showSuccessMessage('Préstamos actualizados');
+                    }
+                });
+            }
+
+            // 💳 Event listener para actualizar métodos de pago
+            const refreshPaymentMethodsBtn = document.getElementById('refresh-payment-methods-btn');
+            if (refreshPaymentMethodsBtn) {
+                refreshPaymentMethodsBtn.addEventListener('click', () => {
+                    if (window.renderPaymentMethods) {
+                        window.renderPaymentMethods();
+                        showSuccessMessage('Métodos de pago actualizados');
+                    }
+                });
+            }
+
+            // 🔍 Event listeners para conciliación de saldos
+            const reconcileBalancesBtn = document.getElementById('reconcile-balances-btn');
+            if (reconcileBalancesBtn) {
+                reconcileBalancesBtn.addEventListener('click', () => {
+                    if (window.renderBalanceReconciliation) {
+                        window.renderBalanceReconciliation();
+                        // Actualizar fecha de última conciliación
+                        const lastReconciliationDate = document.getElementById('last-reconciliation-date');
+                        if (lastReconciliationDate) {
+                            lastReconciliationDate.textContent = new Date().toLocaleString('es-ES');
+                        }
+                        showSuccessMessage('Conciliación actualizada');
+                    }
+                });
+            }
+
+            const adjustBalancesBtn = document.getElementById('adjust-balances-btn');
+            if (adjustBalancesBtn) {
+                adjustBalancesBtn.addEventListener('click', () => {
+                    if (window.detectDiscrepancies) {
+                        window.detectDiscrepancies();
+                    }
+                });
+            }
+
+            // 🧪 Event listener para probar sistema contable
+            const testAccountingSystemBtn = document.getElementById('test-accounting-system-btn');
+            if (testAccountingSystemBtn) {
+                testAccountingSystemBtn.addEventListener('click', async () => {
+                    if (window.runAccountingSystemTests) {
+                        showSuccessMessage('Ejecutando pruebas del sistema contable...');
+                        try {
+                            await window.runAccountingSystemTests();
+                        } catch (error) {
+                            console.error('Error ejecutando pruebas:', error);
+                            showErrorMessage('Error al ejecutar las pruebas del sistema');
+                        }
+                    } else {
+                        showErrorMessage('Sistema de pruebas no disponible');
+                    }
+                });
+            }
+
             console.log('✅ Event listeners inicializados');
         };
 
@@ -5865,6 +6748,344 @@ ${transactionData}`;
                     initializeTestingSystem();
                 }
             }, 5000);
+
+            // 💰 Función para renderizar préstamos
+            window.renderLoans = () => {
+                const loansGivenTotalEl = document.getElementById('loans-given-total');
+                const loansGivenCountEl = document.getElementById('loans-given-count');
+                const loansReceivedTotalEl = document.getElementById('loans-received-total');
+                const loansReceivedCountEl = document.getElementById('loans-received-count');
+                const activeLoansListEl = document.getElementById('active-loans-list');
+
+                if (!activeLoansListEl) return;
+
+                // Filtrar préstamos activos
+                const loansGiven = transactions.filter(t => t.type === 'loan_given' && t.loanDetails?.status === 'active');
+                const loansReceived = transactions.filter(t => t.type === 'loan_received' && t.loanDetails?.status === 'active');
+
+                // Calcular totales
+                const totalGiven = loansGiven.reduce((sum, loan) => sum + (loan.loanDetails?.balance || loan.amount), 0);
+                const totalReceived = loansReceived.reduce((sum, loan) => sum + (loan.loanDetails?.balance || loan.amount), 0);
+
+                // Actualizar resumen
+                if (loansGivenTotalEl) loansGivenTotalEl.textContent = formatCurrency(totalGiven);
+                if (loansGivenCountEl) loansGivenCountEl.textContent = `${loansGiven.length} préstamos activos`;
+                if (loansReceivedTotalEl) loansReceivedTotalEl.textContent = formatCurrency(totalReceived);
+                if (loansReceivedCountEl) loansReceivedCountEl.textContent = `${loansReceived.length} préstamos activos`;
+
+                // Renderizar lista de préstamos activos
+                const allActiveLoans = [...loansGiven, ...loansReceived].sort((a, b) => {
+                    const dateA = a.loanDetails?.terms?.dueDate ? new Date(a.loanDetails.terms.dueDate) : new Date();
+                    const dateB = b.loanDetails?.terms?.dueDate ? new Date(b.loanDetails.terms.dueDate) : new Date();
+                    return dateA - dateB; // Ordenar por fecha de vencimiento
+                });
+
+                if (allActiveLoans.length === 0) {
+                    activeLoansListEl.innerHTML = `
+                        <div class="text-center py-8">
+                            <i data-lucide="hand-coins" class="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-2"></i>
+                            <p class="text-slate-500 dark:text-slate-400">No hay préstamos activos</p>
+                            <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Los préstamos aparecerán aquí cuando registres transacciones de tipo préstamo</p>
+                        </div>
+                    `;
+                } else {
+                    activeLoansListEl.innerHTML = allActiveLoans.map(loan => {
+                        const isGiven = loan.type === 'loan_given';
+                        const person = isGiven ? loan.loanDetails?.borrower : loan.loanDetails?.lender;
+                        const dueDate = loan.loanDetails?.terms?.dueDate;
+                        const balance = loan.loanDetails?.balance || loan.amount;
+                        const interestRate = loan.loanDetails?.terms?.interestRate || 0;
+
+                        // Calcular días hasta vencimiento
+                        const today = new Date();
+                        const due = new Date(dueDate);
+                        const daysUntilDue = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+
+                        let statusClass = 'text-green-600';
+                        let statusText = 'Al día';
+                        if (daysUntilDue < 0) {
+                            statusClass = 'text-red-600';
+                            statusText = `Vencido (${Math.abs(daysUntilDue)} días)`;
+                        } else if (daysUntilDue <= 7) {
+                            statusClass = 'text-amber-600';
+                            statusText = `Vence en ${daysUntilDue} días`;
+                        }
+
+                        return `
+                            <div class="bg-slate-50 dark:bg-gray-700/50 p-4 rounded-lg border-l-4 ${isGiven ? 'border-amber-500' : 'border-purple-500'}">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center gap-2">
+                                        <i data-lucide="${isGiven ? 'arrow-up-right' : 'arrow-down-left'}"
+                                           class="w-4 h-4 ${isGiven ? 'text-amber-500' : 'text-purple-500'}"></i>
+                                        <h4 class="font-semibold text-sm">
+                                            ${isGiven ? 'Prestado a' : 'Recibido de'} ${person?.name || 'Desconocido'}
+                                        </h4>
+                                    </div>
+                                    <span class="text-xs px-2 py-1 rounded-full ${isGiven ? 'bg-amber-100 text-amber-700' : 'bg-purple-100 text-purple-700'}">
+                                        ${person?.relationship || 'Sin relación'}
+                                    </span>
+                                </div>
+
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                                    <div>
+                                        <span class="text-slate-500 dark:text-slate-400">Saldo:</span>
+                                        <p class="font-semibold ${isGiven ? 'text-amber-600' : 'text-purple-600'}">
+                                            ${formatCurrency(balance)}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500 dark:text-slate-400">Interés:</span>
+                                        <p class="font-semibold">${interestRate}%</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500 dark:text-slate-400">Vencimiento:</span>
+                                        <p class="font-semibold">${new Date(dueDate).toLocaleDateString('es-ES')}</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500 dark:text-slate-400">Estado:</span>
+                                        <p class="font-semibold ${statusClass}">${statusText}</p>
+                                    </div>
+                                </div>
+
+                                ${person?.contact ? `
+                                    <div class="mt-2 pt-2 border-t border-slate-200 dark:border-slate-600">
+                                        <span class="text-xs text-slate-500 dark:text-slate-400">Contacto: ${person.contact}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                lucide.createIcons();
+            };
+
+            // 🔍 Sistema de Conciliación de Saldos
+            window.renderBalanceReconciliation = () => {
+                const balanceComparisonGrid = document.getElementById('balance-comparison-grid');
+                const discrepanciesSection = document.getElementById('discrepancies-section');
+                const discrepanciesList = document.getElementById('discrepancies-list');
+
+                if (!balanceComparisonGrid) return;
+
+                // Obtener saldos calculados por el sistema contable
+                let calculatedBalances = {};
+                if (window.AccountingCalculator) {
+                    const calculator = new window.AccountingCalculator();
+                    const metrics = calculator.calculateCorrectedMetrics(transactions);
+                    calculatedBalances = metrics.paymentMethodBalances;
+                }
+
+                // Obtener métodos de pago únicos de las transacciones
+                const paymentMethods = new Set();
+                transactions.forEach(t => {
+                    if (t.paymentMethod?.id) {
+                        paymentMethods.add(t.paymentMethod.id);
+                    }
+                    // Para transferencias, agregar ambos métodos
+                    if (t.type === 'transfer' && t.transferDetails) {
+                        paymentMethods.add(t.transferDetails.fromMethod.id);
+                        paymentMethods.add(t.transferDetails.toMethod.id);
+                    }
+                });
+
+                if (paymentMethods.size === 0) {
+                    balanceComparisonGrid.innerHTML = `
+                        <div class="text-center py-8 col-span-full">
+                            <i data-lucide="balance-scale" class="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-2"></i>
+                            <p class="text-slate-500 dark:text-slate-400">No hay métodos de pago para conciliar</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Renderizar comparación de saldos
+                const methodsArray = Array.from(paymentMethods);
+                balanceComparisonGrid.innerHTML = methodsArray.map(methodId => {
+                    const method = window.PaymentMethodsSystem?.catalog[methodId];
+                    const calculatedBalance = calculatedBalances[methodId] || 0;
+                    const realBalance = 0; // Por defecto, el usuario debe ingresar el saldo real
+                    const difference = realBalance - calculatedBalance;
+
+                    let statusClass = 'text-green-600';
+                    let statusIcon = 'check-circle';
+                    let statusText = 'Conciliado';
+
+                    if (Math.abs(difference) > 0) {
+                        statusClass = 'text-red-600';
+                        statusIcon = 'alert-circle';
+                        statusText = 'Discrepancia';
+                    }
+
+                    return `
+                        <div class="bg-slate-50 dark:bg-gray-700/50 p-4 rounded-lg border">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="${method?.icon || 'credit-card'}" class="w-4 h-4" style="color: ${method?.color || '#6B7280'}"></i>
+                                    <h4 class="font-semibold text-sm">${method?.displayName || methodId}</h4>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <i data-lucide="${statusIcon}" class="w-4 h-4 ${statusClass}"></i>
+                                    <span class="text-xs ${statusClass}">${statusText}</span>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500 dark:text-slate-400">Saldo Calculado:</span>
+                                    <span class="font-semibold">${formatCurrency(calculatedBalance)}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-slate-500 dark:text-slate-400">Saldo Real:</span>
+                                    <input type="number"
+                                           class="real-balance-input w-20 px-2 py-1 text-xs border rounded text-right"
+                                           data-method-id="${methodId}"
+                                           placeholder="0"
+                                           step="1000">
+                                </div>
+                                <div class="flex justify-between pt-2 border-t border-slate-200 dark:border-slate-600">
+                                    <span class="text-slate-500 dark:text-slate-400">Diferencia:</span>
+                                    <span class="font-semibold difference-amount" data-method-id="${methodId}">$0</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                // Agregar event listeners para calcular diferencias en tiempo real
+                balanceComparisonGrid.querySelectorAll('.real-balance-input').forEach(input => {
+                    input.addEventListener('input', (e) => {
+                        const methodId = e.target.dataset.methodId;
+                        const realBalance = parseFloat(e.target.value) || 0;
+                        const calculatedBalance = calculatedBalances[methodId] || 0;
+                        const difference = realBalance - calculatedBalance;
+
+                        const differenceEl = balanceComparisonGrid.querySelector(`[data-method-id="${methodId}"].difference-amount`);
+                        if (differenceEl) {
+                            differenceEl.textContent = formatCurrency(difference);
+                            differenceEl.className = `font-semibold difference-amount ${difference === 0 ? 'text-green-600' : 'text-red-600'}`;
+                        }
+                    });
+                });
+
+                lucide.createIcons();
+            };
+
+            // 🔍 Función para detectar y mostrar discrepancias
+            window.detectDiscrepancies = () => {
+                const discrepanciesSection = document.getElementById('discrepancies-section');
+                const discrepanciesList = document.getElementById('discrepancies-list');
+
+                if (!discrepanciesSection || !discrepanciesList) return;
+
+                const realBalanceInputs = document.querySelectorAll('.real-balance-input');
+                const discrepancies = [];
+
+                // Obtener saldos calculados
+                let calculatedBalances = {};
+                if (window.AccountingCalculator) {
+                    const calculator = new window.AccountingCalculator();
+                    const metrics = calculator.calculateCorrectedMetrics(transactions);
+                    calculatedBalances = metrics.paymentMethodBalances;
+                }
+
+                realBalanceInputs.forEach(input => {
+                    const methodId = input.dataset.methodId;
+                    const realBalance = parseFloat(input.value) || 0;
+                    const calculatedBalance = calculatedBalances[methodId] || 0;
+                    const difference = realBalance - calculatedBalance;
+
+                    if (Math.abs(difference) > 0) {
+                        const method = window.PaymentMethodsSystem?.catalog[methodId];
+                        discrepancies.push({
+                            methodId,
+                            methodName: method?.displayName || methodId,
+                            calculatedBalance,
+                            realBalance,
+                            difference
+                        });
+                    }
+                });
+
+                if (discrepancies.length === 0) {
+                    discrepanciesSection.style.display = 'none';
+                    showSuccessMessage('¡Todos los saldos están conciliados! ✅');
+                } else {
+                    discrepanciesSection.style.display = 'block';
+                    discrepanciesList.innerHTML = discrepancies.map(disc => `
+                        <div class="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="font-semibold text-red-700 dark:text-red-300">${disc.methodName}</h4>
+                                <span class="text-xs px-2 py-1 bg-red-100 text-red-700 rounded-full">
+                                    ${disc.difference > 0 ? 'Falta registrar' : 'Sobra registrado'}
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-3 gap-3 text-sm">
+                                <div>
+                                    <span class="text-red-600 dark:text-red-400">Calculado:</span>
+                                    <p class="font-semibold">${formatCurrency(disc.calculatedBalance)}</p>
+                                </div>
+                                <div>
+                                    <span class="text-red-600 dark:text-red-400">Real:</span>
+                                    <p class="font-semibold">${formatCurrency(disc.realBalance)}</p>
+                                </div>
+                                <div>
+                                    <span class="text-red-600 dark:text-red-400">Diferencia:</span>
+                                    <p class="font-semibold text-red-600">${formatCurrency(Math.abs(disc.difference))}</p>
+                                </div>
+                            </div>
+                            <button class="mt-2 px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                                    onclick="createAdjustmentTransaction('${disc.methodId}', ${disc.difference})">
+                                Crear Ajuste Automático
+                            </button>
+                        </div>
+                    `).join('');
+
+                    showErrorMessage(`Se encontraron ${discrepancies.length} discrepancias en los saldos`);
+                }
+            };
+
+            // 🔧 Función para crear transacción de ajuste automático
+            window.createAdjustmentTransaction = async (methodId, difference) => {
+                try {
+                    const method = window.PaymentMethodsSystem?.catalog[methodId];
+                    const isPositive = difference > 0;
+
+                    const adjustmentData = {
+                        description: `Ajuste de conciliación - ${method?.displayName || methodId}`,
+                        amount: Math.abs(difference),
+                        type: isPositive ? 'income' : 'expense',
+                        category: 'Ajustes de Conciliación',
+                        subcategory: isPositive ? 'Ingresos no registrados' : 'Gastos no registrados',
+                        date: new Date().toISOString().split('T')[0],
+                        paymentMethod: {
+                            id: methodId,
+                            type: method?.type || 'other',
+                            provider: method?.provider || methodId,
+                            displayName: method?.displayName || methodId,
+                            icon: method?.icon || 'credit-card',
+                            color: method?.color || '#6B7280'
+                        },
+                        notes: `Ajuste automático por conciliación de saldos. Diferencia detectada: ${formatCurrency(difference)}`,
+                        isAdjustment: true,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+
+                    await transactionsCollection.add(adjustmentData);
+                    showSuccessMessage(`Ajuste creado exitosamente para ${method?.displayName || methodId}`);
+
+                    // Actualizar la conciliación
+                    setTimeout(() => {
+                        if (window.renderBalanceReconciliation) {
+                            window.renderBalanceReconciliation();
+                        }
+                    }, 1000);
+
+                } catch (error) {
+                    console.error('Error creando ajuste:', error);
+                    showErrorMessage('Error al crear el ajuste automático');
+                }
+            };
 
             // 💳 Función para renderizar métodos de pago
             window.renderPaymentMethods = () => {
